@@ -1,7 +1,7 @@
 +++
 id = "P-002"
 title = "lasius check: conformance engine for workspace repos"
-status = "open"
+status = "claimed"
 created = "2026-11-09"
 owner = "devin"
 priority = "high"
