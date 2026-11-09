@@ -5,10 +5,12 @@
   "scripts": {
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "docs:preview": "vitepress preview",
+    "docs:deploy": "bun run docs:build && bunx gh-pages -d .vitepress/dist"
   },
   "devDependencies": {
     "vitepress": "^1.6.3",
-    "vitepress-plugin-llms": "^1.14.0"
+    "vitepress-plugin-llms": "^1.14.0",
+    "gh-pages": "^6.3.0"
   }
 }
