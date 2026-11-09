@@ -7,11 +7,11 @@ discovered upward from the current directory.
 | --- | --- |
 | `lasius init [--org <org>]` | Scaffold the workspace repo, clone all org repos, generate the workspace file |
 | `lasius clone` | Clone all missing org repos into `repos_dir` |
-| `lasius update` | `git pull --ff-only` every clone |
+| `lasius update [--json]` (`sync` alias) | `git pull --ff-only` every clone |
 | `lasius status [--json]` | Branch / dirty / ahead-behind table per clone |
-| `lasius code-workspace generate` | Regenerate the `*.code-workspace` file |
+| `lasius code-workspace generate [--json]` | Regenerate the `*.code-workspace` file |
 | `lasius open [--editor <cmd>]` | Open the workspace file (`$VISUAL`/`$EDITOR`/`code`/`zed`/`cursor`/`vi`) |
-| `lasius doctor` | Environment + drift diagnostics; exit 1 on any failure |
+| `lasius doctor [--json]` | Environment + drift diagnostics; exit 1 on any failure |
 | `lasius exec [--filter <substr>] -- <cmd>` | Run a command in every (matching) clone |
 | `lasius add <repo>` | Clone a single org repo by name |
 | `lasius rm <repo> [--yes] [--force]` | Remove a clone after safety checks |
