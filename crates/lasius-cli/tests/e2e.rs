@@ -370,3 +370,30 @@ fn sync_alias_and_json_flags() {
     let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
     assert_eq!(doc["repos"], 1);
 }
+
+#[test]
+fn check_reports_conformance() {
+    let (_tmp, root, path) = setup(&["alpha"]);
+    assert!(run(&["init"], &root, &path).status.success());
+
+    // healthy workspace passes (warn-level findings like remote-match
+    // on file:// fixture remotes don't fail the run)
+    let out = run(&["check"], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(!stdout(&out).contains("ERROR"));
+
+    // break it: gitignore no longer covers repos_dir
+    fs::write(root.join(".gitignore"), "# nothing\n").unwrap();
+    let out = run(&["check"], &root, &path);
+    assert!(!out.status.success());
+    assert!(stderr(&out).contains("conformance check(s) failed"));
+
+    // --json emits findings
+    let out = run(&["check", "--json"], &root, &path);
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert!(doc
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|f| f["check"] == "gitignore-coverage"));
+}

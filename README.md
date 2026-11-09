@@ -42,6 +42,7 @@ lasius status                  # branch / dirty / ahead-behind table (--json for
 lasius code-workspace generate [--json]  # regenerate the *.code-workspace file
 lasius open                    # open the workspace file in your editor
 lasius doctor [--json]         # env + drift diagnostics
+lasius check [--json] [--only id]  # conformance checks (structure/clones/generated/policy)
 lasius exec -- cargo build     # run a command in every clone (--filter <substr>)
 lasius add <repo>              # clone a single org repo
 lasius rm <repo>               # remove a clone after safety checks

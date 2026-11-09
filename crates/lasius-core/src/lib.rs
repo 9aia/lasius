@@ -1,5 +1,6 @@
 //! Pure domain logic for lasius — no I/O, fully unit-testable.
 
+pub mod checks;
 pub mod config;
 pub mod error;
 pub mod gh;
@@ -7,6 +8,7 @@ pub mod names;
 pub mod status;
 pub mod workspace_file;
 
+pub use checks::{run as run_checks, Facts, Finding, RepoFacts, Severity};
 pub use config::WorkspaceConfig;
 pub use error::CoreError;
 pub use gh::Repo;

@@ -66,6 +66,18 @@ enum Commands {
         #[arg(long)]
         json: bool,
     },
+    /// Conformance checks — does the workspace follow the lasius pattern?
+    Check {
+        /// Check domain to run (structure|clones|generated|policy)
+        #[arg(long)]
+        domain: Option<String>,
+        /// Only run these check ids (repeatable or comma-separated)
+        #[arg(long, value_delimiter = ',')]
+        only: Vec<String>,
+        /// Emit JSON findings instead of the table
+        #[arg(long)]
+        json: bool,
+    },
     /// Open the generated workspace file in an editor
     Open {
         /// Editor command (default: $VISUAL, $EDITOR, or code/zed/cursor/vi)
@@ -146,6 +158,9 @@ fn main() {
                     action: CodeWorkspaceAction::Generate { json },
                 } => commands::code_workspace_generate(&ws, *json),
                 Commands::Doctor { json } => commands::doctor(&ws, *json),
+                Commands::Check { domain, only, json } => {
+                    commands::check(&ws, domain.as_deref(), only, *json)
+                }
                 Commands::Open { editor } => commands::open(&ws, editor.clone()),
                 Commands::Rm { name, yes, force } => commands::rm(&ws, name, *yes, *force),
                 Commands::Exec { filter, cmd } => commands::exec(&ws, filter.as_deref(), cmd),

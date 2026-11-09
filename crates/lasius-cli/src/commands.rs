@@ -129,6 +129,8 @@ pub fn init(root_flag: Option<&Path>, org: Option<String>, cwd: &Path) -> Result
             workspace_file: None,
             exclude: Vec::new(),
             include_private: false,
+            checks: Default::default(),
+            policy: Default::default(),
         };
         fs::write(&config_path, config.to_toml())
             .with_context(|| format!("cannot write {}", config_path.display()))?;
@@ -714,4 +716,198 @@ pub fn add(ws: &Workspace, name: &str) -> Result<()> {
         )
     })?;
     clone_all(ws, std::slice::from_ref(repo))
+}
+
+/// Facts for one clone — all git/fs probes done here, in parallel.
+fn repo_facts(ws: &Workspace, name: &str) -> lasius_core::RepoFacts {
+    use lasius_core::RepoFacts;
+    let dir = ws.repo_path(name);
+    let mut f = RepoFacts {
+        name: name.to_string(),
+        is_git: dir.join(".git").exists(),
+        ..Default::default()
+    };
+    if !f.is_git {
+        return f;
+    }
+    f.remote = git(&dir, &["remote", "get-url", "origin"])
+        .ok()
+        .filter(|o| o.success())
+        .map(|o| o.stdout.trim().to_string());
+
+    // worktrees: porcelain "worktree <path>" lines; first is the main checkout
+    if let Ok(o) = git(&dir, &["worktree", "list", "--porcelain"]) {
+        if o.success() {
+            let mut paths = Vec::new();
+            for line in o.stdout.lines() {
+                if let Some(p) = line.strip_prefix("worktree ") {
+                    paths.push(p.to_string());
+                }
+            }
+            f.worktree_names = paths
+                .iter()
+                .filter_map(|p| std::path::Path::new(p).file_name())
+                .map(|n| n.to_string_lossy().to_string())
+                .collect();
+            f.broken_worktrees = paths
+                .into_iter()
+                .skip(1)
+                .filter(|p| !std::path::Path::new(p).exists())
+                .collect();
+        }
+    }
+
+    f.has_nested_git = has_nested_git_dir(&dir);
+    f.missing_files = ws
+        .config
+        .policy
+        .require_files
+        .iter()
+        .filter(|file| !dir.join(file).exists())
+        .cloned()
+        .collect();
+    f
+}
+
+/// Depth-limited scan for a `.git` *directory* below the top level
+/// (worktrees/submodules use `.git` files, so dirs only = real nesting).
+fn has_nested_git_dir(dir: &Path) -> bool {
+    fn walk(dir: &Path, depth: u8) -> bool {
+        if depth == 0 {
+            return false;
+        }
+        let Ok(entries) = fs::read_dir(dir) else {
+            return false;
+        };
+        for e in entries.flatten() {
+            let p = e.path();
+            let name = e.file_name();
+            if name == ".git" && p.is_dir() {
+                return true;
+            }
+            if p.is_dir()
+                && !name.to_string_lossy().starts_with('.')
+                && name != "target"
+                && name != "node_modules"
+                && walk(&p, depth - 1)
+            {
+                return true;
+            }
+        }
+        false
+    }
+    // start below the repo root itself
+    if let Ok(entries) = fs::read_dir(dir) {
+        for e in entries.flatten() {
+            let p = e.path();
+            if p.is_dir()
+                && e.file_name() != ".git"
+                && !e.file_name().to_string_lossy().starts_with('.')
+                && e.file_name() != "target"
+                && e.file_name() != "node_modules"
+                && walk(&p, 3)
+            {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+/// `lasius check` — conformance findings over the workspace.
+pub fn check(ws: &Workspace, domain: Option<&str>, only: &[String], json: bool) -> Result<()> {
+    use lasius_core::{run_checks, Facts, Severity};
+
+    let local_names = support::local_repos(ws)?;
+    let repos_dir = ws.config.repos_path(&ws.root);
+    let gitignore = fs::read_to_string(ws.root.join(".gitignore")).ok();
+    let readme = ws.root.join("README.md").is_file();
+    let agents = ws.root.join("AGENTS.md").is_file();
+
+    let ws_path = ws.workspace_file_path();
+    let workspace_file = fs::read_to_string(&ws_path).ok();
+    let workspace_fresh = workspace_file.as_deref().is_some_and(|on_disk| {
+        let fresh =
+            lasius_core::build_workspace_file(&ws.config.org, &ws.config.repos_dir, &local_names);
+        on_disk == fresh
+    });
+
+    let org_names = support::org_repos(ws)
+        .ok()
+        .map(|repos| repos.iter().map(|r| r.name.clone()).collect());
+
+    let repo_facts: Vec<lasius_core::RepoFacts> =
+        proc::par_map(&local_names, |n| repo_facts(ws, n));
+
+    let facts = Facts {
+        config: &ws.config,
+        gitignore,
+        readme,
+        agents,
+        repos_dir_exists: repos_dir.is_dir(),
+        local_names: local_names.clone(),
+        workspace_file,
+        workspace_fresh,
+        org_names,
+        repos: repo_facts,
+    };
+
+    // domain filter → check-id groups
+    let only_ids: Vec<String> = if only.is_empty() {
+        Vec::new()
+    } else {
+        only.to_vec()
+    };
+    let _ = domain; // domain selection lands with the env-domain merge
+    let findings = run_checks(
+        &facts,
+        if only_ids.is_empty() {
+            None
+        } else {
+            Some(&only_ids)
+        },
+    );
+
+    if json {
+        let doc: Vec<serde_json::Value> = findings
+            .iter()
+            .map(|f| {
+                serde_json::json!({
+                    "check": f.check,
+                    "severity": match f.severity {
+                        Severity::Info => "info",
+                        Severity::Warn => "warn",
+                        Severity::Error => "error",
+                    },
+                    "repo": f.repo,
+                    "message": f.message,
+                })
+            })
+            .collect();
+        println!("{}", serde_json::to_string_pretty(&doc)?);
+    } else {
+        for f in &findings {
+            let tag = match f.severity {
+                Severity::Info => "info ",
+                Severity::Warn => "warn ",
+                Severity::Error => "ERROR",
+            };
+            match &f.repo {
+                Some(r) => println!("{tag} {:<22} {}", r, f.message),
+                None => println!("{tag} {:<22} {}", f.check, f.message),
+            }
+        }
+        if findings.is_empty() {
+            println!("all checks passed");
+        }
+    }
+
+    let errors = findings
+        .iter()
+        .filter(|f| f.severity == Severity::Error)
+        .count();
+    if errors > 0 {
+        anyhow::bail!("{errors} conformance check(s) failed");
+    }
+    Ok(())
 }

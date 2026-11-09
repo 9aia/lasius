@@ -33,6 +33,50 @@ pub struct WorkspaceConfig {
     /// Include private repos in discovery (requires `gh` auth with access).
     #[serde(default)]
     pub include_private: bool,
+
+    /// `[checks]` — conformance engine toggles.
+    #[serde(default)]
+    pub checks: CheckConfig,
+
+    /// `[policy]` — org conventions enforced by `lasius check`.
+    #[serde(default)]
+    pub policy: Policy,
+}
+
+/// `[checks]` table — enable/disable and severity overrides.
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct CheckConfig {
+    /// Check ids (kebab-case) to skip entirely.
+    #[serde(default)]
+    pub disabled: Vec<String>,
+
+    /// Per-check severity overrides, e.g. `{ "worktree-health" = "warn" }`.
+    #[serde(default)]
+    pub severity: std::collections::BTreeMap<String, String>,
+}
+
+impl CheckConfig {
+    /// Whether `id` is enabled.
+    pub fn is_enabled(&self, id: &str) -> bool {
+        !self.disabled.iter().any(|d| d == id)
+    }
+}
+
+/// `[policy]` table — data-driven org conventions.
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct Policy {
+    /// Worktree names every clone must have (e.g. `["project", "docs"]`).
+    #[serde(default)]
+    pub require_worktrees: Vec<String>,
+
+    /// Files every clone must contain (e.g. `["AGENTS.md"]`).
+    #[serde(default)]
+    pub require_files: Vec<String>,
+
+    /// Treat a clone whose `origin` doesn't match `org/<name>` as an error
+    /// (default: warn).
+    #[serde(default)]
+    pub remote_must_match_org: bool,
 }
 
 fn default_repos_dir() -> String {
@@ -64,6 +108,43 @@ impl WorkspaceConfig {
         }
         if self.include_private {
             out.push_str("include_private = true\n");
+        }
+        if !self.checks.disabled.is_empty() {
+            let items: Vec<String> = self
+                .checks
+                .disabled
+                .iter()
+                .map(|d| format!("{d:?}"))
+                .collect();
+            out.push_str(&format!("[checks]\ndisabled = [{}]\n", items.join(", ")));
+        }
+        if !self.checks.severity.is_empty() {
+            if self.checks.disabled.is_empty() {
+                out.push_str("[checks]\n");
+            }
+            for (k, v) in &self.checks.severity {
+                out.push_str(&format!("severity.{k} = {v:?}\n"));
+            }
+        }
+        let p = &self.policy;
+        if !p.require_worktrees.is_empty() || !p.require_files.is_empty() || p.remote_must_match_org
+        {
+            out.push_str("[policy]\n");
+            if !p.require_worktrees.is_empty() {
+                let items: Vec<String> = p
+                    .require_worktrees
+                    .iter()
+                    .map(|d| format!("{d:?}"))
+                    .collect();
+                out.push_str(&format!("require_worktrees = [{}]\n", items.join(", ")));
+            }
+            if !p.require_files.is_empty() {
+                let items: Vec<String> = p.require_files.iter().map(|d| format!("{d:?}")).collect();
+                out.push_str(&format!("require_files = [{}]\n", items.join(", ")));
+            }
+            if p.remote_must_match_org {
+                out.push_str("remote_must_match_org = true\n");
+            }
         }
         out
     }
