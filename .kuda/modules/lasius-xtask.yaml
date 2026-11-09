@@ -1,0 +1,35 @@
+name: lasius-xtask
+path: xtask/Cargo.toml
+purpose: 'lasius-xtask — workspace automation: check / test / coverage.'
+api:
+- name: lasius-xtask
+  kind: module
+  file: xtask/Cargo.toml
+  line: 1
+  module: lasius-xtask
+- name: main
+  kind: function
+  file: xtask/src/main.rs
+  line: 22
+  module: lasius-xtask
+- name: run
+  kind: function
+  file: xtask/src/main.rs
+  line: 12
+  module: lasius-xtask
+deps:
+- anyhow
+notes: ''
+verify:
+- xtask/Cargo.toml
+- xtask/src/main.rs
+provenance:
+  files:
+  - xtask/Cargo.toml
+  - xtask/src/main.rs
+  hashes:
+  - 234c277e4bb2cec12930cee5859b9ed9524510cb
+  - 8bc23d2d369768740d3f13d2eac0201bf7f25769
+  commit_sha: a3b59258a6cdda9b7a80b27d8fdc9df6a3f58081
+  generated_at: '1794194647'
+  generator: kuda-template/0.1.2

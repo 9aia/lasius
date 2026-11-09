@@ -1,0 +1,30 @@
+name: project
+path: project/BACKLOG.md
+purpose: myco work ledger — tasks, ADRs, issues, plans, handoffs
+api:
+- name: P-001
+  kind: record
+  file: project/proposals/proposal-0001-lasius-workspace-gardener-for-github-orgs.md
+  line: 2
+  module: project
+deps: []
+notes: ''
+verify:
+- project/BACKLOG.md
+- project/TODO.md
+- project/index.md
+- project/proposals/proposal-0001-lasius-workspace-gardener-for-github-orgs.md
+provenance:
+  files:
+  - project/BACKLOG.md
+  - project/TODO.md
+  - project/index.md
+  - project/proposals/proposal-0001-lasius-workspace-gardener-for-github-orgs.md
+  hashes:
+  - 9065e6f6e33503b5f7a4a773acd637396048731c
+  - 43239019748c50461e4fbf75cbdc42c0815128f2
+  - 5464201262393df7510496f7c28ef895e9020714
+  - b27745fddb11f7c1a7c07f0f509835e128649d5c
+  commit_sha: a3b59258a6cdda9b7a80b27d8fdc9df6a3f58081
+  generated_at: '1794194647'
+  generator: kuda-template/0.1.2

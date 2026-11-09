@@ -1,0 +1,29 @@
+name: lasius
+root: /home/luis/GitHub/9aia/workspace/repos/lasius
+purpose: Workspace gardener for GitHub orgs — clone, sync, inspect, and generate
+modules:
+- lasius
+- lasius-core
+- lasius-xtask
+- project
+commands:
+- cargo check
+- cargo test --workspace
+tree_digest: 309bf829ed293fa54724dee3daf9e60a31f63aff
+files_total: 22
+provenance:
+  files:
+  - Cargo.toml
+  - README.md
+  - crates/lasius-cli/Cargo.toml
+  - crates/lasius-core/Cargo.toml
+  - xtask/Cargo.toml
+  hashes:
+  - 5d97711b077e008e0ba95c33a1614d6e869d8521
+  - 0cdde1a55d8a70489f0d216ee48b97d6900bed6e
+  - 88c1b6e79b0ee74be97b7a9a4092bb5d70f8f026
+  - e652df3ed76782348b86659e9f0a4c2096fd4ee0
+  - 234c277e4bb2cec12930cee5859b9ed9524510cb
+  commit_sha: a3b59258a6cdda9b7a80b27d8fdc9df6a3f58081
+  generated_at: '1794194647'
+  generator: kuda/0.1.0
