@@ -87,8 +87,46 @@ pub fn org_repos(ws: &Workspace) -> Result<Vec<Repo>> {
         };
         anyhow::bail!("gh repo list failed with exit code {}: {detail}", out.code);
     }
-    lasius_core::gh::decode_repo_list(&out.stdout, &ws.config.exclude, ws.config.include_private)
-        .map_err(|e| anyhow::anyhow!("could not decode gh repo list output: {e}"))
+    let mut repos = lasius_core::gh::decode_repo_list(
+        &out.stdout,
+        &ws.config.exclude,
+        ws.config.include_private,
+    )
+    .map_err(|e| anyhow::anyhow!("could not decode gh repo list output: {e}"))?;
+    // The workspace repo itself is never a member — detected from the
+    // root's own `origin` remote (owner must match `org`).
+    if let Some(own) = own_repo_name(ws) {
+        repos.retain(|r| r.name != own);
+    }
+    Ok(repos)
+}
+
+/// Repo name of the workspace's own `origin` remote, if the remote's
+/// owner matches `config.org`. `None` when the root isn't a git clone
+/// of `<org>/<something>` (e.g. fresh `init` before `git init`).
+fn own_repo_name(ws: &Workspace) -> Option<String> {
+    let out = proc::capture_labeled(
+        "git remote",
+        "git",
+        &["remote".into(), "get-url".into(), "origin".into()],
+        Some(&ws.root),
+    )
+    .ok()?;
+    if !out.success() {
+        return None;
+    }
+    let url = out.stdout.trim().trim_end_matches('/');
+    let url = url.strip_suffix(".git").unwrap_or(url);
+    let mut parts = url.rsplit('/');
+    let repo = parts.next()?;
+    let owner = parts.next()?;
+    // ssh form `git@host:owner/repo` — owner may carry a `host:` prefix
+    let owner = owner.rsplit(':').next().unwrap_or(owner);
+    if owner.eq_ignore_ascii_case(&ws.config.org) && !repo.is_empty() {
+        Some(repo.to_string())
+    } else {
+        None
+    }
 }
 
 /// Names of git clones under `repos_dir`, sorted. Skips files/symlinks and

@@ -61,7 +61,9 @@ overwrites existing files.
 Repo discovery is automatic: `gh repo list <org> --json name,sshUrl,isArchived,isPrivate`
 (non-archived only; private repos are skipped unless `include_private =
 true`, `exclude` globs applied, unsafe names rejected before they can
-become paths). Archive a repo on GitHub to exclude it.
+become paths). Archive a repo on GitHub to exclude it. The workspace
+repo itself is auto-detected from the root's `origin` remote and never
+cloned — no `exclude` entry needed.
 
 `lasius serve` speaks ndjson JSON-RPC on stdio — the same wire as
 `tamias serve` / `sepia serve` / `cuora serve` / `myco serve`. Requests

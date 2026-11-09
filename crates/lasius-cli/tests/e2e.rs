@@ -397,3 +397,53 @@ fn check_reports_conformance() {
         .iter()
         .any(|f| f["check"] == "gitignore-coverage"));
 }
+
+#[test]
+fn workspace_repo_self_excluded() {
+    let tmp = tempfile::tempdir().unwrap();
+    let base = tmp.path();
+    // org has "workspace" + "alpha"; the workspace root's origin IS
+    // testorg/workspace → it must never be cloned into repos/
+    let org_dir = base.join("org");
+    let mut repos = Vec::new();
+    for name in ["workspace", "alpha"] {
+        let src = org_dir.join(name);
+        make_git_repo(&src);
+        repos.push((name, src));
+    }
+    let root = base.join("ws");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(root.join("lasius.toml"), "org = \"testorg\"\n").unwrap();
+    let path_env = fake_gh(base, &repos);
+
+    // give the workspace root an origin remote of testorg/workspace
+    git(&root, &["init", "-b", "main"]);
+    git(
+        &root,
+        &[
+            "-c",
+            "user.email=t@t",
+            "-c",
+            "user.name=t",
+            "commit",
+            "--allow-empty",
+            "-m",
+            "i",
+        ],
+    );
+    git(
+        &root,
+        &[
+            "remote",
+            "add",
+            "origin",
+            "git@github.com:testorg/workspace.git",
+        ],
+    );
+
+    let out = run(&["clone"], &root, &path_env);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(root.join("repos/alpha/.git").exists());
+    assert!(!root.join("repos/workspace").exists());
+    assert!(stdout(&out).contains("skip") || !stdout(&out).contains("cloned  workspace"));
+}
