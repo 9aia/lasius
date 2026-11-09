@@ -11,6 +11,7 @@ use crate::error::CoreError;
 /// repos_dir = "repos"                          # optional, default "repos"
 /// workspace_file = "ktbhealth.code-workspace"  # optional, default "{org}.code-workspace"
 /// exclude = ["secret-*"]                       # optional name globs
+/// include_private = true                       # optional, default false
 /// ```
 #[derive(Debug, Clone, Deserialize)]
 pub struct WorkspaceConfig {
@@ -28,6 +29,10 @@ pub struct WorkspaceConfig {
     /// Glob patterns (`*`, `?`) of repo names to skip during discovery.
     #[serde(default)]
     pub exclude: Vec<String>,
+
+    /// Include private repos in discovery (requires `gh` auth with access).
+    #[serde(default)]
+    pub include_private: bool,
 }
 
 fn default_repos_dir() -> String {
@@ -52,6 +57,13 @@ impl WorkspaceConfig {
         }
         if let Some(file) = &self.workspace_file {
             out.push_str(&format!("workspace_file = {:?}\n", file));
+        }
+        if !self.exclude.is_empty() {
+            let items: Vec<String> = self.exclude.iter().map(|e| format!("{e:?}")).collect();
+            out.push_str(&format!("exclude = [{}]\n", items.join(", ")));
+        }
+        if self.include_private {
+            out.push_str("include_private = true\n");
         }
         out
     }

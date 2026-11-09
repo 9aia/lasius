@@ -17,13 +17,20 @@ struct GhRepo {
     ssh_url: String,
     #[serde(rename = "isArchived", default)]
     is_archived: bool,
+    #[serde(rename = "isPrivate", default)]
+    is_private: bool,
 }
 
 /// Decode `gh repo list` JSON into sorted, non-archived, name-filtered repos.
 ///
-/// Fails on malformed JSON, unsafe names (checked before the archived filter,
-/// matching the reference implementation), or missing fields.
-pub fn decode_repo_list(json: &str, exclude: &[String]) -> Result<Vec<Repo>, CoreError> {
+/// Private repos are dropped unless `include_private` is set. Fails on
+/// malformed JSON or unsafe names (checked before filtering, matching the
+/// reference implementation).
+pub fn decode_repo_list(
+    json: &str,
+    exclude: &[String],
+    include_private: bool,
+) -> Result<Vec<Repo>, CoreError> {
     let items: Vec<GhRepo> = serde_json::from_str(json)?;
 
     if let Some(bad) = items.iter().find(|r| !is_safe_repo_name(&r.name)) {
@@ -33,6 +40,7 @@ pub fn decode_repo_list(json: &str, exclude: &[String]) -> Result<Vec<Repo>, Cor
     let mut repos: Vec<Repo> = items
         .into_iter()
         .filter(|r| !r.is_archived)
+        .filter(|r| include_private || !r.is_private)
         .filter(|r| {
             !exclude
                 .iter()
@@ -69,6 +77,7 @@ mod tests {
                 ("alpha", "git@x:alpha.git", false),
             ]),
             &[],
+            false,
         )
         .unwrap();
         assert_eq!(
@@ -91,6 +100,7 @@ mod tests {
         let out = decode_repo_list(
             &json(&[("secret-x", "u", false), ("ui", "u", false)]),
             &["secret-*".into()],
+            false,
         )
         .unwrap();
         assert_eq!(out.len(), 1);
@@ -100,16 +110,19 @@ mod tests {
     #[test]
     fn rejects_invalid_json() {
         assert!(matches!(
-            decode_repo_list("garbage", &[]),
+            decode_repo_list("garbage", &[], false),
             Err(CoreError::GhJson(_))
         ));
     }
 
     #[test]
     fn rejects_wrong_field_types() {
-        assert!(
-            decode_repo_list(r#"[{"name":"ui","sshUrl":42,"isArchived":false}]"#, &[]).is_err()
-        );
+        assert!(decode_repo_list(
+            r#"[{"name":"ui","sshUrl":42,"isArchived":false}]"#,
+            &[],
+            false
+        )
+        .is_err());
     }
 
     #[test]
@@ -117,15 +130,32 @@ mod tests {
         for name in [".", "..", "a/b", "has space", ""] {
             let bad = format!("[{{\"name\":\"{name}\",\"sshUrl\":\"u\",\"isArchived\":true}}]");
             assert!(
-                matches!(decode_repo_list(&bad, &[]), Err(CoreError::UnsafeName(_))),
+                matches!(
+                    decode_repo_list(&bad, &[], false),
+                    Err(CoreError::UnsafeName(_))
+                ),
                 "{name:?} should be rejected"
             );
         }
     }
 
     #[test]
+    fn filters_private_unless_included() {
+        let payload = r#"[
+            {"name":"pub","sshUrl":"u","isArchived":false,"isPrivate":false},
+            {"name":"priv","sshUrl":"u","isArchived":false,"isPrivate":true}
+        ]"#;
+        let out = decode_repo_list(payload, &[], false).unwrap();
+        assert_eq!(out.len(), 1);
+        assert_eq!(out[0].name, "pub");
+
+        let out = decode_repo_list(payload, &[], true).unwrap();
+        assert_eq!(out.len(), 2);
+    }
+
+    #[test]
     fn allows_dotfile_repos() {
-        let out = decode_repo_list(&json(&[(".github", "u", false)]), &[]).unwrap();
+        let out = decode_repo_list(&json(&[(".github", "u", false)]), &[], false).unwrap();
         assert_eq!(out[0].name, ".github");
     }
 }

@@ -74,7 +74,7 @@ pub fn org_repos(ws: &Workspace) -> Result<Vec<Repo>> {
             "--limit".into(),
             "200".into(),
             "--json".into(),
-            "name,sshUrl,isArchived".into(),
+            "name,sshUrl,isArchived,isPrivate".into(),
         ],
         None,
     )?;
@@ -87,7 +87,7 @@ pub fn org_repos(ws: &Workspace) -> Result<Vec<Repo>> {
         };
         anyhow::bail!("gh repo list failed with exit code {}: {detail}", out.code);
     }
-    lasius_core::gh::decode_repo_list(&out.stdout, &ws.config.exclude)
+    lasius_core::gh::decode_repo_list(&out.stdout, &ws.config.exclude, ws.config.include_private)
         .map_err(|e| anyhow::anyhow!("could not decode gh repo list output: {e}"))
 }
 

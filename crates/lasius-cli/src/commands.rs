@@ -128,6 +128,7 @@ pub fn init(root_flag: Option<&Path>, org: Option<String>, cwd: &Path) -> Result
             repos_dir: "repos".to_string(),
             workspace_file: None,
             exclude: Vec::new(),
+            include_private: false,
         };
         fs::write(&config_path, config.to_toml())
             .with_context(|| format!("cannot write {}", config_path.display()))?;
