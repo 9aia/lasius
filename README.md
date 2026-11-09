@@ -34,7 +34,7 @@ Requires `git` and `gh` (authenticated) on PATH.
 ```bash
 cd my-org-workspace
 
-lasius init                    # first run: write lasius.toml (--org if needed), clone, generate
+lasius init                    # scaffold the workspace repo + clone all org repos + generate
 lasius clone                   # clone all missing org repos
 lasius update                  # git pull --ff-only everywhere
 lasius status                  # branch / dirty / ahead-behind table (--json for machines)
@@ -48,6 +48,11 @@ lasius rm <repo>               # remove a clone after safety checks
 
 All commands accept `--root <dir>`; without it, `lasius.toml` is
 discovered upward from the current directory.
+
+`lasius init` scaffolds the whole workspace repo — `lasius.toml`,
+`.gitignore` entries for `repos/` and the workspace file, README/AGENTS
+stubs — then clones and generates. Everything is idempotent and never
+overwrites existing files.
 
 Repo discovery is automatic: `gh repo list <org> --json name,sshUrl,isArchived`
 (non-archived only, `exclude` globs applied, unsafe names rejected before

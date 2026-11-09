@@ -133,6 +133,17 @@ fn init_creates_config_with_org_flag() {
     assert!(out.status.success(), "stderr: {}", stderr(&out));
     assert!(root.join("lasius.toml").exists());
     assert!(root.join("repos/alpha/.git").exists());
+    // scaffold artifacts
+    let gitignore = fs::read_to_string(root.join(".gitignore")).unwrap();
+    assert!(gitignore.contains("/repos/"));
+    assert!(gitignore.contains("testorg.code-workspace"));
+    assert!(root.join("README.md").exists());
+    assert!(root.join("AGENTS.md").exists());
+    // idempotent: second init doesn't duplicate gitignore entries
+    let out2 = run(&["init"], &root, &path_env);
+    assert!(out2.status.success());
+    let gitignore2 = fs::read_to_string(root.join(".gitignore")).unwrap();
+    assert_eq!(gitignore, gitignore2);
 }
 
 #[test]

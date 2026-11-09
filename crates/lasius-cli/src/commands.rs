@@ -108,7 +108,11 @@ fn clone_all(ws: &Workspace, repos: &[Repo]) -> Result<()> {
     Ok(())
 }
 
-/// `lasius init` — create `lasius.toml` if missing, then clone + generate.
+/// `lasius init` — scaffold the workspace repo, then clone + generate.
+///
+/// Creates `lasius.toml`, `.gitignore` entries, and README/AGENTS stubs
+/// when missing (all idempotent), then runs the same clone-all flow as
+/// `lasius clone`.
 pub fn init(root_flag: Option<&Path>, org: Option<String>, cwd: &Path) -> Result<()> {
     let root = root_flag
         .map(Path::to_path_buf)
@@ -131,8 +135,78 @@ pub fn init(root_flag: Option<&Path>, org: Option<String>, cwd: &Path) -> Result
     }
 
     let ws = support::load(&root)?;
+
+    // .gitignore: ensure repos_dir + workspace file are ignored.
+    let needed = [
+        format!("/{}/", ws.config.repos_dir),
+        ws.config.workspace_file_name(),
+    ];
+    let gitignore = root.join(".gitignore");
+    let existing = fs::read_to_string(&gitignore).unwrap_or_default();
+    let present: std::collections::BTreeSet<&str> = existing.lines().map(str::trim).collect();
+    let missing: Vec<&String> = needed
+        .iter()
+        .filter(|p| !present.contains(p.as_str()))
+        .collect();
+    if !missing.is_empty() {
+        let mut content = existing;
+        if !content.is_empty() && !content.ends_with('\n') {
+            content.push('\n');
+        }
+        content.push_str("\n# Managed by lasius\n");
+        for p in &missing {
+            content.push_str(p);
+            content.push('\n');
+        }
+        fs::write(&gitignore, content)
+            .with_context(|| format!("cannot write {}", gitignore.display()))?;
+        println!("updated {} ({})", gitignore.display(), missing.len());
+    }
+
+    // Doc stubs — only when absent, never overwrite.
+    for (name, body) in [
+        ("README.md", readme_stub(&ws.config.org)),
+        ("AGENTS.md", agents_stub(&ws.config.org)),
+    ] {
+        let path = root.join(name);
+        if !path.exists() {
+            fs::write(&path, body).with_context(|| format!("cannot write {}", path.display()))?;
+            println!("wrote {}", path.display());
+        }
+    }
+
     let repos = support::org_repos(&ws)?;
     clone_all(&ws, &repos)
+}
+
+fn readme_stub(org: &str) -> String {
+    format!(
+        "# {org} workspace\n\n\
+         Metarepo for the [{org}](https://github.com/{org}) GitHub org — config \
+         only, managed by [lasius](https://github.com/9aia/lasius).\n\n\
+         `repos/` holds independent clones (gitignored); `*.code-workspace` is \
+         generated. See `lasius.toml` and `lasius --help`.\n"
+    )
+}
+
+fn agents_stub(org: &str) -> String {
+    format!(
+        "# {org} workspace — agent guide\n\n\
+         Metarepo root for the {org} org. Config only — repo management is \
+         delegated to [lasius](https://github.com/9aia/lasius) via \
+         `lasius.toml`. All org repositories are cloned under `repos/` \
+         (gitignored); each is an independent repo with its own `AGENTS.md` — \
+         read it before working inside.\n\n\
+         ## Workspace commands\n\n\
+         - `lasius init` — scaffold + clone all org repos + generate the \
+         workspace file\n\
+         - `lasius update` — fast-forward pull every clone\n\
+         - `lasius status` — branch / dirty / sync matrix (`--json`)\n\
+         - `lasius code-workspace generate` — regenerate the workspace file\n\
+         - `lasius doctor` — env + drift diagnostics\n\
+         - `lasius exec -- <cmd>` — run a command in every clone\n\
+         - `lasius rm <repo>` — remove a clone after safety checks\n"
+    )
 }
 
 /// Best-effort owner inference from `origin`'s github URL.

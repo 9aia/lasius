@@ -32,7 +32,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Bootstrap: write lasius.toml if missing, clone all org repos, generate the workspace file
+    /// Scaffold the workspace repo (lasius.toml, .gitignore, doc stubs), clone all org repos, generate the workspace file
     Init {
         /// GitHub org to manage (required when lasius.toml doesn't exist yet)
         #[arg(long)]
