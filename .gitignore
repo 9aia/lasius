@@ -6,3 +6,6 @@ Cargo.lock.bak
 # lasius worktrees
 project/
 docs/
+
+# kuda
+.kuda/index.sqlite

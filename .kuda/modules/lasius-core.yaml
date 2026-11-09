@@ -1,0 +1,250 @@
+name: lasius-core
+path: crates/lasius-core/Cargo.toml
+purpose: Pure domain logic for lasius — config model, gh decoding, git status, workspace files
+api:
+- name: BRANCH_AB
+  kind: const
+  file: crates/lasius-core/src/status.rs
+  line: 14
+  module: lasius-core
+- name: BRANCH_HEAD
+  kind: const
+  file: crates/lasius-core/src/status.rs
+  line: 13
+  module: lasius-core
+- name: CoreError
+  kind: type
+  file: crates/lasius-core/src/error.rs
+  line: 5
+  module: lasius-core
+- name: GhRepo
+  kind: type
+  file: crates/lasius-core/src/gh.rs
+  line: 14
+  module: lasius-core
+- name: GitStatus
+  kind: type
+  file: crates/lasius-core/src/status.rs
+  line: 5
+  module: lasius-core
+- name: Repo
+  kind: type
+  file: crates/lasius-core/src/gh.rs
+  line: 8
+  module: lasius-core
+- name: StatusRow
+  kind: type
+  file: crates/lasius-core/src/status.rs
+  line: 52
+  module: lasius-core
+- name: WorkspaceConfig
+  kind: type
+  file: crates/lasius-core/src/config.rs
+  line: 17
+  module: lasius-core
+- name: allows_dotfile_repos
+  kind: function
+  file: crates/lasius-core/src/gh.rs
+  line: 157
+  module: lasius-core
+- name: applies_exclude_globs
+  kind: function
+  file: crates/lasius-core/src/gh.rs
+  line: 99
+  module: lasius-core
+- name: build_workspace_file
+  kind: function
+  file: crates/lasius-core/src/workspace_file.rs
+  line: 26
+  module: lasius-core
+- name: config
+  kind: module
+  file: crates/lasius-core/src/lib.rs
+  line: 3
+  module: lasius-core
+- name: decode_repo_list
+  kind: function
+  file: crates/lasius-core/src/gh.rs
+  line: 29
+  module: lasius-core
+- name: decodes_sorts_and_filters_archived
+  kind: function
+  file: crates/lasius-core/src/gh.rs
+  line: 72
+  module: lasius-core
+- name: default_repos_dir
+  kind: function
+  file: crates/lasius-core/src/config.rs
+  line: 38
+  module: lasius-core
+- name: empty_input_is_detached
+  kind: function
+  file: crates/lasius-core/src/status.rs
+  line: 124
+  module: lasius-core
+- name: error
+  kind: module
+  file: crates/lasius-core/src/lib.rs
+  line: 4
+  module: lasius-core
+- name: excludes_node_modules_and_target
+  kind: function
+  file: crates/lasius-core/src/workspace_file.rs
+  line: 82
+  module: lasius-core
+- name: filters_private_unless_included
+  kind: function
+  file: crates/lasius-core/src/gh.rs
+  line: 143
+  module: lasius-core
+- name: format_status_header
+  kind: function
+  file: crates/lasius-core/src/status.rs
+  line: 78
+  module: lasius-core
+- name: format_status_row
+  kind: function
+  file: crates/lasius-core/src/status.rs
+  line: 62
+  module: lasius-core
+- name: format_status_table
+  kind: function
+  file: crates/lasius-core/src/status.rs
+  line: 89
+  module: lasius-core
+- name: from_toml
+  kind: function
+  file: crates/lasius-core/src/config.rs
+  line: 44
+  module: lasius-core
+- name: gh
+  kind: module
+  file: crates/lasius-core/src/lib.rs
+  line: 5
+  module: lasius-core
+- name: includes_root_and_sorted_repos
+  kind: function
+  file: crates/lasius-core/src/workspace_file.rs
+  line: 55
+  module: lasius-core
+- name: is_excluded
+  kind: function
+  file: crates/lasius-core/src/config.rs
+  line: 94
+  module: lasius-core
+- name: is_safe_repo_name
+  kind: function
+  file: crates/lasius-core/src/names.rs
+  line: 8
+  module: lasius-core
+- name: json
+  kind: function
+  file: crates/lasius-core/src/gh.rs
+  line: 63
+  module: lasius-core
+- name: lasius-core
+  kind: module
+  file: crates/lasius-core/Cargo.toml
+  line: 1
+  module: lasius-core
+- name: names
+  kind: module
+  file: crates/lasius-core/src/lib.rs
+  line: 6
+  module: lasius-core
+- name: pad
+  kind: function
+  file: crates/lasius-core/src/status.rs
+  line: 57
+  module: lasius-core
+- name: parse_git_status
+  kind: function
+  file: crates/lasius-core/src/status.rs
+  line: 17
+  module: lasius-core
+- name: parses_clean_branch_with_upstream
+  kind: function
+  file: crates/lasius-core/src/status.rs
+  line: 104
+  module: lasius-core
+- name: parses_detached_and_dirty
+  kind: function
+  file: crates/lasius-core/src/status.rs
+  line: 114
+  module: lasius-core
+- name: parses_full_config
+  kind: function
+  file: crates/lasius-core/src/config.rs
+  line: 116
+  module: lasius-core
+- name: parses_minimal_config
+  kind: function
+  file: crates/lasius-core/src/config.rs
+  line: 107
+  module: lasius-core
+- name: paths_join_under_root
+  kind: function
+  file: crates/lasius-core/src/config.rs
+  line: 138
+  module: lasius-core
+- name: rejects_empty_org
+  kind: function
+  file: crates/lasius-core/src/config.rs
+  line: 128
+  module: lasius-core
+- name: rejects_invalid_json
+  kind: function
+  file: crates/lasius-core/src/gh.rs
+  line: 111
+  module: lasius-core
+- name: rejects_invalid_toml
+  kind: function
+  file: crates/lasius-core/src/config.rs
+  line: 133
+  module: lasius-core
+api_omitted: 23
+deps:
+- serde
+- serde_json
+- thiserror
+- toml
+- thiserror
+- serde_json
+- serde
+- config
+- error
+- gh
+- status
+- workspace_file
+notes: ''
+verify:
+- crates/lasius-core/Cargo.toml
+- crates/lasius-core/src/config.rs
+- crates/lasius-core/src/error.rs
+- crates/lasius-core/src/gh.rs
+- crates/lasius-core/src/lib.rs
+- crates/lasius-core/src/names.rs
+- crates/lasius-core/src/status.rs
+- crates/lasius-core/src/workspace_file.rs
+provenance:
+  files:
+  - crates/lasius-core/Cargo.toml
+  - crates/lasius-core/src/config.rs
+  - crates/lasius-core/src/error.rs
+  - crates/lasius-core/src/gh.rs
+  - crates/lasius-core/src/lib.rs
+  - crates/lasius-core/src/names.rs
+  - crates/lasius-core/src/status.rs
+  - crates/lasius-core/src/workspace_file.rs
+  hashes:
+  - e652df3ed76782348b86659e9f0a4c2096fd4ee0
+  - 343bd57eb0b798a63ecbf86f16d602fd5b1fef9b
+  - 9373ec20f342f872227187341edb0ac00d600911
+  - ea6bbf2f1717b44772a25df1433ce96509894813
+  - 861a0e86d5770c31e25ab3cce717e0d963f16675
+  - f4e9f6c592a21ab03265be9bfd0ff43a432c6dcf
+  - 3d0483f7647e000f50f06ca64549e1e39fe13b72
+  - fd1a3179822cb286d71464ab1b405087098d3007
+  commit_sha: a3b59258a6cdda9b7a80b27d8fdc9df6a3f58081
+  generated_at: '1794194647'
+  generator: kuda-template/0.1.2

@@ -23,7 +23,7 @@ own history and remotes. `*.code-workspace` is generated, never committed.
 ## Install
 
 ```bash
-cargo install lasius            # once published
+cargo install lasius
 # or from source:
 cargo install --path crates/lasius-cli
 ```
