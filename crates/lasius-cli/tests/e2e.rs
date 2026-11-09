@@ -338,3 +338,35 @@ fn serve_answers_jsonrpc_ops() {
     assert_eq!(bad["ok"], false);
     assert!(bad["error"].as_str().unwrap().contains("unknown op"));
 }
+
+#[test]
+fn sync_alias_and_json_flags() {
+    let (_tmp, root, path) = setup(&["alpha"]);
+    assert!(run(&["clone"], &root, &path).status.success());
+
+    // `sync` is a visible alias for `update`
+    let out = run(&["sync", "--json"], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert!(doc
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|r| r["name"] == "alpha" && r["ok"] == true));
+
+    // doctor --json emits check rows
+    let out = run(&["doctor", "--json"], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert!(doc
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|c| c["name"] == "git" && c["ok"] == true));
+
+    // code-workspace generate --json
+    let out = run(&["code-workspace", "generate", "--json"], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert_eq!(doc["repos"], 1);
+}

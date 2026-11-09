@@ -37,11 +37,11 @@ cd my-org-workspace
 
 lasius init                    # scaffold the workspace repo + clone all org repos + generate
 lasius clone                   # clone all missing org repos
-lasius update                  # git pull --ff-only everywhere
+lasius update [--json]         # git pull --ff-only everywhere (alias: sync)
 lasius status                  # branch / dirty / ahead-behind table (--json for machines)
-lasius code-workspace generate # regenerate the *.code-workspace file
+lasius code-workspace generate [--json]  # regenerate the *.code-workspace file
 lasius open                    # open the workspace file in your editor
-lasius doctor                  # env + drift diagnostics
+lasius doctor [--json]         # env + drift diagnostics
 lasius exec -- cargo build     # run a command in every clone (--filter <substr>)
 lasius add <repo>              # clone a single org repo
 lasius rm <repo>               # remove a clone after safety checks

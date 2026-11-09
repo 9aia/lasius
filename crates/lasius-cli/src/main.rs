@@ -42,7 +42,12 @@ enum Commands {
     /// Clone all missing org repos into repos_dir
     Clone,
     /// git pull --ff-only every clone
-    Update,
+    #[command(visible_alias = "sync")]
+    Update {
+        /// Emit JSON instead of the table
+        #[arg(long)]
+        json: bool,
+    },
     /// Show branch / dirty / sync status for every clone
     Status {
         /// Emit JSON instead of the table
@@ -56,7 +61,11 @@ enum Commands {
         action: CodeWorkspaceAction,
     },
     /// Environment + drift diagnostics
-    Doctor,
+    Doctor {
+        /// Emit JSON instead of the check table
+        #[arg(long)]
+        json: bool,
+    },
     /// Open the generated workspace file in an editor
     Open {
         /// Editor command (default: $VISUAL, $EDITOR, or code/zed/cursor/vi)
@@ -102,7 +111,11 @@ enum Commands {
 #[derive(Subcommand)]
 enum CodeWorkspaceAction {
     /// Regenerate the *.code-workspace file from local clones
-    Generate,
+    Generate {
+        /// Emit JSON instead of the summary line
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 fn main() {
@@ -127,12 +140,12 @@ fn main() {
             };
             match command {
                 Commands::Clone => commands::clone(&ws),
-                Commands::Update => commands::update(&ws),
+                Commands::Update { json } => commands::update(&ws, *json),
                 Commands::Status { json } => commands::status(&ws, *json),
                 Commands::CodeWorkspace {
-                    action: CodeWorkspaceAction::Generate,
-                } => commands::code_workspace_generate(&ws),
-                Commands::Doctor => commands::doctor(&ws),
+                    action: CodeWorkspaceAction::Generate { json },
+                } => commands::code_workspace_generate(&ws, *json),
+                Commands::Doctor { json } => commands::doctor(&ws, *json),
                 Commands::Open { editor } => commands::open(&ws, editor.clone()),
                 Commands::Rm { name, yes, force } => commands::rm(&ws, name, *yes, *force),
                 Commands::Exec { filter, cmd } => commands::exec(&ws, filter.as_deref(), cmd),

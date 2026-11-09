@@ -240,8 +240,16 @@ pub fn clone(ws: &Workspace) -> Result<()> {
     clone_all(ws, &repos)
 }
 
-/// `lasius update` — pull --ff-only every clone, in parallel.
-pub fn update(ws: &Workspace) -> Result<()> {
+/// One repo's pull outcome for `--json` output.
+#[derive(serde::Serialize)]
+pub struct UpdateRow {
+    name: String,
+    ok: bool,
+    detail: String,
+}
+
+/// `lasius update` (alias `sync`) — pull --ff-only everywhere.
+pub fn update(ws: &Workspace, json: bool) -> Result<()> {
     let names = support::local_repos(ws)?;
     let results = proc::par_map(&names, |name| {
         let dir = ws.repo_path(name);
@@ -249,25 +257,41 @@ pub fn update(ws: &Workspace) -> Result<()> {
         (name.clone(), out)
     });
 
+    let mut rows = Vec::new();
     let mut failed = 0;
     for (name, out) in &results {
-        match out {
-            Ok(o) if o.success() => {
-                println!("ok      {:<22} {}", name, o.last_stdout_line());
-            }
+        let (ok, detail) = match out {
+            Ok(o) if o.success() => (true, o.last_stdout_line().to_string()),
             Ok(o) => {
                 let detail = if o.stderr.trim().is_empty() {
                     o.stdout.trim()
                 } else {
                     o.stderr.trim()
                 };
-                println!("FAIL    {:<22} {detail}", name);
-                failed += 1;
+                (false, detail.to_string())
             }
-            Err(e) => {
-                println!("FAIL    {:<22} {e}", name);
-                failed += 1;
-            }
+            Err(e) => (false, e.to_string()),
+        };
+        if !ok {
+            failed += 1;
+        }
+        rows.push(UpdateRow {
+            name: name.clone(),
+            ok,
+            detail,
+        });
+    }
+
+    if json {
+        println!("{}", serde_json::to_string_pretty(&rows)?);
+    } else {
+        for r in &rows {
+            println!(
+                "{:<8}{:<22} {}",
+                if r.ok { "ok" } else { "FAIL" },
+                r.name,
+                r.detail
+            );
         }
     }
     if failed > 0 {
@@ -372,12 +396,20 @@ pub fn status(ws: &Workspace, json: bool) -> Result<()> {
 }
 
 /// `lasius code-workspace generate`.
-pub fn code_workspace_generate(ws: &Workspace) -> Result<()> {
+pub fn code_workspace_generate(ws: &Workspace, json: bool) -> Result<()> {
     let count = support::refresh_workspace(ws)?;
-    println!(
-        "wrote {} ({count} repo folders)",
-        ws.workspace_file_path().display()
-    );
+    let path = ws.workspace_file_path();
+    if json {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({
+                "path": path,
+                "repos": count,
+            }))?
+        );
+    } else {
+        println!("wrote {} ({count} repo folders)", path.display());
+    }
     Ok(())
 }
 
@@ -482,18 +514,23 @@ pub fn doctor_checks(ws: &Workspace) -> Result<Vec<(String, bool, String)>> {
 }
 
 /// `lasius doctor` — environment + drift diagnostics. Exit 1 on any failure.
-pub fn doctor(ws: &Workspace) -> Result<()> {
+pub fn doctor(ws: &Workspace, json: bool) -> Result<()> {
     let checks = doctor_checks(ws)?;
-    let mut failed = 0;
-    for (name, ok, detail) in &checks {
-        println!(
-            "{} {:<14} {}",
-            if *ok { "ok  " } else { "FAIL" },
-            name,
-            detail
-        );
-        if !ok {
-            failed += 1;
+    let failed = checks.iter().filter(|(_, ok, _)| !*ok).count();
+    if json {
+        let doc: Vec<serde_json::Value> = checks
+            .iter()
+            .map(|(name, ok, detail)| serde_json::json!({"name": name, "ok": ok, "detail": detail}))
+            .collect();
+        println!("{}", serde_json::to_string_pretty(&doc)?);
+    } else {
+        for (name, ok, detail) in &checks {
+            println!(
+                "{} {:<14} {}",
+                if *ok { "ok  " } else { "FAIL" },
+                name,
+                detail
+            );
         }
     }
     if failed > 0 {
