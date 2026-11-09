@@ -6,6 +6,7 @@
 
 mod commands;
 mod proc;
+mod serve;
 mod support;
 
 use std::path::PathBuf;
@@ -87,6 +88,15 @@ enum Commands {
         /// Repo name
         name: String,
     },
+    /// ndjson JSON-RPC over stdio — read-only ops for embedding
+    /// (ping, list, status, doctor); same wire as tamias/sepia/cuora/myco serve
+    Serve,
+    /// Print shell completion script for SHELL
+    Completions {
+        /// Shell to generate completions for
+        #[arg(value_enum)]
+        shell: clap_complete::Shell,
+    },
 }
 
 #[derive(Subcommand)]
@@ -98,6 +108,12 @@ enum CodeWorkspaceAction {
 fn main() {
     let cli = Cli::parse();
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+
+    if let Commands::Completions { shell } = &cli.command {
+        let mut cmd = <Cli as clap::CommandFactory>::command();
+        clap_complete::generate(*shell, &mut cmd, "lasius", &mut std::io::stdout());
+        return;
+    }
 
     let result = match &cli.command {
         Commands::Init { org } => commands::init(cli.root.as_deref(), org.clone(), &cwd),
@@ -121,6 +137,8 @@ fn main() {
                 Commands::Rm { name, yes, force } => commands::rm(&ws, name, *yes, *force),
                 Commands::Exec { filter, cmd } => commands::exec(&ws, filter.as_deref(), cmd),
                 Commands::Add { name } => commands::add(&ws, name),
+                Commands::Serve => serve::serve(&ws),
+                Commands::Completions { .. } => unreachable!(),
                 Commands::Init { .. } => unreachable!(),
             }
         }

@@ -276,8 +276,12 @@ pub fn update(ws: &Workspace) -> Result<()> {
     Ok(())
 }
 
-/// `lasius status` — table (or `--json`) plus per-repo ERR lines.
-pub fn status(ws: &Workspace, json: bool) -> Result<()> {
+/// A per-repo status failure: repo name + human-readable detail.
+pub type StatusFailure = (String, String);
+
+/// Collect per-repo status rows plus failure pairs.
+/// Shared by `status` (prints) and `serve status` (JSON).
+pub fn collect_status(ws: &Workspace) -> Result<(Vec<StatusRow>, Vec<StatusFailure>)> {
     let names = support::local_repos(ws)?;
     let results = proc::par_map(&names, |name| {
         let dir = ws.repo_path(name);
@@ -286,7 +290,7 @@ pub fn status(ws: &Workspace, json: bool) -> Result<()> {
     });
 
     let mut rows: Vec<StatusRow> = Vec::new();
-    let mut failures: Vec<String> = Vec::new();
+    let mut failures: Vec<StatusFailure> = Vec::new();
     for (name, out) in results {
         match out {
             Ok(o) if o.success() => {
@@ -305,15 +309,36 @@ pub fn status(ws: &Workspace, json: bool) -> Result<()> {
                         o.stderr.trim()
                     }
                 );
-                eprintln!("ERR     {:<22} {detail}", name);
-                failures.push(format!("{name}: {detail}"));
+                failures.push((name, detail));
             }
             Err(e) => {
                 let detail = format!("git status {name}: {e}");
-                eprintln!("ERR     {:<22} {detail}", name);
-                failures.push(format!("{name}: {detail}"));
+                failures.push((name, detail));
             }
         }
+    }
+    Ok((rows, failures))
+}
+
+/// Status rows only — bails if any repo failed (used by `serve status`).
+pub fn status_rows(ws: &Workspace) -> Result<Vec<StatusRow>> {
+    let (rows, failures) = collect_status(ws)?;
+    if !failures.is_empty() {
+        let detail = failures
+            .iter()
+            .map(|(n, d)| format!("{n}: {d}"))
+            .collect::<Vec<_>>()
+            .join("; ");
+        anyhow::bail!("{} repo(s) failed status: {detail}", failures.len());
+    }
+    Ok(rows)
+}
+
+/// `lasius status` — table (or `--json`) plus per-repo ERR lines.
+pub fn status(ws: &Workspace, json: bool) -> Result<()> {
+    let (rows, failures) = collect_status(ws)?;
+    for (name, detail) in &failures {
+        eprintln!("ERR     {:<22} {detail}", name);
     }
 
     if json {
@@ -336,11 +361,12 @@ pub fn status(ws: &Workspace, json: bool) -> Result<()> {
     }
 
     if !failures.is_empty() {
-        anyhow::bail!(
-            "{} repo(s) failed status: {}",
-            failures.len(),
-            failures.join("; ")
-        );
+        let detail = failures
+            .iter()
+            .map(|(n, d)| format!("{n}: {d}"))
+            .collect::<Vec<_>>()
+            .join("; ");
+        anyhow::bail!("{} repo(s) failed status: {detail}", failures.len());
     }
     Ok(())
 }
@@ -355,8 +381,9 @@ pub fn code_workspace_generate(ws: &Workspace) -> Result<()> {
     Ok(())
 }
 
-/// `lasius doctor` — environment + drift diagnostics. Exit 1 on any failure.
-pub fn doctor(ws: &Workspace) -> Result<()> {
+/// Doctor check rows `(name, ok, detail)` — shared by `doctor` (prints)
+/// and `serve doctor` (JSON). No printing happens here.
+pub fn doctor_checks(ws: &Workspace) -> Result<Vec<(String, bool, String)>> {
     let mut checks: Vec<(String, bool, String)> = Vec::new();
 
     // git
@@ -405,18 +432,21 @@ pub fn doctor(ws: &Workspace) -> Result<()> {
             let missing: Vec<&&str> = org_names.difference(&local_set).collect();
             let extra: Vec<&&str> = local_set.difference(&org_names).collect();
             let ok = missing.is_empty() && extra.is_empty();
+            let names = |v: &[&&str]| {
+                v.iter()
+                    .take(5)
+                    .map(|s| s.to_string())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            };
             let detail = format!(
-                "{} missing locally, {} not in org",
+                "{} missing locally ({}), {} not in org ({})",
                 missing.len(),
-                extra.len()
+                names(&missing),
+                extra.len(),
+                names(&extra)
             );
             checks.push(("drift".into(), ok, detail));
-            for m in missing.iter().take(10) {
-                println!("  missing locally: {m}");
-            }
-            for e in extra.iter().take(10) {
-                println!("  not in org:      {e}");
-            }
         }
         checks.push(("local clones".into(), true, format!("{}", local.len())));
     }
@@ -448,6 +478,12 @@ pub fn doctor(ws: &Workspace) -> Result<()> {
         )),
     }
 
+    Ok(checks)
+}
+
+/// `lasius doctor` — environment + drift diagnostics. Exit 1 on any failure.
+pub fn doctor(ws: &Workspace) -> Result<()> {
+    let checks = doctor_checks(ws)?;
     let mut failed = 0;
     for (name, ok, detail) in &checks {
         println!(

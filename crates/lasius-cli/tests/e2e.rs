@@ -297,3 +297,44 @@ fn unsafe_name_rejected_by_core_paths() {
     assert!(!out.status.success());
     assert!(stderr(&out).contains("unsafe repo name"));
 }
+
+#[test]
+fn serve_answers_jsonrpc_ops() {
+    let (_tmp, root, path) = setup(&["alpha"]);
+    assert!(run(&["clone"], &root, &path).status.success());
+
+    let mut child = Command::new(bin())
+        .args(["serve"])
+        .current_dir(&root)
+        .env("PATH", &path)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .unwrap();
+    {
+        use std::io::Write;
+        let mut stdin = child.stdin.take().unwrap();
+        writeln!(stdin, "{{\"op\":\"ping\"}}").unwrap();
+        writeln!(stdin, "{{\"op\":\"list\"}}").unwrap();
+        writeln!(stdin, "{{\"op\":\"status\"}}").unwrap();
+        writeln!(stdin, "{{\"op\":\"doctor\"}}").unwrap();
+        writeln!(stdin, "{{\"op\":\"bogus\"}}").unwrap();
+    }
+    let out = child.wait_with_output().unwrap();
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let text = stdout(&out);
+    let lines: Vec<&str> = text.lines().collect();
+    assert_eq!(lines.len(), 5);
+    for line in &lines[..4] {
+        let v: serde_json::Value = serde_json::from_str(line).unwrap();
+        assert_eq!(v["ok"], true, "line: {line}");
+    }
+    assert!(lines[0].contains("\"pong\":true"));
+    assert!(lines[1].contains("\"alpha\""));
+    assert!(lines[2].contains("\"branch\""));
+    assert!(lines[3].contains("\"checks\""));
+    let bad: serde_json::Value = serde_json::from_str(lines[4]).unwrap();
+    assert_eq!(bad["ok"], false);
+    assert!(bad["error"].as_str().unwrap().contains("unknown op"));
+}
