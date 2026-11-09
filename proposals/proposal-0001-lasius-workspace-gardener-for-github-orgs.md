@@ -1,7 +1,7 @@
 +++
 id = "P-001"
 title = "lasius: workspace gardener for GitHub orgs"
-status = "open"
+status = "claimed"
 created = "2026-11-09"
 owner = "devin"
 priority = "high"
