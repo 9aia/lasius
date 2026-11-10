@@ -11,8 +11,8 @@ I/O); `lasius-cli` is the composition root.
 
 | Crate | Role |
 | --- | --- |
-| `crates/lasius-core` | `lasius.toml` model, `gh repo list` JSON decoding (serde), repo-name safety + exclude globs, `git status --porcelain=v2` parse/format, `*.code-workspace` generation — pure, unit-tested |
-| `crates/lasius-cli` | the `lasius` binary — clap derive, `std::process` for `git`/`gh`/`sh`, `std::fs` for the workspace, `std::thread::scope` parallelism. `init` scaffolds the workspace repo (`lasius.toml`, `.gitignore`, doc stubs) then clones + generates. E2e tests spawn the real binary against fake `gh` + `file://` git repos |
+| `crates/lasius-core` | `lasius.toml` model (incl. `provider`), `gh repo list` JSON decoding, failure classification, repo-name safety + exclude globs, `git status --porcelain=v2` parse/format, `*.code-workspace` generation — pure, unit-tested |
+| `crates/lasius-cli` | the `lasius` binary — clap derive, `std::process` for `git`/`gh`/`sh`, `std::fs` for the workspace, `std::thread::scope` parallelism, `providers.rs` `RepoProvider` seam. `init` scaffolds the workspace repo (`lasius.toml`, `.gitignore`, doc stubs) then clones + generates. E2e tests spawn the real binary against fake `gh` + `file://` git repos |
 | `xtask` (`lasius-xtask`) | `check` (fmt + clippy -D warnings) / `test` (nextest or cargo test) / `coverage` (llvm-cov) / `fmt` |
 
 ## Commands
