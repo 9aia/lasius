@@ -39,10 +39,24 @@ fn to_proc(output: Output) -> ProcOutput {
 /// Spawn `program args…` in `cwd`, capturing stdout/stderr. Never panics on
 /// non-zero exit — check [`ProcOutput::success`].
 pub fn capture(program: &str, args: &[String], cwd: Option<&Path>) -> io::Result<ProcOutput> {
+    capture_env(program, args, cwd, &[])
+}
+
+/// [`capture`] plus extra environment variables — e.g. `GIT_TERMINAL_PROMPT=0`
+/// to keep credential prompts from hanging a probe.
+pub fn capture_env(
+    program: &str,
+    args: &[String],
+    cwd: Option<&Path>,
+    envs: &[(&str, &str)],
+) -> io::Result<ProcOutput> {
     let mut cmd = Command::new(program);
     cmd.args(args);
     if let Some(dir) = cwd {
         cmd.current_dir(dir);
+    }
+    for (key, value) in envs {
+        cmd.env(key, value);
     }
     cmd.output().map(to_proc)
 }

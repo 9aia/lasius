@@ -8,6 +8,7 @@ use crate::error::CoreError;
 ///
 /// ```toml
 /// org = "ktbhealth"
+/// provider = "github"                        # optional, default "github"
 /// repos_dir = "repos"                          # optional, default "repos"
 /// workspace_file = "ktbhealth.code-workspace"  # optional, default "{org}.code-workspace"
 /// exclude = ["secret-*"]                       # optional name globs
@@ -15,8 +16,13 @@ use crate::error::CoreError;
 /// ```
 #[derive(Debug, Clone, Deserialize)]
 pub struct WorkspaceConfig {
-    /// GitHub org (or user) whose non-archived repos are managed.
+    /// Org (or user) whose non-archived repos are managed.
     pub org: String,
+
+    /// Git forge that owns repo discovery. Unknown values are a config
+    /// error — there is no silent fallback.
+    #[serde(default)]
+    pub provider: ProviderKind,
 
     /// Directory under the workspace root that holds clones.
     #[serde(default = "default_repos_dir")]
@@ -41,6 +47,28 @@ pub struct WorkspaceConfig {
     /// `[policy]` — org conventions enforced by `lasius check`.
     #[serde(default)]
     pub policy: Policy,
+}
+
+/// Git forge provider that owns org repo discovery.
+///
+/// Serialized lowercase (`provider = "github"`). New forges add a variant;
+/// `lasius-cli` dispatches on this to pick a provider implementation.
+/// Unknown strings fail deserialization — no silent default.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ProviderKind {
+    /// GitHub, discovered via the `gh` CLI. The default and only provider.
+    #[default]
+    Github,
+}
+
+impl ProviderKind {
+    /// Config-file spelling, e.g. `"github"`.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Github => "github",
+        }
+    }
 }
 
 /// `[checks]` table — enable/disable and severity overrides.
@@ -96,6 +124,9 @@ impl WorkspaceConfig {
     /// Serialize back to `lasius.toml` form (used by `init --org`).
     pub fn to_toml(&self) -> String {
         let mut out = format!("org = {:?}\n", self.org);
+        if self.provider != ProviderKind::default() {
+            out.push_str(&format!("provider = {:?}\n", self.provider.as_str()));
+        }
         if self.repos_dir != default_repos_dir() {
             out.push_str(&format!("repos_dir = {:?}\n", self.repos_dir));
         }
@@ -225,6 +256,31 @@ mod tests {
             cfg.workspace_file_path(root),
             PathBuf::from("/ws/o.code-workspace")
         );
+    }
+
+    #[test]
+    fn provider_defaults_to_github() {
+        let cfg = WorkspaceConfig::from_toml("org = \"o\"").unwrap();
+        assert_eq!(cfg.provider, ProviderKind::Github);
+    }
+
+    #[test]
+    fn parses_explicit_provider() {
+        let cfg = WorkspaceConfig::from_toml("org = \"o\"\nprovider = \"github\"\n").unwrap();
+        assert_eq!(cfg.provider, ProviderKind::Github);
+    }
+
+    #[test]
+    fn rejects_unknown_provider() {
+        let err = WorkspaceConfig::from_toml("org = \"o\"\nprovider = \"gitlab\"\n").unwrap_err();
+        assert!(matches!(err, CoreError::Config(_)));
+        assert!(err.to_string().contains("gitlab"));
+    }
+
+    #[test]
+    fn to_toml_omits_default_provider() {
+        let cfg = WorkspaceConfig::from_toml("org = \"o\"\nprovider = \"github\"\n").unwrap();
+        assert!(!cfg.to_toml().contains("provider"));
     }
 
     #[test]

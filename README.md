@@ -11,6 +11,7 @@ A *workspace* is just a directory with a `lasius.toml`:
 
 ```toml
 org = "ktbhealth"                        # GitHub org or user
+provider = "github"                      # optional, default "github" (only provider today)
 repos_dir = "repos"                      # optional, default "repos"
 workspace_file = "ktbhealth.code-workspace"  # optional, default "{org}.code-workspace"
 exclude = ["secret-*"]                   # optional name globs
@@ -58,7 +59,8 @@ discovered upward from the current directory.
 stubs — then clones and generates. Everything is idempotent and never
 overwrites existing files.
 
-Repo discovery is automatic: `gh repo list <org> --json name,sshUrl,isArchived,isPrivate`
+Repo discovery is provider-driven (`provider = "github"` today): `gh repo
+list <org> --json name,sshUrl,isArchived,isPrivate`
 (non-archived only; private repos are skipped unless `include_private =
 true`, `exclude` globs applied, unsafe names rejected before they can
 become paths). Archive a repo on GitHub to exclude it. The workspace

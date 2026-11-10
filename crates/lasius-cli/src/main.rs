@@ -6,6 +6,7 @@
 
 mod commands;
 mod proc;
+mod providers;
 mod serve;
 mod support;
 

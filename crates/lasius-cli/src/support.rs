@@ -62,49 +62,19 @@ pub fn resolve(root_flag: Option<&Path>, cwd: &Path) -> Result<Workspace> {
     )
 }
 
-/// `gh repo list <org>` decoded via [`lasius_core::gh::decode_repo_list`].
+/// Org repos via the configured [`crate::providers::RepoProvider`].
 pub fn org_repos(ws: &Workspace) -> Result<Vec<Repo>> {
-    let out = proc::capture_labeled(
-        "gh repo list",
-        "gh",
-        &[
-            "repo".into(),
-            "list".into(),
-            ws.config.org.clone(),
-            "--limit".into(),
-            "200".into(),
-            "--json".into(),
-            "name,sshUrl,isArchived,isPrivate".into(),
-        ],
-        None,
-    )?;
-    if !out.success() {
-        let stderr = out.stderr.trim();
-        let detail = if stderr.is_empty() {
-            out.stdout.trim()
-        } else {
-            stderr
-        };
-        anyhow::bail!("gh repo list failed with exit code {}: {detail}", out.code);
-    }
-    let mut repos = lasius_core::gh::decode_repo_list(
-        &out.stdout,
-        &ws.config.exclude,
-        ws.config.include_private,
-    )
-    .map_err(|e| anyhow::anyhow!("could not decode gh repo list output: {e}"))?;
-    // The workspace repo itself is never a member — detected from the
-    // root's own `origin` remote (owner must match `org`).
-    if let Some(own) = own_repo_name(ws) {
-        repos.retain(|r| r.name != own);
-    }
-    Ok(repos)
+    crate::providers::for_kind(ws.config.provider).list_repos(ws)
 }
 
 /// Repo name of the workspace's own `origin` remote, if the remote's
 /// owner matches `config.org`. `None` when the root isn't a git clone
 /// of `<org>/<something>` (e.g. fresh `init` before `git init`).
-fn own_repo_name(ws: &Workspace) -> Option<String> {
+///
+/// Parses the generic `<owner>/<repo>` URL tail, which matches
+/// github.com remotes (ssh `git@host:owner/repo` and https forms). Other
+/// providers with different remote layouts should override this.
+pub(crate) fn own_repo_name(ws: &Workspace) -> Option<String> {
     let out = proc::capture_labeled(
         "git remote",
         "git",

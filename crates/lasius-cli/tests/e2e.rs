@@ -399,6 +399,45 @@ fn check_reports_conformance() {
 }
 
 #[test]
+fn check_reports_org_discovery_failure() {
+    let tmp = tempfile::tempdir().unwrap();
+    let base = tmp.path();
+    // fake gh that fails like an unauthenticated user
+    let bin_dir = base.join("bin");
+    fs::create_dir_all(&bin_dir).unwrap();
+    fs::write(
+        bin_dir.join("gh"),
+        "#!/bin/sh\necho 'gh: not logged in — run `gh auth login`' >&2\nexit 1\n",
+    )
+    .unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(bin_dir.join("gh"), fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    let root = base.join("ws");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(root.join("lasius.toml"), "org = \"testorg\"\n").unwrap();
+    // satisfy the Error-severity structural checks so the run stays green
+    fs::write(root.join(".gitignore"), "/repos/\ntestorg.code-workspace\n").unwrap();
+    let path_env = format!("{}:{}", bin_dir.display(), std::env::var("PATH").unwrap());
+    assert!(run(&["code-workspace", "generate"], &root, &path_env)
+        .status
+        .success());
+
+    let out = run(&["check"], &root, &path_env);
+    assert!(
+        out.status.success(),
+        "org-drift is Info — check must not fail: {}",
+        stderr(&out)
+    );
+    let text = stdout(&out);
+    assert!(text.contains("org-drift"));
+    assert!(text.contains("org discovery failed"));
+    assert!(text.contains("auth/permission"));
+}
+
+#[test]
 fn workspace_repo_self_excluded() {
     let tmp = tempfile::tempdir().unwrap();
     let base = tmp.path();

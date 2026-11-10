@@ -7,7 +7,9 @@ use std::path::Path;
 use std::process::Command as ProcCommand;
 
 use anyhow::{Context, Result};
-use lasius_core::{parse_git_status, Repo, StatusRow, WorkspaceConfig};
+use lasius_core::{
+    classify_failure, parse_git_status, tail_text, FailureKind, Repo, StatusRow, WorkspaceConfig,
+};
 
 use crate::proc::{self, ProcOutput};
 use crate::support::{self, Workspace, CONFIG_FILE};
@@ -15,6 +17,30 @@ use crate::support::{self, Workspace, CONFIG_FILE};
 fn git(repo: &Path, args: &[&str]) -> Result<ProcOutput> {
     let owned: Vec<String> = args.iter().map(|s| s.to_string()).collect();
     proc::capture_labeled("git", "git", &owned, Some(repo))
+}
+
+/// Format raw process output as a failure detail: classified with an
+/// `access-denied:` / `not-found:` prefix when recognized, otherwise the
+/// raw text — always capped to the last ~300 chars.
+fn failure_detail(raw: &str) -> String {
+    let snippet = tail_text(raw.trim(), 300);
+    if snippet.is_empty() {
+        return snippet;
+    }
+    match classify_failure(raw) {
+        FailureKind::AccessDenied => format!("access-denied: {snippet}"),
+        FailureKind::NotFound => format!("not-found: {snippet}"),
+        FailureKind::Other => snippet,
+    }
+}
+
+/// stderr preferred, stdout as fallback — the usual git/gh failure shape.
+fn failure_text(o: &ProcOutput) -> &str {
+    if o.stderr.trim().is_empty() {
+        o.stdout.trim()
+    } else {
+        o.stderr.trim()
+    }
 }
 
 /// Outcome of attempting one clone.
@@ -47,7 +73,7 @@ fn clone_all(ws: &Workspace, repos: &[Repo]) -> Result<()> {
             "git",
             &[
                 "clone".to_string(),
-                repo.ssh_url.clone(),
+                repo.clone_url.clone(),
                 target.to_string_lossy().into_owned(),
             ],
             None,
@@ -55,11 +81,7 @@ fn clone_all(ws: &Workspace, repos: &[Repo]) -> Result<()> {
         match out {
             Ok(o) if o.success() => (repo.name.clone(), CloneOutcome::Cloned),
             Ok(o) => {
-                let detail = if o.stderr.trim().is_empty() {
-                    o.stdout.trim().to_string()
-                } else {
-                    o.stderr.trim().to_string()
-                };
+                let detail = failure_detail(failure_text(&o));
                 (repo.name.clone(), CloneOutcome::Failed(detail))
             }
             Err(e) => (repo.name.clone(), CloneOutcome::Failed(e.to_string())),
@@ -125,6 +147,7 @@ pub fn init(root_flag: Option<&Path>, org: Option<String>, cwd: &Path) -> Result
             .context("no lasius.toml found and no --org given — pass --org <org>")?;
         let config = WorkspaceConfig {
             org,
+            provider: Default::default(),
             repos_dir: "repos".to_string(),
             workspace_file: None,
             exclude: Vec::new(),
@@ -212,7 +235,9 @@ fn agents_stub(org: &str) -> String {
     )
 }
 
-/// Best-effort owner inference from `origin`'s github URL.
+/// Best-effort owner inference from `origin`'s github URL. GitHub-specific —
+/// only used by `init` when no `lasius.toml` exists yet, i.e. when the
+/// provider is necessarily the default (`github`).
 fn infer_org_from_remote(root: &Path) -> Option<String> {
     let out = proc::capture(
         "git",
@@ -265,12 +290,8 @@ pub fn update(ws: &Workspace, json: bool) -> Result<()> {
         let (ok, detail) = match out {
             Ok(o) if o.success() => (true, o.last_stdout_line().to_string()),
             Ok(o) => {
-                let detail = if o.stderr.trim().is_empty() {
-                    o.stdout.trim()
-                } else {
-                    o.stderr.trim()
-                };
-                (false, detail.to_string())
+                let detail = failure_detail(failure_text(o));
+                (false, detail)
             }
             Err(e) => (false, e.to_string()),
         };
@@ -329,11 +350,7 @@ pub fn collect_status(ws: &Workspace) -> Result<(Vec<StatusRow>, Vec<StatusFailu
                 let detail = format!(
                     "git status {name} failed with exit code {}: {}",
                     o.code,
-                    if o.stderr.trim().is_empty() {
-                        o.stdout.trim()
-                    } else {
-                        o.stderr.trim()
-                    }
+                    failure_detail(failure_text(&o))
                 );
                 failures.push((name, detail));
             }
@@ -429,29 +446,32 @@ pub fn doctor_checks(ws: &Workspace) -> Result<Vec<(String, bool, String)>> {
         Err(e) => checks.push(("git".into(), false, e.to_string())),
     }
 
-    // gh + auth
-    match proc::capture("gh", &["auth".to_string(), "status".to_string()], None) {
-        Ok(o) if o.success() => checks.push(("gh auth".into(), true, "authenticated".into())),
+    // provider auth probe + org repo list
+    let provider = crate::providers::for_kind(ws.config.provider);
+    let (probe_prog, probe_args) = provider.auth_probe();
+    match proc::capture(probe_prog, &probe_args, None) {
+        Ok(o) if o.success() => {
+            checks.push((provider.auth_check().into(), true, "authenticated".into()));
+        }
         Ok(o) => checks.push((
-            "gh auth".into(),
+            provider.auth_check().into(),
             false,
             format!("exit {}: {}", o.code, o.stderr.trim()),
         )),
-        Err(e) => checks.push(("gh auth".into(), false, e.to_string())),
+        Err(e) => checks.push((provider.auth_check().into(), false, e.to_string())),
     }
 
-    // org repo list
     let org = match support::org_repos(ws) {
         Ok(repos) => {
             checks.push((
-                "gh repo list".into(),
+                provider.list_label().into(),
                 true,
                 format!("{} repos", repos.len()),
             ));
             Some(repos)
         }
         Err(e) => {
-            checks.push(("gh repo list".into(), false, format!("{e:#}")));
+            checks.push((provider.list_label().into(), false, format!("{e:#}")));
             None
         }
     };
@@ -735,6 +755,34 @@ fn repo_facts(ws: &Workspace, name: &str) -> lasius_core::RepoFacts {
         .filter(|o| o.success())
         .map(|o| o.stdout.trim().to_string());
 
+    // Probe reachability — GIT_TERMINAL_PROMPT=0 + ssh BatchMode keep
+    // credential/host-key prompts from hanging the check. BatchMode also
+    // overrides any user-set GIT_SSH for this probe only.
+    if f.remote.is_some() {
+        let out = proc::capture_env(
+            "git",
+            &[
+                "ls-remote".to_string(),
+                "origin".to_string(),
+                "HEAD".to_string(),
+            ],
+            Some(&dir),
+            &[
+                ("GIT_TERMINAL_PROMPT", "0"),
+                ("GIT_SSH_COMMAND", "ssh -o BatchMode=yes"),
+            ],
+        );
+        match out {
+            Ok(o) if o.success() => f.remote_ok = Some(true),
+            Ok(o) => {
+                f.remote_ok = Some(false);
+                f.remote_error = Some(tail_text(failure_text(&o).trim(), 200));
+            }
+            // spawn itself failed — leave unprobed rather than guessing.
+            Err(_) => {}
+        }
+    }
+
     // worktrees: porcelain "worktree <path>" lines; first is the main checkout
     if let Ok(o) = git(&dir, &["worktree", "list", "--porcelain"]) {
         if o.success() {
@@ -832,9 +880,12 @@ pub fn check(ws: &Workspace, domain: Option<&str>, only: &[String], json: bool) 
         on_disk == fresh
     });
 
-    let org_names = support::org_repos(ws)
+    let org_result = support::org_repos(ws);
+    let org_names = org_result
+        .as_ref()
         .ok()
         .map(|repos| repos.iter().map(|r| r.name.clone()).collect());
+    let org_error = org_result.err().map(|e| tail_text(&format!("{e:#}"), 300));
 
     let repo_facts: Vec<lasius_core::RepoFacts> =
         proc::par_map(&local_names, |n| repo_facts(ws, n));
@@ -849,6 +900,7 @@ pub fn check(ws: &Workspace, domain: Option<&str>, only: &[String], json: bool) 
         workspace_file,
         workspace_fresh,
         org_names,
+        org_error,
         repos: repo_facts,
     };
 

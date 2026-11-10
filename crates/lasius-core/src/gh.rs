@@ -3,18 +3,19 @@ use serde::Deserialize;
 use crate::error::CoreError;
 use crate::names::is_safe_repo_name;
 
-/// A non-archived repo from `gh repo list --json name,sshUrl,isArchived`.
+/// A non-archived repo discovered from a forge. `clone_url` is whatever the
+/// provider reports — `git@…` ssh for GitHub today, but https URLs are fine.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Repo {
     pub name: String,
-    pub ssh_url: String,
+    pub clone_url: String,
 }
 
 #[derive(Debug, Deserialize)]
 struct GhRepo {
     name: String,
     #[serde(rename = "sshUrl")]
-    ssh_url: String,
+    clone_url: String,
     #[serde(rename = "isArchived", default)]
     is_archived: bool,
     #[serde(rename = "isPrivate", default)]
@@ -48,7 +49,7 @@ pub fn decode_repo_list(
         })
         .map(|r| Repo {
             name: r.name,
-            ssh_url: r.ssh_url,
+            clone_url: r.clone_url,
         })
         .collect();
     repos.sort_by(|a, b| a.name.cmp(&b.name));
@@ -85,11 +86,11 @@ mod tests {
             vec![
                 Repo {
                     name: "alpha".into(),
-                    ssh_url: "git@x:alpha.git".into()
+                    clone_url: "git@x:alpha.git".into()
                 },
                 Repo {
                     name: "beta".into(),
-                    ssh_url: "git@x:beta.git".into()
+                    clone_url: "git@x:beta.git".into()
                 },
             ]
         );

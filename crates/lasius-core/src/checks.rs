@@ -71,6 +71,11 @@ pub struct RepoFacts {
     pub has_nested_git: bool,
     /// `[policy.require_files]` entries missing from the clone.
     pub missing_files: Vec<String>,
+    /// `git ls-remote origin HEAD` probe: `Some(true)` reachable,
+    /// `Some(false)` failed, `None` not probed (no origin / not a clone).
+    pub remote_ok: Option<bool>,
+    /// stderr tail when `remote_ok` is `Some(false)`.
+    pub remote_error: Option<String>,
 }
 
 /// Everything the checks need — gathered once by the cli.
@@ -92,8 +97,10 @@ pub struct Facts<'a> {
     pub workspace_file: Option<String>,
     /// Whether the on-disk workspace file matches a fresh generation.
     pub workspace_fresh: bool,
-    /// Org repo names from `gh`, if discovery succeeded.
+    /// Org repo names from the configured provider, if discovery succeeded.
     pub org_names: Option<Vec<String>>,
+    /// Why org discovery failed (truncated error text), if it did.
+    pub org_error: Option<String>,
     /// Per-repo facts (parallel-gathered).
     pub repos: Vec<RepoFacts>,
 }
@@ -142,6 +149,9 @@ pub fn run(facts: &Facts, only: Option<&[String]>) -> Vec<Finding> {
     }
     if want("remote-match") {
         remote_match(facts, &mut out);
+    }
+    if want("remote-reachable") {
+        remote_reachable(facts, &mut out);
     }
     if want("worktree-health") {
         worktree_health(facts, &mut out);
@@ -316,6 +326,32 @@ fn remote_match(f: &Facts, out: &mut Vec<Finding>) {
     }
 }
 
+fn remote_reachable(f: &Facts, out: &mut Vec<Finding>) {
+    let cfg = f.config;
+    for r in &f.repos {
+        // No origin → remote-match already reports it; not a clone → skip.
+        if !r.is_git || r.remote.is_none() {
+            continue;
+        }
+        if r.remote_ok == Some(false) {
+            let mut msg =
+                "origin unreachable — credentials/permissions problem, or remote renamed?"
+                    .to_string();
+            if let Some(err) = r.remote_error.as_deref().filter(|e| !e.is_empty()) {
+                msg.push_str(&format!(" ({err})"));
+            }
+            push(
+                out,
+                cfg,
+                "remote-reachable",
+                Severity::Warn,
+                Some(r.name.clone()),
+                msg,
+            );
+        }
+    }
+}
+
 fn worktree_health(f: &Facts, out: &mut Vec<Finding>) {
     let cfg = f.config;
     for r in &f.repos {
@@ -380,14 +416,24 @@ fn workspace_freshness(f: &Facts, out: &mut Vec<Finding>) {
 fn org_drift(f: &Facts, out: &mut Vec<Finding>) {
     let cfg = f.config;
     let Some(org) = &f.org_names else {
-        push(
-            out,
-            cfg,
-            "org-drift",
-            Severity::Info,
-            None,
-            "org repo list unavailable — drift check skipped".into(),
-        );
+        let msg = match &f.org_error {
+            Some(err) => {
+                let hint = match crate::failure::classify(err) {
+                    crate::failure::FailureKind::AccessDenied => match cfg.provider {
+                        crate::ProviderKind::Github => {
+                            " — looks like an auth/permission problem; check `gh auth status`"
+                        }
+                    },
+                    crate::failure::FailureKind::NotFound => {
+                        " — org may not exist or the token can't see it"
+                    }
+                    crate::failure::FailureKind::Other => "",
+                };
+                format!("org discovery failed: {err}{hint} — drift check skipped")
+            }
+            None => "org repo list unavailable — drift check skipped".into(),
+        };
+        push(out, cfg, "org-drift", Severity::Info, None, msg);
         return;
     };
     let org_set: std::collections::BTreeSet<&str> = org
@@ -473,6 +519,7 @@ mod tests {
             workspace_file: Some("{}".into()),
             workspace_fresh: true,
             org_names: Some(vec![]),
+            org_error: None,
             repos: vec![],
         }
     }
@@ -578,6 +625,75 @@ mod tests {
         let v = run(&f, None);
         assert!(v.iter().any(|x| x.check == "required-worktrees"));
         assert!(v.iter().any(|x| x.check == "required-files"));
+    }
+
+    #[test]
+    fn remote_reachable_flags_unreachable_origin() {
+        let c = cfg("org = \"o\"\n");
+        let mut f = base_facts(&c);
+        f.repos.push(RepoFacts {
+            name: "a".into(),
+            is_git: true,
+            remote: Some("git@github.com:o/a.git".into()),
+            remote_ok: Some(false),
+            remote_error: Some("Permission denied (publickey)".into()),
+            ..Default::default()
+        });
+        let v = run(&f, None);
+        let hit = v
+            .iter()
+            .find(|x| x.check == "remote-reachable" && x.repo.as_deref() == Some("a"));
+        assert!(hit.is_some());
+        assert_eq!(hit.unwrap().severity, Severity::Warn);
+        assert!(hit.unwrap().message.contains("Permission denied"));
+    }
+
+    #[test]
+    fn remote_reachable_skips_unprobed_and_reachable() {
+        let c = cfg("org = \"o\"\n");
+        let mut f = base_facts(&c);
+        for (name, remote_ok) in [("ok", Some(true)), ("skip", None)] {
+            f.repos.push(RepoFacts {
+                name: name.into(),
+                is_git: true,
+                remote: Some("git@github.com:o/x.git".into()),
+                remote_ok,
+                ..Default::default()
+            });
+        }
+        // no origin at all → remote-match covers it, remote-reachable stays silent
+        f.repos.push(RepoFacts {
+            name: "noremote".into(),
+            is_git: true,
+            ..Default::default()
+        });
+        assert!(!run(&f, None).iter().any(|x| x.check == "remote-reachable"));
+    }
+
+    #[test]
+    fn org_drift_reports_discovery_error() {
+        let c = cfg("org = \"o\"\n");
+        let mut f = base_facts(&c);
+        f.org_names = None;
+        f.org_error = Some(
+            "gh repo list failed with exit code 1: gh: not logged in — run `gh auth login`".into(),
+        );
+        let v = run(&f, None);
+        let hit = v.iter().find(|x| x.check == "org-drift").unwrap();
+        assert_eq!(hit.severity, Severity::Info);
+        assert!(hit.message.contains("org discovery failed"));
+        assert!(hit.message.contains("auth/permission"));
+    }
+
+    #[test]
+    fn org_drift_generic_when_no_error_detail() {
+        let c = cfg("org = \"o\"\n");
+        let mut f = base_facts(&c);
+        f.org_names = None;
+        let v = run(&f, None);
+        assert!(v
+            .iter()
+            .any(|x| x.check == "org-drift" && x.message.contains("unavailable")));
     }
 
     #[test]
