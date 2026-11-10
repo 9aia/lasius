@@ -756,10 +756,12 @@ fn repo_facts(ws: &Workspace, name: &str) -> lasius_core::RepoFacts {
         .map(|o| o.stdout.trim().to_string());
 
     // Probe reachability — GIT_TERMINAL_PROMPT=0 + ssh BatchMode keep
-    // credential/host-key prompts from hanging the check. BatchMode also
-    // overrides any user-set GIT_SSH for this probe only.
+    // credential/host-key prompts from hanging the check, and the timeout
+    // covers a hung network. BatchMode also overrides any user-set
+    // GIT_SSH for this probe only.
     if f.remote.is_some() {
-        let out = proc::capture_env(
+        const PROBE_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(20);
+        let out = proc::capture_env_timeout(
             "git",
             &[
                 "ls-remote".to_string(),
@@ -771,12 +773,17 @@ fn repo_facts(ws: &Workspace, name: &str) -> lasius_core::RepoFacts {
                 ("GIT_TERMINAL_PROMPT", "0"),
                 ("GIT_SSH_COMMAND", "ssh -o BatchMode=yes"),
             ],
+            PROBE_TIMEOUT,
         );
         match out {
             Ok(o) if o.success() => f.remote_ok = Some(true),
             Ok(o) => {
                 f.remote_ok = Some(false);
-                f.remote_error = Some(tail_text(failure_text(&o).trim(), 200));
+                f.remote_error = Some(if o.timed_out {
+                    format!("timed out after {}s", PROBE_TIMEOUT.as_secs())
+                } else {
+                    tail_text(failure_text(&o).trim(), 200)
+                });
             }
             // spawn itself failed — leave unprobed rather than guessing.
             Err(_) => {}
