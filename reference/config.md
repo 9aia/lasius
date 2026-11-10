@@ -28,8 +28,9 @@ Check ids: `gitignore-coverage`, `docs-stubs`, `repos-dir`,
 `required-files`. Severity values: `info`, `warn`, `error`.
 
 `remote-reachable` probes each clone's `origin` with `git ls-remote`
-(credential prompts disabled) and warns when the remote can't be
-reached — broken credentials, renamed remotes, or lost access.
+(credential prompts disabled, 20s timeout) and warns when the remote
+can't be reached — broken credentials, renamed remotes, lost access,
+or an unresponsive host.
 
 ## `[policy]` — org conventions
 

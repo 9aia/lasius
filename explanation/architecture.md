@@ -24,7 +24,8 @@ Per-repo failures never abort a batch: `clone`/`update`/`status`
 collect them and report at the end, with stderr classified
 (`access-denied:`, `not-found:`) so credential and permission problems
 are obvious. `check` adds `remote-reachable`, which probes each
-clone's `origin` via `git ls-remote` with credential prompts disabled.
+clone's `origin` via `git ls-remote` with credential prompts disabled
+and a 20s timeout, so a hung network can't stall the run.
 
 ## Safety
 
