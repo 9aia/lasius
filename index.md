@@ -15,7 +15,7 @@ features:
   - title: One root, every repo
     details: Independent git clones under repos/ — no submodules, each keeps its own history and remotes.
   - title: Automatic discovery
-    details: gh repo list finds org repos; archived repos are excluded, private ones opt-in.
+    details: Provider-driven repo discovery finds org repos; archived repos are excluded, private ones opt-in.
   - title: Editor-ready
     details: Generates a *.code-workspace multi-root file for VS Code and friends.
   - title: Embeddable

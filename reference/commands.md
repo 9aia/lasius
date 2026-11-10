@@ -19,6 +19,10 @@ discovered upward from the current directory.
 | `lasius serve` | ndjson JSON-RPC on stdio (see [wire reference](/reference/serve)) |
 | `lasius completions <shell>` | Print a shell completion script |
 
+Clone/update/status failures are collected per repo and reported at
+the end; recognised auth and missing-repo errors are tagged
+`access-denied:` / `not-found:` before the stderr snippet.
+
 `check` reads `[checks]` (disabled ids, severity overrides) and `[policy]`
 (require_worktrees, require_files, remote_must_match_org) from `lasius.toml` —
 see [config reference](/reference/config).
