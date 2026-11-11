@@ -194,7 +194,7 @@ checksum = "3bd1574e617a9a6c1f8f8181bd7e841e1f20e4277607ef28945765188d6284d4"
 
 [[package]]
 name = "lasius"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -211,7 +211,7 @@ dependencies = [
 
 [[package]]
 name = "lasius-core"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -221,7 +221,7 @@ dependencies = [
 
 [[package]]
 name = "lasius-driver"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "clap",
  "lasius",
@@ -234,7 +234,7 @@ dependencies = [
 
 [[package]]
 name = "lasius-forge"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -242,7 +242,7 @@ dependencies = [
 
 [[package]]
 name = "lasius-forge-gh"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "lasius-forge",
  "tempfile",
@@ -250,7 +250,7 @@ dependencies = [
 
 [[package]]
 name = "lasius-vcs"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -258,7 +258,7 @@ dependencies = [
 
 [[package]]
 name = "lasius-vcs-git"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "lasius-vcs",
  "tempfile",
@@ -266,7 +266,7 @@ dependencies = [
 
 [[package]]
 name = "lasius-xtask"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "serde_json",

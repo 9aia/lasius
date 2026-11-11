@@ -19,7 +19,7 @@
 # `tools/bin/` payload bin: `lasius serve` is a *surface*, not a
 # second binary — it rides the same shim.
 name: lasius
-version: "0.3.0"
+version: "0.4.0"
 type: files
 description: >-
   Workspace gardener for GitHub orgs — clone, sync, inspect, and

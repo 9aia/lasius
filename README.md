@@ -28,7 +28,7 @@ pack — a generated `bins[]` shim over `tamias-driver-lasius`, no
 hand-rolled binary. With `tamias` installed:
 
 ```bash
-tamias install 9aia:lasius@0.3.0    # org registry (needs TAMIAS_REGISTRY_TOKEN)
+tamias install 9aia:lasius@0.4.0    # org registry (needs TAMIAS_REGISTRY_TOKEN)
 ```
 
 From a checkout:

@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/9aia/lasius"
@@ -22,13 +22,13 @@ inherits = "release"
 lto = "thin"
 
 [workspace.dependencies]
-lasius = { path = "crates/lasius-cli", version = "0.3.0" }
-lasius-core = { path = "crates/lasius-core", version = "0.3.0" }
-lasius-forge = { path = "crates/lasius-forge", version = "0.3.0" }
-lasius-forge-gh = { path = "crates/lasius-forge-gh", version = "0.3.0" }
-lasius-vcs = { path = "crates/lasius-vcs", version = "0.3.0" }
-lasius-vcs-git = { path = "crates/lasius-vcs-git", version = "0.3.0" }
-lasius-driver = { path = "crates/lasius-driver", version = "0.3.0" }
+lasius = { path = "crates/lasius-cli", version = "0.4.0" }
+lasius-core = { path = "crates/lasius-core", version = "0.4.0" }
+lasius-forge = { path = "crates/lasius-forge", version = "0.4.0" }
+lasius-forge-gh = { path = "crates/lasius-forge-gh", version = "0.4.0" }
+lasius-vcs = { path = "crates/lasius-vcs", version = "0.4.0" }
+lasius-vcs-git = { path = "crates/lasius-vcs-git", version = "0.4.0" }
+lasius-driver = { path = "crates/lasius-driver", version = "0.4.0" }
 
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
