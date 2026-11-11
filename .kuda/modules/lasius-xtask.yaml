@@ -1,7 +1,17 @@
 name: lasius-xtask
 path: xtask/Cargo.toml
-purpose: 'lasius-xtask — workspace automation: check / test / coverage.'
+purpose: 'lasius-xtask — workspace automation: check / test / coverage /'
 api:
+- name: host_triple
+  kind: function
+  file: xtask/src/main.rs
+  line: 51
+  module: lasius-xtask
+- name: install
+  kind: function
+  file: xtask/src/main.rs
+  line: 96
+  module: lasius-xtask
 - name: lasius-xtask
   kind: module
   file: xtask/Cargo.toml
@@ -10,15 +20,31 @@ api:
 - name: main
   kind: function
   file: xtask/src/main.rs
-  line: 22
+  line: 121
+  module: lasius-xtask
+- name: pack
+  kind: function
+  file: xtask/src/main.rs
+  line: 67
   module: lasius-xtask
 - name: run
   kind: function
   file: xtask/src/main.rs
-  line: 12
+  line: 16
+  module: lasius-xtask
+- name: run_out
+  kind: function
+  file: xtask/src/main.rs
+  line: 27
+  module: lasius-xtask
+- name: target_dir
+  kind: function
+  file: xtask/src/main.rs
+  line: 38
   module: lasius-xtask
 deps:
 - anyhow
+- serde_json
 notes: ''
 verify:
 - xtask/Cargo.toml
@@ -28,8 +54,8 @@ provenance:
   - xtask/Cargo.toml
   - xtask/src/main.rs
   hashes:
-  - 234c277e4bb2cec12930cee5859b9ed9524510cb
-  - 8bc23d2d369768740d3f13d2eac0201bf7f25769
-  commit_sha: a3b59258a6cdda9b7a80b27d8fdc9df6a3f58081
-  generated_at: '1794194647'
+  - 71efabd40e313d27e2fea97ed39941767b77db79
+  - 47f8f35ec9f1efbe54a842b9aacb65dff671e78f
+  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
+  generated_at: '1794417801'
   generator: kuda-template/0.1.2

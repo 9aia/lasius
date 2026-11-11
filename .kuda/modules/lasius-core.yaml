@@ -2,6 +2,11 @@ name: lasius-core
 path: crates/lasius-core/Cargo.toml
 purpose: Pure domain logic for lasius — config model, gh decoding, git status, workspace files
 api:
+- name: ACCESS
+  kind: const
+  file: crates/lasius-core/src/failure.rs
+  line: 38
+  module: lasius-core
 - name: BRANCH_AB
   kind: const
   file: crates/lasius-core/src/status.rs
@@ -12,25 +17,70 @@ api:
   file: crates/lasius-core/src/status.rs
   line: 13
   module: lasius-core
+- name: CheckConfig
+  kind: type
+  file: crates/lasius-core/src/config.rs
+  line: 76
+  module: lasius-core
 - name: CoreError
   kind: type
   file: crates/lasius-core/src/error.rs
   line: 5
   module: lasius-core
+- name: Facts
+  kind: type
+  file: crates/lasius-core/src/checks.rs
+  line: 83
+  module: lasius-core
+- name: FailureKind
+  kind: type
+  file: crates/lasius-core/src/failure.rs
+  line: 7
+  module: lasius-core
+- name: Finding
+  kind: type
+  file: crates/lasius-core/src/checks.rs
+  line: 35
+  module: lasius-core
 - name: GhRepo
   kind: type
   file: crates/lasius-core/src/gh.rs
-  line: 14
+  line: 15
   module: lasius-core
 - name: GitStatus
   kind: type
   file: crates/lasius-core/src/status.rs
   line: 5
   module: lasius-core
+- name: NOT_FOUND
+  kind: const
+  file: crates/lasius-core/src/failure.rs
+  line: 62
+  module: lasius-core
+- name: Policy
+  kind: type
+  file: crates/lasius-core/src/config.rs
+  line: 95
+  module: lasius-core
+- name: ProviderKind
+  kind: type
+  file: crates/lasius-core/src/config.rs
+  line: 59
+  module: lasius-core
 - name: Repo
   kind: type
   file: crates/lasius-core/src/gh.rs
-  line: 8
+  line: 9
+  module: lasius-core
+- name: RepoFacts
+  kind: type
+  file: crates/lasius-core/src/checks.rs
+  line: 59
+  module: lasius-core
+- name: Severity
+  kind: type
+  file: crates/lasius-core/src/checks.rs
+  line: 12
   module: lasius-core
 - name: StatusRow
   kind: type
@@ -40,169 +90,119 @@ api:
 - name: WorkspaceConfig
   kind: type
   file: crates/lasius-core/src/config.rs
-  line: 17
+  line: 18
   module: lasius-core
 - name: allows_dotfile_repos
   kind: function
   file: crates/lasius-core/src/gh.rs
-  line: 157
+  line: 158
   module: lasius-core
 - name: applies_exclude_globs
   kind: function
   file: crates/lasius-core/src/gh.rs
-  line: 99
+  line: 100
+  module: lasius-core
+- name: as_str
+  kind: function
+  file: crates/lasius-core/src/config.rs
+  line: 67
+  module: lasius-core
+- name: base_facts
+  kind: function
+  file: crates/lasius-core/src/checks.rs
+  line: 511
+  module: lasius-core
+- name: broken_worktree_is_error
+  kind: function
+  file: crates/lasius-core/src/checks.rs
+  line: 555
   module: lasius-core
 - name: build_workspace_file
   kind: function
   file: crates/lasius-core/src/workspace_file.rs
   line: 26
   module: lasius-core
-- name: config
+- name: cfg
+  kind: function
+  file: crates/lasius-core/src/checks.rs
+  line: 507
+  module: lasius-core
+- name: checks
   kind: module
   file: crates/lasius-core/src/lib.rs
   line: 3
   module: lasius-core
+- name: classifies_https_auth_failures
+  kind: function
+  file: crates/lasius-core/src/failure.rs
+  line: 101
+  module: lasius-core
+- name: classifies_not_found
+  kind: function
+  file: crates/lasius-core/src/failure.rs
+  line: 116
+  module: lasius-core
+- name: classifies_ssh_publickey_denied
+  kind: function
+  file: crates/lasius-core/src/failure.rs
+  line: 95
+  module: lasius-core
+- name: classify
+  kind: function
+  file: crates/lasius-core/src/failure.rs
+  line: 32
+  module: lasius-core
+- name: clean_workspace_has_no_findings
+  kind: function
+  file: crates/lasius-core/src/checks.rs
+  line: 528
+  module: lasius-core
+- name: clone_validity
+  kind: function
+  file: crates/lasius-core/src/checks.rs
+  line: 262
+  module: lasius-core
+- name: config
+  kind: module
+  file: crates/lasius-core/src/lib.rs
+  line: 4
+  module: lasius-core
 - name: decode_repo_list
   kind: function
   file: crates/lasius-core/src/gh.rs
-  line: 29
+  line: 30
   module: lasius-core
 - name: decodes_sorts_and_filters_archived
   kind: function
   file: crates/lasius-core/src/gh.rs
-  line: 72
+  line: 73
   module: lasius-core
 - name: default_repos_dir
   kind: function
   file: crates/lasius-core/src/config.rs
-  line: 38
+  line: 110
+  module: lasius-core
+- name: disabled_and_only_filters
+  kind: function
+  file: crates/lasius-core/src/checks.rs
+  line: 700
+  module: lasius-core
+- name: docs_stubs
+  kind: function
+  file: crates/lasius-core/src/checks.rs
+  line: 224
+  module: lasius-core
+- name: drift_flags_missing_and_extra
+  kind: function
+  file: crates/lasius-core/src/checks.rs
+  line: 600
   module: lasius-core
 - name: empty_input_is_detached
   kind: function
   file: crates/lasius-core/src/status.rs
   line: 124
   module: lasius-core
-- name: error
-  kind: module
-  file: crates/lasius-core/src/lib.rs
-  line: 4
-  module: lasius-core
-- name: excludes_node_modules_and_target
-  kind: function
-  file: crates/lasius-core/src/workspace_file.rs
-  line: 82
-  module: lasius-core
-- name: filters_private_unless_included
-  kind: function
-  file: crates/lasius-core/src/gh.rs
-  line: 143
-  module: lasius-core
-- name: format_status_header
-  kind: function
-  file: crates/lasius-core/src/status.rs
-  line: 78
-  module: lasius-core
-- name: format_status_row
-  kind: function
-  file: crates/lasius-core/src/status.rs
-  line: 62
-  module: lasius-core
-- name: format_status_table
-  kind: function
-  file: crates/lasius-core/src/status.rs
-  line: 89
-  module: lasius-core
-- name: from_toml
-  kind: function
-  file: crates/lasius-core/src/config.rs
-  line: 44
-  module: lasius-core
-- name: gh
-  kind: module
-  file: crates/lasius-core/src/lib.rs
-  line: 5
-  module: lasius-core
-- name: includes_root_and_sorted_repos
-  kind: function
-  file: crates/lasius-core/src/workspace_file.rs
-  line: 55
-  module: lasius-core
-- name: is_excluded
-  kind: function
-  file: crates/lasius-core/src/config.rs
-  line: 94
-  module: lasius-core
-- name: is_safe_repo_name
-  kind: function
-  file: crates/lasius-core/src/names.rs
-  line: 8
-  module: lasius-core
-- name: json
-  kind: function
-  file: crates/lasius-core/src/gh.rs
-  line: 63
-  module: lasius-core
-- name: lasius-core
-  kind: module
-  file: crates/lasius-core/Cargo.toml
-  line: 1
-  module: lasius-core
-- name: names
-  kind: module
-  file: crates/lasius-core/src/lib.rs
-  line: 6
-  module: lasius-core
-- name: pad
-  kind: function
-  file: crates/lasius-core/src/status.rs
-  line: 57
-  module: lasius-core
-- name: parse_git_status
-  kind: function
-  file: crates/lasius-core/src/status.rs
-  line: 17
-  module: lasius-core
-- name: parses_clean_branch_with_upstream
-  kind: function
-  file: crates/lasius-core/src/status.rs
-  line: 104
-  module: lasius-core
-- name: parses_detached_and_dirty
-  kind: function
-  file: crates/lasius-core/src/status.rs
-  line: 114
-  module: lasius-core
-- name: parses_full_config
-  kind: function
-  file: crates/lasius-core/src/config.rs
-  line: 116
-  module: lasius-core
-- name: parses_minimal_config
-  kind: function
-  file: crates/lasius-core/src/config.rs
-  line: 107
-  module: lasius-core
-- name: paths_join_under_root
-  kind: function
-  file: crates/lasius-core/src/config.rs
-  line: 138
-  module: lasius-core
-- name: rejects_empty_org
-  kind: function
-  file: crates/lasius-core/src/config.rs
-  line: 128
-  module: lasius-core
-- name: rejects_invalid_json
-  kind: function
-  file: crates/lasius-core/src/gh.rs
-  line: 111
-  module: lasius-core
-- name: rejects_invalid_toml
-  kind: function
-  file: crates/lasius-core/src/config.rs
-  line: 133
-  module: lasius-core
-api_omitted: 23
+api_omitted: 87
 deps:
 - serde
 - serde_json
@@ -211,16 +211,20 @@ deps:
 - thiserror
 - serde_json
 - serde
+- checks
 - config
 - error
+- failure
 - gh
 - status
 - workspace_file
 notes: ''
 verify:
 - crates/lasius-core/Cargo.toml
+- crates/lasius-core/src/checks.rs
 - crates/lasius-core/src/config.rs
 - crates/lasius-core/src/error.rs
+- crates/lasius-core/src/failure.rs
 - crates/lasius-core/src/gh.rs
 - crates/lasius-core/src/lib.rs
 - crates/lasius-core/src/names.rs
@@ -229,8 +233,10 @@ verify:
 provenance:
   files:
   - crates/lasius-core/Cargo.toml
+  - crates/lasius-core/src/checks.rs
   - crates/lasius-core/src/config.rs
   - crates/lasius-core/src/error.rs
+  - crates/lasius-core/src/failure.rs
   - crates/lasius-core/src/gh.rs
   - crates/lasius-core/src/lib.rs
   - crates/lasius-core/src/names.rs
@@ -238,13 +244,15 @@ provenance:
   - crates/lasius-core/src/workspace_file.rs
   hashes:
   - e652df3ed76782348b86659e9f0a4c2096fd4ee0
-  - 343bd57eb0b798a63ecbf86f16d602fd5b1fef9b
+  - a874b77ca4aeed394dad6c15a07e581ea83c9be5
+  - 9b0de90177522db3dfff47005af7a6d9d52d705e
   - 9373ec20f342f872227187341edb0ac00d600911
-  - ea6bbf2f1717b44772a25df1433ce96509894813
-  - 861a0e86d5770c31e25ab3cce717e0d963f16675
+  - 6a8b8f28afd0565ff38249fc62bfb8f8ec703743
+  - 53398e6b5fd4f7809bfc13076ea11c06b91a3341
+  - 8b52069b582f105d9bd81d91642d2a1607ff4e15
   - f4e9f6c592a21ab03265be9bfd0ff43a432c6dcf
   - 3d0483f7647e000f50f06ca64549e1e39fe13b72
   - fd1a3179822cb286d71464ab1b405087098d3007
-  commit_sha: a3b59258a6cdda9b7a80b27d8fdc9df6a3f58081
-  generated_at: '1794194647'
+  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
+  generated_at: '1794417801'
   generator: kuda-template/0.1.2

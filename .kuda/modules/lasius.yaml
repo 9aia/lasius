@@ -9,38 +9,58 @@ api:
   module: lasius
 - name: Cli
   kind: type
-  file: crates/lasius-cli/src/main.rs
-  line: 25
+  file: crates/lasius-cli/src/lib.rs
+  line: 35
   module: lasius
 - name: CloneOutcome
   kind: type
   file: crates/lasius-cli/src/commands.rs
-  line: 21
+  line: 47
+  module: lasius
+- name: Cmd
+  kind: type
+  file: crates/lasius-cli/src/lib.rs
+  line: 45
   module: lasius
 - name: CodeWorkspaceAction
   kind: type
-  file: crates/lasius-cli/src/main.rs
-  line: 103
+  file: crates/lasius-cli/src/lib.rs
+  line: 134
   module: lasius
-- name: Commands
+- name: Github
   kind: type
-  file: crates/lasius-cli/src/main.rs
-  line: 35
+  file: crates/lasius-cli/src/providers.rs
+  line: 44
   module: lasius
 - name: OPS
   kind: const
   file: crates/lasius-cli/src/serve.rs
   line: 18
   module: lasius
+- name: PROBE_TIMEOUT
+  kind: const
+  file: crates/lasius-cli/src/commands.rs
+  line: 763
+  module: lasius
 - name: ProcOutput
   kind: type
   file: crates/lasius-cli/src/proc.rs
-  line: 10
+  line: 11
+  module: lasius
+- name: RepoProvider
+  kind: trait
+  file: crates/lasius-cli/src/providers.rs
+  line: 14
   module: lasius
 - name: StatusFailure
   kind: type
   file: crates/lasius-cli/src/commands.rs
-  line: 280
+  line: 327
+  module: lasius
+- name: UpdateRow
+  kind: type
+  file: crates/lasius-cli/src/commands.rs
+  line: 272
   module: lasius
 - name: Workspace
   kind: type
@@ -50,159 +70,139 @@ api:
 - name: add
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 668
-  module: lasius
-- name: add_clones_single_repo
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 260
+  line: 727
   module: lasius
 - name: agents_stub
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 193
+  line: 218
   module: lasius
-- name: bin
+- name: args
   kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 11
+  file: crates/lasius-cli/src/proc.rs
+  line: 155
+  module: lasius
+- name: auth_check
+  kind: function
+  file: crates/lasius-cli/src/providers.rs
+  line: 51
+  module: lasius
+- name: auth_probe
+  kind: function
+  file: crates/lasius-cli/src/providers.rs
+  line: 55
   module: lasius
 - name: capture
   kind: function
   file: crates/lasius-cli/src/proc.rs
-  line: 41
+  line: 45
   module: lasius
-- name: capture_labeled
+- name: capture_env
   kind: function
   file: crates/lasius-cli/src/proc.rs
   line: 51
   module: lasius
+- name: capture_env_timeout
+  kind: function
+  file: crates/lasius-cli/src/proc.rs
+  line: 71
+  module: lasius
+- name: capture_labeled
+  kind: function
+  file: crates/lasius-cli/src/proc.rs
+  line: 124
+  module: lasius
+- name: capture_returns_exit_code_and_output
+  kind: function
+  file: crates/lasius-cli/src/proc.rs
+  line: 160
+  module: lasius
+- name: check
+  kind: function
+  file: crates/lasius-cli/src/commands.rs
+  line: 873
+  module: lasius
 - name: clone
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 238
+  line: 265
   module: lasius
 - name: clone_all
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 30
-  module: lasius
-- name: clone_is_idempotent
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 150
+  line: 56
   module: lasius
 - name: code_workspace_generate
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 375
-  module: lasius
-- name: code_workspace_generate_regenerates
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 191
+  line: 418
   module: lasius
 - name: collect_status
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 284
+  line: 331
+  module: lasius
+- name: command
+  kind: function
+  file: crates/lasius-cli/src/lib.rs
+  line: 163
   module: lasius
 - name: commands
   kind: module
-  file: crates/lasius-cli/src/main.rs
-  line: 7
+  file: crates/lasius-cli/src/lib.rs
+  line: 16
+  module: lasius
+- name: dispatch
+  kind: function
+  file: crates/lasius-cli/src/lib.rs
+  line: 169
   module: lasius
 - name: dispatch
   kind: function
   file: crates/lasius-cli/src/serve.rs
   line: 43
   module: lasius
+- name: dispatch_returns_github
+  kind: function
+  file: crates/lasius-cli/src/providers.rs
+  line: 113
+  module: lasius
 - name: doctor
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 485
+  line: 539
   module: lasius
 - name: doctor_checks
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 386
-  module: lasius
-- name: doctor_reports_ok_on_healthy_workspace
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 201
+  line: 437
   module: lasius
 - name: exec
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 618
+  line: 677
   module: lasius
-- name: exec_filter_selects_subset
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 250
-  module: lasius
-- name: exec_runs_in_each_clone
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 238
-  module: lasius
-- name: fails_outside_workspace
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 269
-  module: lasius
-- name: fake_gh
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 67
-  module: lasius
-- name: git
+- name: failure_detail
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 15
+  line: 25
   module: lasius
-- name: git
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 56
-  module: lasius
-- name: handle
-  kind: function
-  file: crates/lasius-cli/src/serve.rs
-  line: 36
-  module: lasius
-- name: infer_org_from_remote
+- name: failure_text
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 214
+  line: 38
   module: lasius
-- name: init
+- name: fast_process_is_not_timed_out
   kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 116
+  file: crates/lasius-cli/src/proc.rs
+  line: 185
   module: lasius
-- name: init_clones_and_generates_workspace
+- name: for_kind
   kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 109
+  file: crates/lasius-cli/src/providers.rs
+  line: 37
   module: lasius
-- name: init_creates_config_with_org_flag
-  kind: function
-  file: crates/lasius-cli/tests/e2e.rs
-  line: 122
-  module: lasius
-- name: lasius
-  kind: module
-  file: Cargo.toml
-  line: 1
-  module: lasius
-- name: lasius
-  kind: module
-  file: crates/lasius-cli/Cargo.toml
-  line: 1
-  module: lasius
-api_omitted: 36
+api_omitted: 44
 deps:
 - anyhow
 - clap
@@ -211,8 +211,6 @@ deps:
 - serde
 - serde_json
 - thiserror
-- tempfile
-- tempfile
 - anyhow
 - serde_json
 - lasius-core
@@ -222,30 +220,30 @@ verify:
 - Cargo.toml
 - crates/lasius-cli/Cargo.toml
 - crates/lasius-cli/src/commands.rs
-- crates/lasius-cli/src/main.rs
+- crates/lasius-cli/src/lib.rs
 - crates/lasius-cli/src/proc.rs
+- crates/lasius-cli/src/providers.rs
 - crates/lasius-cli/src/serve.rs
 - crates/lasius-cli/src/support.rs
-- crates/lasius-cli/tests/e2e.rs
 provenance:
   files:
   - Cargo.toml
   - crates/lasius-cli/Cargo.toml
   - crates/lasius-cli/src/commands.rs
-  - crates/lasius-cli/src/main.rs
+  - crates/lasius-cli/src/lib.rs
   - crates/lasius-cli/src/proc.rs
+  - crates/lasius-cli/src/providers.rs
   - crates/lasius-cli/src/serve.rs
   - crates/lasius-cli/src/support.rs
-  - crates/lasius-cli/tests/e2e.rs
   hashes:
-  - 5d97711b077e008e0ba95c33a1614d6e869d8521
-  - 88c1b6e79b0ee74be97b7a9a4092bb5d70f8f026
-  - d57f00ba53cab0da6b89228c0bd4054212eaa2c3
-  - bc125c98c3d47e91f46074d9d9e7d6a10746e705
-  - 7574b7206c9860d4ed18ba5ebb71cb50fa3f0bd5
-  - 3b11eb42d9ad88b6cdd5315cf844be545a9763be
-  - 804d82bc2e2eb576781e2a401b508f6ef660bc35
-  - 8853f6a3d5c1205c88fdc4562ed606acfc95937f
-  commit_sha: a3b59258a6cdda9b7a80b27d8fdc9df6a3f58081
-  generated_at: '1794194647'
+  - 610b242bd1457cbeff1ff6decc6df5391eee309a
+  - 7e79c1ccda9030953c0119c9ee78ffa5c1dc3378
+  - 4e5dac3c26871f9531d82f45bef1544f488d0325
+  - d8a1511d2ce795cd9e2369953782acab79e7688d
+  - 3576ab200b7d9d7f6d11b5ec4246c3cd587b9119
+  - 415e6446334c162054fff2edbcd6695395b7cd45
+  - fd4a2f17950d7a2bf01ff1e03003ffe8cc309264
+  - 6fb78000285f28c3eec195bb56db267137f86037
+  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
+  generated_at: '1794417801'
   generator: kuda-template/0.1.2

@@ -7,8 +7,8 @@ for *Lasius niger*, the black garden ant — it tends the garden.
 Rust workspace, ports-and-adapters. `lasius-core` is pure domain (no
 I/O); `lasius-cli` is the composition root — its lib exposes the
 engine surface (`Cli`/`command()`/`parse_from()`/`dispatch()`/
-`run_from()`) that `lasius-driver` consumes for the generated
-CLI/MCP surfaces (P-021).
+`run_from()`) that `lasius-driver` consumes for the ops surface and
+the `bins[]` shim passthrough (P-021/T-012).
 
 ## Layout
 
@@ -17,9 +17,10 @@ CLI/MCP surfaces (P-021).
 | `crates/lasius-core` | `lasius.toml` model (incl. `provider`), `gh repo list` JSON decoding, failure classification, repo-name safety + exclude globs, `git status --porcelain=v2` parse/format, `*.code-workspace` generation — pure, unit-tested |
 | `crates/lasius-vcs` | VCS port — union trait (history/worktree/tag/sync ops) shared by tarsi/mimus/bupha/kuda/sturn consumers (P-019) |
 | `crates/lasius-vcs-git` | git impl of `lasius-vcs` — shells out to the `git` binary |
-| `crates/lasius-cli` | the `lasius` engine lib + binary — clap derive in `lib.rs` (`Cli`/`command`/`parse_from`/`dispatch`/`run_from`), thin `main.rs` → `lasius::run()`; `std::process` for `git`/`gh`/`sh`, `std::fs` for the workspace, `std::thread::scope` parallelism, `providers.rs` `RepoProvider` seam. `init` scaffolds the workspace repo (`lasius.toml`, `.gitignore`, doc stubs) then clones + generates. E2e tests spawn the real binary against fake `gh` + `file://` git repos |
-| `crates/lasius-driver` | `tamias-driver-lasius` — pavo driver exposing the engine ops surface: every bounded `lasius` verb as a `cli.<verb>` wire query derived from `lasius::command()` (`serve`/`open`/`exec` are surfaces — unbounded/host-interactive), `run <argv>` passthrough, `serve` ndjson loop, feature-gated `cli`/`mcp` embedded surfaces. No views |
-| `xtask` (`lasius-xtask`) | `check` (fmt + clippy -D warnings) / `test` (nextest or cargo test) / `coverage` (llvm-cov) / `fmt` |
+| `crates/lasius-cli` | the `lasius` engine lib — clap derive in `lib.rs` (`Cli`/`command`/`parse_from`/`dispatch`/`run_from`), **no bin**: the command ships as the tamias pack in `libraries/lasius/` (T-012); `std::process` for `git`/`gh`/`sh`, `std::fs` for the workspace, `std::thread::scope` parallelism, `providers.rs` `RepoProvider` seam. `init` scaffolds the workspace repo (`lasius.toml`, `.gitignore`, doc stubs) then clones + generates. E2e tests live in `lasius-driver/tests/` and spawn `tamias-driver-lasius run` against fake `gh` + `file://` git repos |
+| `crates/lasius-driver` | `tamias-driver-lasius` — pavo driver exposing the engine ops surface: every bounded `lasius` verb as a `cli.<verb>` wire query derived from `lasius::command()` (`serve`/`open`/`exec` are surfaces — unbounded/host-interactive), `run <argv>` + `cli <argv>` passthroughs re-execing the engine in-process (`cli` is the `bins[]` shim verb — strips `--dir`/`--name`, inherited stdio), feature-gated `mcp` embedded surface. No views |
+| `libraries/lasius` | the tamias pack — `tamias.yaml` declares `bins: [{name: lasius, shim: cli, driver: lasius}]`; `cargo xtask pack` stages `drivers/bin/<triple>/tamias-driver-lasius` (gitignored) |
+| `xtask` (`lasius-xtask`) | `check` (fmt + clippy -D warnings) / `test` (nextest or cargo test) / `coverage` (llvm-cov) / `pack` (stage the pack payload) / `install` (release driver → `~/.local/bin`) / `fmt` |
 
 ## Commands
 
@@ -27,6 +28,13 @@ CLI/MCP surfaces (P-021).
 cargo xtask check          # fmt --check + clippy -D warnings
 cargo xtask test           # whole suite (nextest if present)
 cargo xtask coverage       # llvm-cov summary; extra args pass through
+cargo xtask pack           # stage libraries/lasius driver payload
+                           # (release tamias-driver-lasius → drivers/bin/<triple>/)
+cargo xtask install        # release-build tamias-driver-lasius →
+                           # ~/.local/bin (the `lasius` command itself
+                           # is the tamias pack's generated bins[] shim —
+                           # `cargo xtask pack` + `tamias install
+                           # --allow-drivers ./libraries/lasius`)
 cargo xtask fmt            # cargo fmt --all
 ```
 

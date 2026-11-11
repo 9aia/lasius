@@ -1,0 +1,147 @@
+name: lasius-vcs-git
+path: crates/lasius-vcs-git/Cargo.toml
+purpose: Git impl of lasius-vcs — shells out to the git binary.
+api:
+- name: GitVcs
+  kind: type
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 14
+  module: lasius-vcs-git
+- name: commits
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 75
+  module: lasius-vcs-git
+- name: delete_tag
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 234
+  module: lasius-vcs-git
+- name: describe
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 175
+  module: lasius-vcs-git
+- name: diff_stat
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 143
+  module: lasius-vcs-git
+- name: first_line
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 49
+  module: lasius-vcs-git
+- name: fixture
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 259
+  module: lasius-vcs-git
+- name: git_ok
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 37
+  module: lasius-vcs-git
+- name: git_out
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 17
+  module: lasius-vcs-git
+- name: has_commit
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 71
+  module: lasius-vcs-git
+- name: head
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 56
+  module: lasius-vcs-git
+- name: history_ops
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 288
+  module: lasius-vcs-git
+- name: lasius-vcs-git
+  kind: module
+  file: crates/lasius-vcs-git/Cargo.toml
+  line: 1
+  module: lasius-vcs-git
+- name: push
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 244
+  module: lasius-vcs-git
+- name: push_tag
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 230
+  module: lasius-vcs-git
+- name: resolve
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 63
+  module: lasius-vcs-git
+- name: sync
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 240
+  module: lasius-vcs-git
+- name: tag
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 222
+  module: lasius-vcs-git
+- name: tag_exists
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 215
+  module: lasius-vcs-git
+- name: tags
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 163
+  module: lasius-vcs-git
+- name: tests
+  kind: module
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 253
+  module: lasius-vcs-git
+- name: worktree_add
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 184
+  module: lasius-vcs-git
+- name: worktree_and_tag_lifecycle
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 309
+  module: lasius-vcs-git
+- name: worktree_prune
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 209
+  module: lasius-vcs-git
+- name: worktree_remove
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 197
+  module: lasius-vcs-git
+deps:
+- lasius-vcs
+- tempfile
+- lasius-vcs
+notes: ''
+verify:
+- crates/lasius-vcs-git/Cargo.toml
+- crates/lasius-vcs-git/src/lib.rs
+provenance:
+  files:
+  - crates/lasius-vcs-git/Cargo.toml
+  - crates/lasius-vcs-git/src/lib.rs
+  hashes:
+  - f088dd721b910fe406b7648e5db324f469108c55
+  - 9299ae4fed55eb350e4d26f27dce8a530212677a
+  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
+  generated_at: '1794417801'
+  generator: kuda-template/0.1.2

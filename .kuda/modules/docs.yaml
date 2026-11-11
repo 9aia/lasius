@@ -1,0 +1,99 @@
+name: docs
+path: docs/package.json
+purpose: documentation corpus — pages as records, backticked refs as edges
+api:
+- name: Architecture
+  kind: record
+  file: docs/explanation/architecture.md
+  line: 1
+  module: docs
+- name: Bootstrap a workspace repo
+  kind: record
+  file: docs/tutorials/bootstrap.md
+  line: 1
+  module: docs
+- name: Commands
+  kind: record
+  file: docs/reference/commands.md
+  line: 1
+  module: docs
+- name: Embed via serve
+  kind: record
+  file: docs/how-to/serve.md
+  line: 1
+  module: docs
+- name: Exclude repos
+  kind: record
+  file: docs/how-to/exclude-repos.md
+  line: 1
+  module: docs
+- name: Getting started
+  kind: record
+  file: docs/getting-started.md
+  line: 1
+  module: docs
+- name: Include private repos
+  kind: record
+  file: docs/how-to/private-repos.md
+  line: 1
+  module: docs
+- name: Run commands everywhere
+  kind: record
+  file: docs/how-to/exec-everywhere.md
+  line: 1
+  module: docs
+- name: lasius.toml
+  kind: record
+  file: docs/reference/config.md
+  line: 1
+  module: docs
+- name: serve wire protocol
+  kind: record
+  file: docs/reference/serve.md
+  line: 1
+  module: docs
+deps: []
+notes: ''
+verify:
+- docs/package.json
+- docs/.vitepress/config.ts
+- docs/explanation/architecture.md
+- docs/getting-started.md
+- docs/how-to/exclude-repos.md
+- docs/how-to/exec-everywhere.md
+- docs/how-to/private-repos.md
+- docs/how-to/serve.md
+- docs/index.md
+- docs/reference/commands.md
+provenance:
+  files:
+  - docs/.vitepress/config.ts
+  - docs/explanation/architecture.md
+  - docs/getting-started.md
+  - docs/how-to/exclude-repos.md
+  - docs/how-to/exec-everywhere.md
+  - docs/how-to/private-repos.md
+  - docs/how-to/serve.md
+  - docs/index.md
+  - docs/package.json
+  - docs/reference/commands.md
+  - docs/reference/config.md
+  - docs/reference/serve.md
+  - docs/tutorials/bootstrap.md
+  hashes:
+  - a85b774584f0241f5bae6b7e5f356d543b38f2a0
+  - bc083f128ba54d261d0d3f0f7084f7a37ffd030e
+  - 17370e725f9443ae0fb1c9dc17f6adf2f2ec1fe1
+  - 53824c05c793ee2e7cf94603e70d29460139428e
+  - 3ec9165f7ccfd62b7ea3781db6e8313475052f8e
+  - bf5a812238afc324ce0647a8c155618fcb149dce
+  - 8d0b1b5bbf4636212443f258d653304a50945f56
+  - 1565a33f6919755b08b30352efc1ba2792297aff
+  - dc13ee02a9d94f08f3b78e3a7111c648b62f76d6
+  - 6631065444eca5b37c35ae2ce4a5bfd7bb76fd9d
+  - 85c602e36f2c756f165bedc1409527fca15dbb76
+  - 79965e3456be1ef8e96c80bb20a6e25ab484fe10
+  - 16ff1605e8c86f31e76ee3f89ecb003f7e4f3b93
+  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
+  generated_at: '1794417801'
+  generator: kuda-template/0.1.2

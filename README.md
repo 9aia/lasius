@@ -23,10 +23,14 @@ own history and remotes. `*.code-workspace` is generated, never committed.
 
 ## Install
 
+The `lasius` command ships as a [tamias](https://github.com/9aia/tamias)
+pack — a generated `bins[]` shim over `tamias-driver-lasius`, no
+hand-rolled binary:
+
 ```bash
-cargo install lasius
-# or from source:
-cargo install --path crates/lasius-cli
+cargo xtask pack                                        # stage the driver payload
+cargo install --path crates/lasius-driver               # or: cargo xtask install
+tamias install --allow-drivers ./libraries/lasius       # deploy the `lasius` shim
 ```
 
 Requires `git` and `gh` (authenticated) on PATH.
@@ -82,9 +86,10 @@ I/O); `lasius-cli` is the composition root — `std::process` for `git`/`gh`,
 | Crate | Role |
 | --- | --- |
 | `crates/lasius-core` | config model, `gh` JSON decoding, repo-name safety, git status parse/format, workspace-file generation — pure, unit-tested |
-| `crates/lasius-cli` | the `lasius` engine lib + binary — clap commands, process/fs layer, e2e tests |
-| `crates/lasius-driver` | `tamias-driver-lasius` — pavo driver: engine ops as `cli.<verb>` wire queries + `run` passthrough (generated CLI/MCP surfaces via features) |
-| `xtask` | `cargo xtask check` / `test` / `coverage` / `fmt` |
+| `crates/lasius-cli` | the `lasius` engine lib — clap commands, process/fs layer (no bin — the command is the tamias pack's `bins[]` shim) |
+| `crates/lasius-driver` | `tamias-driver-lasius` — pavo driver: engine ops as `cli.<verb>` wire queries + `run`/`cli` passthroughs (`cli` is the bins-shim engine passthrough; `mcp` feature-gated) |
+| `libraries/lasius` | the tamias pack — `tamias.yaml` declares `bins: [{name: lasius, shim: cli, driver: lasius}]`; `cargo xtask pack` stages `drivers/bin/<triple>/tamias-driver-lasius` (gitignored) |
+| `xtask` | `cargo xtask check` / `test` / `coverage` / `pack` / `install` / `fmt` |
 
 ## Development
 
@@ -92,6 +97,8 @@ I/O); `lasius-cli` is the composition root — `std::process` for `git`/`gh`,
 ./scripts/setup.sh     # once: git hooks + toolchain check
 cargo xtask check      # fmt --check + clippy -D warnings
 cargo xtask test       # nextest (or cargo test)
+cargo xtask pack       # stage libraries/lasius driver payload
+cargo xtask install    # release-build tamias-driver-lasius → ~/.local/bin
 cargo xtask coverage   # llvm-cov summary; --fail-under-lines N to gate
 ```
 

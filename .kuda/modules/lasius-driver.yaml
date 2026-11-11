@@ -1,0 +1,243 @@
+name: lasius-driver
+path: crates/lasius-driver/Cargo.toml
+purpose: tamias-driver-lasius — pavo driver exposing a lasius workspace's engine ops (no views)
+api:
+- name: Engine
+  kind: type
+  file: crates/lasius-driver/src/surface.rs
+  line: 20
+  module: lasius-driver
+- name: READ_ONLY
+  kind: const
+  file: crates/lasius-driver/src/ops.rs
+  line: 57
+  module: lasius-driver
+- name: SKIP_PARAMS
+  kind: const
+  file: crates/lasius-driver/src/ops.rs
+  line: 52
+  module: lasius-driver
+- name: SURFACES
+  kind: const
+  file: crates/lasius-driver/src/ops.rs
+  line: 48
+  module: lasius-driver
+- name: add_clones_single_repo
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 263
+  module: lasius-driver
+- name: argv
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 193
+  module: lasius-driver
+- name: argv_maps_params_to_lasius_flags
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 357
+  module: lasius-driver
+- name: argv_omits_root_when_absent
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 382
+  module: lasius-driver
+- name: argv_splits_dotted_names_and_json_flags
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 371
+  module: lasius-driver
+- name: bin
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 13
+  module: lasius-driver
+- name: capabilities_json
+  kind: function
+  file: crates/lasius-driver/src/main.rs
+  line: 66
+  module: lasius-driver
+- name: check_reports_conformance
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 378
+  module: lasius-driver
+- name: check_reports_org_discovery_failure
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 405
+  module: lasius-driver
+- name: clone_is_idempotent
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 153
+  module: lasius-driver
+- name: code_workspace_generate_regenerates
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 194
+  module: lasius-driver
+- name: dispatch
+  kind: function
+  file: crates/lasius-driver/src/main.rs
+  line: 74
+  module: lasius-driver
+- name: doctor_reports_ok_on_healthy_workspace
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 204
+  module: lasius-driver
+- name: driver_passes_pavo_conformance
+  kind: function
+  file: crates/lasius-driver/tests/conformance.rs
+  line: 14
+  module: lasius-driver
+- name: engine_argv
+  kind: function
+  file: crates/lasius-driver/src/main.rs
+  line: 114
+  module: lasius-driver
+- name: exec_filter_selects_subset
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 253
+  module: lasius-driver
+- name: exec_runs_in_each_clone
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 241
+  module: lasius-driver
+- name: fails_outside_workspace
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 272
+  module: lasius-driver
+- name: fake_gh
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 70
+  module: lasius-driver
+- name: git
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 59
+  module: lasius-driver
+- name: init_clones_and_generates_workspace
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 112
+  module: lasius-driver
+- name: init_creates_config_with_org_flag
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 125
+  module: lasius-driver
+- name: kind
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 107
+  module: lasius-driver
+- name: lasius-driver
+  kind: module
+  file: crates/lasius-driver/Cargo.toml
+  line: 1
+  module: lasius-driver
+- name: main
+  kind: function
+  file: crates/lasius-driver/src/main.rs
+  line: 140
+  module: lasius-driver
+- name: make_git_repo
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 36
+  module: lasius-driver
+- name: manifest
+  kind: function
+  file: crates/lasius-driver/src/main.rs
+  line: 56
+  module: lasius-driver
+- name: manifest
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 139
+  module: lasius-driver
+- name: manifest_lists_every_non_surface_verb_as_cli_query
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 315
+  module: lasius-driver
+- name: op
+  kind: function
+  file: crates/lasius-driver/src/surface.rs
+  line: 25
+  module: lasius-driver
+- name: op_cmd
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 85
+  module: lasius-driver
+- name: op_of
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 163
+  module: lasius-driver
+- name: op_of_accepts_cli_prefix_only
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 300
+  module: lasius-driver
+- name: ops
+  kind: module
+  file: crates/lasius-driver/src/main.rs
+  line: 44
+  module: lasius-driver
+- name: param_json
+  kind: function
+  file: crates/lasius-driver/src/ops.rs
+  line: 120
+  module: lasius-driver
+- name: rm_refuses_dirty_clone
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 216
+  module: lasius-driver
+api_omitted: 23
+deps:
+- clap
+- lasius
+- pavo-driver-kit
+- pavo-protocol
+- serde_json
+- pavo-testkit
+- tempfile
+- tempfile
+- clap
+- serde_json
+- pavo_protocol
+notes: ''
+verify:
+- crates/lasius-driver/Cargo.toml
+- crates/lasius-driver/src/main.rs
+- crates/lasius-driver/src/ops.rs
+- crates/lasius-driver/src/surface.rs
+- crates/lasius-driver/tests/conformance.rs
+- crates/lasius-driver/tests/e2e.rs
+provenance:
+  files:
+  - crates/lasius-driver/Cargo.toml
+  - crates/lasius-driver/src/main.rs
+  - crates/lasius-driver/src/ops.rs
+  - crates/lasius-driver/src/surface.rs
+  - crates/lasius-driver/tests/conformance.rs
+  - crates/lasius-driver/tests/e2e.rs
+  hashes:
+  - e610ce6601c6365f98d2c47a7c55de1b4600a584
+  - 1199aeb5bdf79b875b0947539597d3add37655e2
+  - ef70bc4d065286bccfa0eee3a2aae7fc728dfd3c
+  - 043b464591dbf19c3b6adba8e8852cc85d255c1d
+  - df811c1ab3cc4861a72bafd9cfb735e816f0982d
+  - c2dee0cc1083ffc513605b91400a961199821558
+  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
+  generated_at: '1794417801'
+  generator: kuda-template/0.1.2

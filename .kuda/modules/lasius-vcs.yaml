@@ -1,0 +1,51 @@
+name: lasius-vcs
+path: crates/lasius-vcs/Cargo.toml
+purpose: VCS port — history/worktree/tag/sync ops, generic over the backend (P-019).
+api:
+- name: CommitInfo
+  kind: type
+  file: crates/lasius-vcs/src/lib.rs
+  line: 16
+  module: lasius-vcs
+- name: DiffStat
+  kind: type
+  file: crates/lasius-vcs/src/lib.rs
+  line: 36
+  module: lasius-vcs
+- name: Vcs
+  kind: trait
+  file: crates/lasius-vcs/src/lib.rs
+  line: 45
+  module: lasius-vcs
+- name: commit_info_serde_round_trip
+  kind: function
+  file: crates/lasius-vcs/src/lib.rs
+  line: 99
+  module: lasius-vcs
+- name: lasius-vcs
+  kind: module
+  file: crates/lasius-vcs/Cargo.toml
+  line: 1
+  module: lasius-vcs
+- name: tests
+  kind: module
+  file: crates/lasius-vcs/src/lib.rs
+  line: 95
+  module: lasius-vcs
+deps:
+- serde
+- serde_json
+notes: ''
+verify:
+- crates/lasius-vcs/Cargo.toml
+- crates/lasius-vcs/src/lib.rs
+provenance:
+  files:
+  - crates/lasius-vcs/Cargo.toml
+  - crates/lasius-vcs/src/lib.rs
+  hashes:
+  - 8f3abd4dd2e314328d01f8a958a10e56613fe00e
+  - b367117fc9ed2952b507274df7a60e9fad97da80
+  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
+  generated_at: '1794417801'
+  generator: kuda-template/0.1.2
