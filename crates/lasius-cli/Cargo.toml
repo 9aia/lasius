@@ -9,9 +9,11 @@ description.workspace = true
 [lints]
 workspace = true
 
-[[bin]]
-name = "lasius"
-path = "src/main.rs"
+# No `[[bin]]` — the `lasius` command ships as the tamias pack in
+# `libraries/lasius/` (a generated `bins[]` shim →
+# `tamias-driver-lasius cli` → `lasius::run_from`, T-012). This
+# crate is the engine lib only; the e2e suite lives in
+# `lasius-driver/tests/` and spawns `tamias-driver-lasius run`.
 
 [dependencies]
 lasius-core.workspace = true
@@ -21,6 +23,3 @@ clap_complete.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
-
-[dev-dependencies]
-tempfile = "3"

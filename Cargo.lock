@@ -202,7 +202,6 @@ dependencies = [
  "lasius-core",
  "serde",
  "serde_json",
- "tempfile",
  "thiserror",
 ]
 
@@ -226,6 +225,7 @@ dependencies = [
  "pavo-protocol",
  "pavo-testkit",
  "serde_json",
+ "tempfile",
 ]
 
 [[package]]
@@ -249,6 +249,7 @@ name = "lasius-xtask"
 version = "0.3.0"
 dependencies = [
  "anyhow",
+ "serde_json",
 ]
 
 [[package]]
@@ -286,7 +287,6 @@ name = "pavo-driver-kit"
 version = "0.1.0"
 source = "git+https://github.com/9aia/pavo#1f5e37afdb0b66a1ef908c2cc2448248493399c2"
 dependencies = [
- "clap",
  "pavo-protocol",
  "serde",
  "serde_json",

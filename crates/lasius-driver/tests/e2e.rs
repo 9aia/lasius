@@ -1,6 +1,8 @@
 #![allow(clippy::unwrap_used)]
-//! End-to-end tests: run the real `lasius` binary against a temp workspace
-//! with a fake `gh` on PATH and real `file://` git repos.
+//! End-to-end tests: run the real engine through
+//! `tamias-driver-lasius run` — the same entrypoint the `lasius`
+//! bins[] shim resolves to — against a temp workspace with a fake
+//! `gh` on PATH and real `file://` git repos.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -9,16 +11,17 @@ use std::process::Command;
 use tempfile::TempDir;
 
 fn bin() -> &'static str {
-    env!("CARGO_BIN_EXE_lasius")
+    env!("CARGO_BIN_EXE_tamias-driver-lasius")
 }
 
 fn run(args: &[&str], cwd: &Path, path_env: &str) -> std::process::Output {
     Command::new(bin())
+        .arg("run")
         .args(args)
         .current_dir(cwd)
         .env("PATH", path_env)
         .output()
-        .expect("spawn lasius")
+        .expect("spawn tamias-driver-lasius run")
 }
 
 fn stdout(o: &std::process::Output) -> String {
@@ -304,7 +307,7 @@ fn serve_answers_jsonrpc_ops() {
     assert!(run(&["clone"], &root, &path).status.success());
 
     let mut child = Command::new(bin())
-        .args(["serve"])
+        .args(["run", "serve"])
         .current_dir(&root)
         .env("PATH", &path)
         .stdin(std::process::Stdio::piped())

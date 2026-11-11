@@ -13,8 +13,13 @@
 //! - `run <argv>` — engine passthrough: `tamias-driver-lasius run
 //!   status` ≡ `lasius status`. Also the child side of `cli.*` wire
 //!   queries (`ops::run_verb` re-execs this same verb so engine
-//!   output never touches the serve stream) and the streaming
-//!   surface for `surfaces` verbs.
+//!   output never touches the serve stream).
+//! - `cli <lasius argv>` — the tamias `bins[]` shim verb: `tamias
+//!   bin exec` calls it with the standard `--dir`/`--name` driver
+//!   flags ahead of the user's argv; they're stripped and the rest
+//!   runs through `lasius::run_from` in-process with inherited
+//!   stdio — full engine parity (`serve` streams, globals/`--json`/
+//!   `--help` all work).
 //! - `serve` — ndjson JSON-RPC on stdio: `{"op":"manifest"}`,
 //!   `{"op":"views"}`, `{"op":"view","view":…,"params":{…}}`,
 //!   `{"op":"query","query":…,"params":{…}}` →
@@ -22,13 +27,12 @@
 //!   `query:"ops"` answers the ops manifest; `query:"cli.<verb>"`
 //!   runs the engine op.
 //!
-//! Optional surfaces: features `cli`/`mcp` embed
-//! pavo-driver-kit's surface layer — `cli <op> [args]` is a
-//! generated CLI over the ops manifest (`serve`/`open`/`exec` ride
-//! as streaming subcommands), `mcp` serves the ops as MCP tools on
-//! stdio. Both are equivalent to the standalone
-//! `tamias-driver-cli`/`tamias-driver-mcp` surface drivers, minus
-//! the PATH/discovery hop.
+//! Optional surface: feature `mcp` embeds pavo-driver-kit's
+//! surface layer — `mcp` serves the ops manifest as MCP tools on
+//! stdio, equivalent to the standalone `tamias-driver-mcp` surface
+//! driver minus the PATH/discovery hop. (`cli` needs no feature:
+//! it's the bins-shim passthrough above, not a generated surface —
+//! the engine's own argv grammar is the contract.)
 //!
 //! Which workspace: ops inherit the `serve` process's cwd — the
 //! `root` param maps to the CLI's `--root` global, and absent it
@@ -38,7 +42,7 @@
 //! view/query names outside `ops`/`cli.*` answer `ok:false`.
 
 mod ops;
-#[cfg(any(feature = "cli", feature = "mcp"))]
+#[cfg(feature = "mcp")]
 mod surface;
 
 use pavo_driver_kit as kit;
@@ -101,6 +105,31 @@ fn dispatch(req: &Request) -> Response {
     }
 }
 
+/// `cli` verb argv (after the `cli` token) → engine argv (argv[0]
+/// included). `tamias bin exec`/`driver exec` prepend the standard
+/// driver flags — `--dir <payload>` `--name <pkg>` — which the
+/// engine doesn't know; consume the leading run of those two
+/// (`--flag v` and `--flag=v` forms) and pass everything else
+/// through untouched.
+fn engine_argv(args: &[String]) -> Vec<String> {
+    let mut out = vec!["lasius".to_string()];
+    let mut i = 0;
+    while i < args.len() {
+        let a = args[i].as_str();
+        if a == "--dir" || a == "--name" {
+            // flag + separate value — skip both (a trailing flag
+            // with no value just ends the scan).
+            i = (i + 2).min(args.len());
+        } else if a.starts_with("--dir=") || a.starts_with("--name=") {
+            i += 1;
+        } else {
+            break;
+        }
+    }
+    out.extend(args[i..].iter().cloned());
+    out
+}
+
 fn serve() -> i32 {
     // The kit owns the ndjson loop — stdin EOF and a dead client
     // both end it quietly, and either way the driver exits 0.
@@ -128,27 +157,31 @@ fn main() {
         }
         // Engine passthrough — `tamias-driver-lasius run status` is
         // `lasius status`. Also the child side of `cli.*` wire
-        // queries (ops::run_verb re-execs this same verb) and the
-        // streaming surface for `surfaces` verbs (`run serve`,
-        // `run open`, `run exec -- …`).
+        // queries (ops::run_verb re-execs this same verb).
         Some("run") => {
             let argv = std::iter::once("lasius".to_string()).chain(args.iter().skip(1).cloned());
             std::process::exit(lasius::run_from(argv));
         }
-        // Embedded surface verbs (feature-gated, optional): the
-        // pavo-driver-kit surface layer renders this driver's own
-        // ops manifest — `cli` = generated clap CLI (op →
-        // subcommand), `mcp` = ops → MCP tools over stdio. The
-        // standalone tamias-driver-cli/-mcp binaries do the same
-        // over process dispatch; these verbs need nothing on PATH.
-        #[cfg(feature = "cli")]
+        // The tamias `bins[]` shim verb (T-012): `tamias bin exec`
+        // runs `<driver> cli --dir <payload> --name <pkg> <lasius
+        // argv>` for a declared `shim: cli` bin. lasius's engine IS
+        // the CLI, so this is a passthrough — strip the two standard
+        // driver flags and hand the rest to `lasius::run_from`
+        // with inherited stdio. That keeps full engine parity a
+        // generated ops→CLI surface can't express: globals before
+        // the verb, `--json`, `--help`, the unbounded `serve`
+        // ndjson loop, and stdin-bound verbs (`rm`'s confirm,
+        // `exec`'s shell) all behave exactly like the retired
+        // `lasius` binary.
         Some("cli") => {
-            let m = kit::surface::OpsManifest::from_value(&ops::manifest()).unwrap_or_default();
-            let argv: Vec<String> = std::iter::once("lasius".to_string())
-                .chain(args.iter().skip(1).cloned())
-                .collect();
-            kit::surface::cli::run("lasius", &m, &argv, &mut surface::Engine)
+            let argv = engine_argv(&args[1..]);
+            std::process::exit(lasius::run_from(argv));
         }
+        // Optional embedded surface (feature-gated): the
+        // pavo-driver-kit surface layer renders this driver's own
+        // ops manifest as MCP tools over stdio — the same ops the
+        // `cli.*` wire queries and the standalone
+        // tamias-driver-mcp binary expose.
         #[cfg(feature = "mcp")]
         Some("mcp") => {
             let m = kit::surface::OpsManifest::from_value(&ops::manifest()).unwrap_or_default();
@@ -163,7 +196,7 @@ fn main() {
         Some("serve") | None => serve(),
         _ => {
             eprintln!(
-                "usage: tamias-driver-lasius manifest|capabilities|ops|run <argv>|serve\n       (feature `cli` adds `cli <op> [args]`; feature `mcp` adds `mcp`)"
+                "usage: tamias-driver-lasius manifest|capabilities|ops|run <argv>|cli <lasius argv>|serve\n       (feature `mcp` adds `mcp`)"
             );
             1
         }
