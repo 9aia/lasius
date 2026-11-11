@@ -10,7 +10,7 @@ api:
 - name: Cli
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 35
+  line: 37
   module: lasius
 - name: CloneOutcome
   kind: type
@@ -20,17 +20,32 @@ api:
 - name: Cmd
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 45
+  line: 47
   module: lasius
 - name: CodeWorkspaceAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 134
+  line: 354
+  module: lasius
+- name: ForgeAction
+  kind: type
+  file: crates/lasius-cli/src/lib.rs
+  line: 232
+  module: lasius
+- name: ForgePrAction
+  kind: type
+  file: crates/lasius-cli/src/lib.rs
+  line: 277
   module: lasius
 - name: Github
   kind: type
   file: crates/lasius-cli/src/providers.rs
   line: 44
+  module: lasius
+- name: MergeMethodArg
+  kind: type
+  file: crates/lasius-cli/src/lib.rs
+  line: 241
   module: lasius
 - name: OPS
   kind: const
@@ -41,6 +56,11 @@ api:
   kind: const
   file: crates/lasius-cli/src/commands.rs
   line: 763
+  module: lasius
+- name: PrStateArg
+  kind: type
+  file: crates/lasius-cli/src/lib.rs
+  line: 258
   module: lasius
 - name: ProcOutput
   kind: type
@@ -61,6 +81,16 @@ api:
   kind: type
   file: crates/lasius-cli/src/commands.rs
   line: 272
+  module: lasius
+- name: VcsAction
+  kind: type
+  file: crates/lasius-cli/src/lib.rs
+  line: 146
+  module: lasius
+- name: VcsWorktreeAction
+  kind: type
+  file: crates/lasius-cli/src/lib.rs
+  line: 200
   module: lasius
 - name: Workspace
   kind: type
@@ -145,17 +175,22 @@ api:
 - name: command
   kind: function
   file: crates/lasius-cli/src/lib.rs
-  line: 163
+  line: 383
   module: lasius
 - name: commands
   kind: module
   file: crates/lasius-cli/src/lib.rs
   line: 16
   module: lasius
+- name: commit
+  kind: function
+  file: crates/lasius-cli/src/vcs.rs
+  line: 102
+  module: lasius
 - name: dispatch
   kind: function
   file: crates/lasius-cli/src/lib.rs
-  line: 169
+  line: 389
   module: lasius
 - name: dispatch
   kind: function
@@ -167,83 +202,62 @@ api:
   file: crates/lasius-cli/src/providers.rs
   line: 113
   module: lasius
-- name: doctor
-  kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 539
-  module: lasius
-- name: doctor_checks
-  kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 437
-  module: lasius
-- name: exec
-  kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 677
-  module: lasius
-- name: failure_detail
-  kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 25
-  module: lasius
-- name: failure_text
-  kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 38
-  module: lasius
-- name: fast_process_is_not_timed_out
-  kind: function
-  file: crates/lasius-cli/src/proc.rs
-  line: 185
-  module: lasius
-- name: for_kind
-  kind: function
-  file: crates/lasius-cli/src/providers.rs
-  line: 37
-  module: lasius
-api_omitted: 44
+api_omitted: 70
 deps:
 - anyhow
 - clap
 - clap_complete
 - lasius-core
+- lasius-forge
+- lasius-forge-gh
+- lasius-vcs
+- lasius-vcs-git
 - serde
 - serde_json
 - thiserror
 - anyhow
 - serde_json
 - lasius-core
+- lasius-forge
+- lasius-forge-gh
+- lasius-vcs
+- lasius-vcs-git
 - clap
 notes: ''
 verify:
 - Cargo.toml
 - crates/lasius-cli/Cargo.toml
 - crates/lasius-cli/src/commands.rs
+- crates/lasius-cli/src/forge.rs
 - crates/lasius-cli/src/lib.rs
 - crates/lasius-cli/src/proc.rs
 - crates/lasius-cli/src/providers.rs
 - crates/lasius-cli/src/serve.rs
 - crates/lasius-cli/src/support.rs
+- crates/lasius-cli/src/vcs.rs
 provenance:
   files:
   - Cargo.toml
   - crates/lasius-cli/Cargo.toml
   - crates/lasius-cli/src/commands.rs
+  - crates/lasius-cli/src/forge.rs
   - crates/lasius-cli/src/lib.rs
   - crates/lasius-cli/src/proc.rs
   - crates/lasius-cli/src/providers.rs
   - crates/lasius-cli/src/serve.rs
   - crates/lasius-cli/src/support.rs
+  - crates/lasius-cli/src/vcs.rs
   hashes:
-  - 610b242bd1457cbeff1ff6decc6df5391eee309a
-  - 7e79c1ccda9030953c0119c9ee78ffa5c1dc3378
+  - 3ee94e480485c95d78ba9fcb7972602cff0691d1
+  - 3dd7ddc7327da4605e0dafb4699f83e491bd6fdc
   - 4e5dac3c26871f9531d82f45bef1544f488d0325
-  - d8a1511d2ce795cd9e2369953782acab79e7688d
+  - e9315f389320205a2275f143eb9567c884f9236e
+  - 5b1138d9ac36c429b4f204b46d2667f52758027e
   - 3576ab200b7d9d7f6d11b5ec4246c3cd587b9119
   - 415e6446334c162054fff2edbcd6695395b7cd45
   - fd4a2f17950d7a2bf01ff1e03003ffe8cc309264
-  - 6fb78000285f28c3eec195bb56db267137f86037
-  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
-  generated_at: '1794417801'
+  - ff8dc94d52c641e08dd51b6152751993e312c237
+  - 32e64b66f0ecf9d8d8939b7d5a842807cbf133dd
+  commit_sha: f536244bb055b9157c2251e9fdc1c40d3210de2d
+  generated_at: '1794424045'
   generator: kuda-template/0.1.2

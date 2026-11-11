@@ -200,6 +200,10 @@ dependencies = [
  "clap",
  "clap_complete",
  "lasius-core",
+ "lasius-forge",
+ "lasius-forge-gh",
+ "lasius-vcs",
+ "lasius-vcs-git",
  "serde",
  "serde_json",
  "thiserror",
@@ -225,6 +229,22 @@ dependencies = [
  "pavo-protocol",
  "pavo-testkit",
  "serde_json",
+ "tempfile",
+]
+
+[[package]]
+name = "lasius-forge"
+version = "0.3.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "lasius-forge-gh"
+version = "0.3.0"
+dependencies = [
+ "lasius-forge",
  "tempfile",
 ]
 

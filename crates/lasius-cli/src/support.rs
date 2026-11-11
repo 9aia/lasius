@@ -122,6 +122,26 @@ pub fn local_repos(ws: &Workspace) -> Result<Vec<String>> {
     Ok(names)
 }
 
+/// Resolve a `repo` argument for the `vcs`/`forge` verbs: a lasius
+/// clone name under `repos_dir`, or an existing filesystem path —
+/// worktrees and foreign checkouts live outside `repos_dir`. A safe
+/// clone name wins when both could match; anything else must be a
+/// directory that exists.
+pub fn repo_dir(ws: &Workspace, repo: &str) -> Result<PathBuf> {
+    if lasius_core::names::is_safe_repo_name(repo) {
+        let dir = ws.repo_path(repo);
+        // `.git` exists() covers linked worktrees too (.git file).
+        if dir.join(".git").exists() {
+            return Ok(dir);
+        }
+    }
+    let path = Path::new(repo);
+    if path.is_dir() {
+        return Ok(path.to_path_buf());
+    }
+    anyhow::bail!("no repo {repo:?} — not a lasius clone and not an existing directory")
+}
+
 /// Regenerate the workspace file from current clones; returns repo count.
 pub fn refresh_workspace(ws: &Workspace) -> Result<usize> {
     let names = local_repos(ws)?;

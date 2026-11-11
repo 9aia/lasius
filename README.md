@@ -51,6 +51,13 @@ lasius check [--json] [--only id]  # conformance checks (structure/clones/genera
 lasius exec -- cargo build     # run a command in every clone (--filter <substr>)
 lasius add <repo>              # clone a single org repo
 lasius rm <repo>               # remove a clone after safety checks
+lasius vcs worktree add <repo> --branch <b> --rev <sha>  # agent worktree
+lasius vcs commit <repo> -m <msg> [--body <text>] [--allow-empty]
+lasius vcs push <repo> [--remote origin] [--branch <b>]
+lasius vcs fetch <repo> [--remote origin] [--refspec <spec>]...
+lasius forge pr create <repo> --title <t> [--body <b>] [--base main] [--head <b>] [--draft]
+lasius forge pr merge <repo> <n> [--method squash|merge|rebase] [--delete-branch]
+lasius forge pr view|checks|list <repo> [<n>] [--json]  # PR + CI status
 lasius serve                   # ndjson JSON-RPC on stdio (ping/list/status/doctor)
 lasius completions <shell>     # print a shell completion script
 ```

@@ -194,6 +194,21 @@ impl Vcs for GitVcs {
         )
     }
 
+    fn worktree_add_branch(
+        &self,
+        repo: &Path,
+        dir: &Path,
+        branch: &str,
+        rev: Option<&str>,
+    ) -> io::Result<()> {
+        let mut args: Vec<&str> = vec!["worktree", "add", "-b", branch];
+        args.push(dir.to_str().unwrap_or_default());
+        if let Some(r) = rev {
+            args.push(r);
+        }
+        git_out(repo, &args).map(|_| ())
+    }
+
     fn worktree_remove(&self, repo: &Path, dir: &Path) -> bool {
         git_ok(
             repo,
@@ -208,6 +223,37 @@ impl Vcs for GitVcs {
 
     fn worktree_prune(&self, repo: &Path) -> bool {
         git_ok(repo, &["worktree", "prune"])
+    }
+
+    // -- working tree / commits ---------------------------------------------
+
+    fn current_branch(&self, repo: &Path) -> Option<String> {
+        git_out(repo, &["rev-parse", "--abbrev-ref", "HEAD"])
+            .ok()
+            .map(|s| first_line(&s))
+            .filter(|s| !s.is_empty() && s != "HEAD")
+    }
+
+    fn stage_all(&self, repo: &Path) -> io::Result<()> {
+        git_out(repo, &["add", "-A"]).map(|_| ())
+    }
+
+    fn commit(
+        &self,
+        repo: &Path,
+        subject: &str,
+        body: Option<&str>,
+        allow_empty: bool,
+    ) -> io::Result<()> {
+        let mut args: Vec<&str> = vec!["commit", "-m", subject];
+        if let Some(b) = body {
+            args.push("-m");
+            args.push(b);
+        }
+        if allow_empty {
+            args.push("--allow-empty");
+        }
+        git_out(repo, &args).map(|_| ())
     }
 
     // -- tags / refs -------------------------------------------------------
@@ -241,10 +287,21 @@ impl Vcs for GitVcs {
         git_ok(repo, &["fetch", remote.unwrap_or("origin"), "--prune"])
     }
 
+    fn fetch(&self, repo: &Path, remote: &str, refspecs: &[&str]) -> io::Result<()> {
+        let mut args: Vec<&str> = vec!["fetch", remote];
+        args.extend_from_slice(refspecs);
+        git_out(repo, &args).map(|_| ())
+    }
+
     fn push(&self, repo: &Path, remote: &str, refspecs: &[&str]) -> bool {
         let mut args: Vec<&str> = vec!["push", remote];
         args.extend_from_slice(refspecs);
         git_ok(repo, &args)
+    }
+
+    fn push_branch(&self, repo: &Path, remote: &str, branch: Option<&str>) -> io::Result<()> {
+        // `HEAD` alone pushes the checked-out branch under its own name.
+        git_out(repo, &["push", "-u", remote, branch.unwrap_or("HEAD")]).map(|_| ())
     }
 }
 
@@ -317,5 +374,49 @@ mod tests {
         assert!(v.tag_exists(&repo, "v9.9.9"));
         assert!(v.delete_tag(&repo, "v9.9.9"));
         assert!(!v.tag_exists(&repo, "v9.9.9"));
+    }
+
+    #[test]
+    fn agent_mutation_ops() {
+        let (_t, repo) = fixture();
+        let v = GitVcs;
+        assert!(v.current_branch(&repo).is_some());
+
+        // commit identity — repo-local config is shared with worktrees
+        assert!(git_ok(&repo, &["config", "user.email", "t@t"]));
+        assert!(git_ok(&repo, &["config", "user.name", "t"]));
+
+        // bare remote wired as origin
+        let remote = repo.parent().unwrap().join("remote.git");
+        let st = Command::new("git")
+            .args(["init", "-q", "--bare"])
+            .arg(&remote)
+            .status()
+            .unwrap();
+        assert!(st.success());
+        assert!(git_ok(
+            &repo,
+            &["remote", "add", "origin", remote.to_str().unwrap()]
+        ));
+
+        // worktree on a new branch at HEAD
+        let wt = repo.parent().unwrap().join("wt-branch");
+        let head = v.head(&repo).unwrap();
+        v.worktree_add_branch(&repo, &wt, "heal/x", Some(&head))
+            .unwrap();
+        assert_eq!(v.current_branch(&wt).as_deref(), Some("heal/x"));
+
+        // edit → stage → commit
+        std::fs::write(wt.join("c.txt"), "x\n").unwrap();
+        v.stage_all(&wt).unwrap();
+        v.commit(&wt, "fix: heal", Some("details"), false).unwrap();
+        let new_head = v.head(&wt).unwrap();
+        assert_ne!(new_head, head);
+
+        // push current branch, then fetch back
+        v.push_branch(&wt, "origin", None).unwrap();
+        assert!(v.has_commit(&remote, &new_head));
+        v.fetch(&wt, "origin", &[]).unwrap();
+        v.fetch(&repo, "origin", &["heal/x"]).unwrap();
     }
 }

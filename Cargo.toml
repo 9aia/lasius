@@ -24,6 +24,8 @@ lto = "thin"
 [workspace.dependencies]
 lasius = { path = "crates/lasius-cli", version = "0.3.0" }
 lasius-core = { path = "crates/lasius-core", version = "0.3.0" }
+lasius-forge = { path = "crates/lasius-forge", version = "0.3.0" }
+lasius-forge-gh = { path = "crates/lasius-forge-gh", version = "0.3.0" }
 lasius-vcs = { path = "crates/lasius-vcs", version = "0.3.0" }
 lasius-vcs-git = { path = "crates/lasius-vcs-git", version = "0.3.0" }
 lasius-driver = { path = "crates/lasius-driver", version = "0.3.0" }

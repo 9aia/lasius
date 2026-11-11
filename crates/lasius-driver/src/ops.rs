@@ -54,7 +54,15 @@ const SKIP_PARAMS: &[&str] = &[];
 /// Read-only verbs — everything else writes clones, pulls remotes,
 /// deletes dirs, or regenerates files. Mutators belong behind a
 /// deliberate trigger, not ambient view polling.
-const READ_ONLY: &[&str] = &["status", "doctor", "check", "completions"];
+const READ_ONLY: &[&str] = &[
+    "status",
+    "doctor",
+    "check",
+    "completions",
+    "forge.pr.view",
+    "forge.pr.checks",
+    "forge.pr.list",
+];
 
 /// `(name, clap spec)` for every leaf verb. Hidden plumbing and
 /// clap's `help` are skipped — they stay reachable through `run`
@@ -349,6 +357,13 @@ mod tests {
                 "cli.code-workspace.generate",
                 "cli.rm",
                 "cli.add",
+                "cli.vcs.worktree.add",
+                "cli.vcs.worktree.remove",
+                "cli.vcs.commit",
+                "cli.vcs.push",
+                "cli.vcs.fetch",
+                "cli.forge.pr.create",
+                "cli.forge.pr.merge",
             ]
         );
     }

@@ -7,6 +7,7 @@
 //! jj/fossil) live in their own crates. Consumers keep a thin
 //! domain trait only where semantics genuinely differ.
 
+use std::io;
 use std::path::Path;
 
 /// A commit as history queries report it — enough for changelog
@@ -66,9 +67,50 @@ pub trait Vcs: Send + Sync {
 
     /// Detached worktree of `sha`/`rev` at `dir`.
     fn worktree_add(&self, repo: &Path, dir: &Path, rev: &str) -> bool;
+    /// Worktree at `dir` on a *new* branch `branch` created at `rev`
+    /// (`None` = HEAD). Errors carry the backend's stderr so callers
+    /// can report why (missing rev, existing branch, …).
+    fn worktree_add_branch(
+        &self,
+        repo: &Path,
+        dir: &Path,
+        branch: &str,
+        rev: Option<&str>,
+    ) -> io::Result<()>;
     fn worktree_remove(&self, repo: &Path, dir: &Path) -> bool;
     /// GC stale administrative worktree entries.
     fn worktree_prune(&self, repo: &Path) -> bool;
+
+    // -- working tree / commits (agent-facing mutations) -------------------
+
+    /// Branch checked out at `repo`; `None` when detached or unknown.
+    fn current_branch(&self, repo: &Path) -> Option<String>;
+    /// Stage every change (tracked + untracked) under `repo`.
+    fn stage_all(&self, repo: &Path) -> io::Result<()>;
+    /// Commit staged changes. `body` becomes a second `-m` paragraph;
+    /// `allow_empty` permits a commit with no staged diff (CI retrigger).
+    fn commit(
+        &self,
+        repo: &Path,
+        subject: &str,
+        body: Option<&str>,
+        allow_empty: bool,
+    ) -> io::Result<()>;
+
+    // -- sync / push -------------------------------------------------------
+
+    /// Fetch + prune so remote refs are current. `remote: None`
+    /// fetches the default (`origin`).
+    fn sync(&self, repo: &Path, remote: Option<&str>) -> bool;
+    /// Fetch `remote` without pruning; empty `refspecs` fetches the
+    /// remote's configured refspecs (e.g. all branches).
+    fn fetch(&self, repo: &Path, remote: &str, refspecs: &[&str]) -> io::Result<()>;
+    /// Push `refspecs` (raw git refspec args) to `remote`.
+    /// Empty = push the current branch.
+    fn push(&self, repo: &Path, remote: &str, refspecs: &[&str]) -> bool;
+    /// Push `branch` (`None` = the branch checked out at `repo`) to
+    /// `remote`, setting upstream. Errors carry the backend's stderr.
+    fn push_branch(&self, repo: &Path, remote: &str, branch: Option<&str>) -> io::Result<()>;
 
     // -- tags / refs -------------------------------------------------------
 
@@ -79,15 +121,6 @@ pub trait Vcs: Send + Sync {
     fn push_tag(&self, repo: &Path, remote: &str, tag: &str) -> bool;
     /// Delete a local tag.
     fn delete_tag(&self, repo: &Path, tag: &str) -> bool;
-
-    // -- sync / push -------------------------------------------------------
-
-    /// Fetch + prune so remote refs are current. `remote: None`
-    /// fetches the default (`origin`).
-    fn sync(&self, repo: &Path, remote: Option<&str>) -> bool;
-    /// Push `refspecs` (raw git refspec args) to `remote`.
-    /// Empty = push the current branch.
-    fn push(&self, repo: &Path, remote: &str, refspecs: &[&str]) -> bool;
 }
 
 #[cfg(test)]

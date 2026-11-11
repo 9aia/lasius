@@ -5,22 +5,22 @@ api:
 - name: CommitInfo
   kind: type
   file: crates/lasius-vcs/src/lib.rs
-  line: 16
+  line: 17
   module: lasius-vcs
 - name: DiffStat
   kind: type
   file: crates/lasius-vcs/src/lib.rs
-  line: 36
+  line: 37
   module: lasius-vcs
 - name: Vcs
   kind: trait
   file: crates/lasius-vcs/src/lib.rs
-  line: 45
+  line: 46
   module: lasius-vcs
 - name: commit_info_serde_round_trip
   kind: function
   file: crates/lasius-vcs/src/lib.rs
-  line: 99
+  line: 132
   module: lasius-vcs
 - name: lasius-vcs
   kind: module
@@ -30,7 +30,7 @@ api:
 - name: tests
   kind: module
   file: crates/lasius-vcs/src/lib.rs
-  line: 95
+  line: 128
   module: lasius-vcs
 deps:
 - serde
@@ -45,7 +45,7 @@ provenance:
   - crates/lasius-vcs/src/lib.rs
   hashes:
   - 8f3abd4dd2e314328d01f8a958a10e56613fe00e
-  - b367117fc9ed2952b507274df7a60e9fad97da80
-  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
-  generated_at: '1794417801'
+  - 36ef0e138586a0b1255a59b7898d3895f29d756e
+  commit_sha: f536244bb055b9157c2251e9fdc1c40d3210de2d
+  generated_at: '1794424045'
   generator: kuda-template/0.1.2

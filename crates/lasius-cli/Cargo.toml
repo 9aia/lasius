@@ -17,6 +17,10 @@ workspace = true
 
 [dependencies]
 lasius-core.workspace = true
+lasius-forge.workspace = true
+lasius-forge-gh.workspace = true
+lasius-vcs.workspace = true
+lasius-vcs-git.workspace = true
 anyhow.workspace = true
 clap.workspace = true
 clap_complete.workspace = true

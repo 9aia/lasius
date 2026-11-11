@@ -231,7 +231,11 @@ fn agents_stub(org: &str) -> String {
          - `lasius code-workspace generate` — regenerate the workspace file\n\
          - `lasius doctor` — env + drift diagnostics\n\
          - `lasius exec -- <cmd>` — run a command in every clone\n\
-         - `lasius rm <repo>` — remove a clone after safety checks\n"
+         - `lasius rm <repo>` — remove a clone after safety checks\n\
+         - `lasius vcs worktree|commit|push|fetch` — agent-facing git \
+         verbs (worktree at a rev, commit, push)\n\
+         - `lasius forge pr create|merge|view|checks|list` — pull-request \
+         and CI-status verbs\n"
     )
 }
 

@@ -1,0 +1,160 @@
+name: lasius-forge
+path: crates/lasius-forge/Cargo.toml
+purpose: Forge port — pull requests, merges, and check status, generic over the backend.
+api:
+- name: CheckKind
+  kind: type
+  file: crates/lasius-forge/src/lib.rs
+  line: 109
+  module: lasius-forge
+- name: CheckRun
+  kind: type
+  file: crates/lasius-forge/src/lib.rs
+  line: 118
+  module: lasius-forge
+- name: CreatePr
+  kind: type
+  file: crates/lasius-forge/src/lib.rs
+  line: 74
+  module: lasius-forge
+- name: Forge
+  kind: trait
+  file: crates/lasius-forge/src/lib.rs
+  line: 158
+  module: lasius-forge
+- name: GhAuthor
+  kind: type
+  file: crates/lasius-forge/src/gh.rs
+  line: 54
+  module: lasius-forge
+- name: GhPr
+  kind: type
+  file: crates/lasius-forge/src/gh.rs
+  line: 14
+  module: lasius-forge
+- name: GhRollup
+  kind: type
+  file: crates/lasius-forge/src/gh.rs
+  line: 63
+  module: lasius-forge
+- name: MergeMethod
+  kind: type
+  file: crates/lasius-forge/src/lib.rs
+  line: 87
+  module: lasius-forge
+- name: PrState
+  kind: type
+  file: crates/lasius-forge/src/lib.rs
+  line: 64
+  module: lasius-forge
+- name: PrStateFilter
+  kind: type
+  file: crates/lasius-forge/src/lib.rs
+  line: 97
+  module: lasius-forge
+- name: PullRequest
+  kind: type
+  file: crates/lasius-forge/src/lib.rs
+  line: 22
+  module: lasius-forge
+- name: VIEW
+  kind: const
+  file: crates/lasius-forge/src/gh.rs
+  line: 166
+  module: lasius-forge
+- name: bucket
+  kind: function
+  file: crates/lasius-forge/src/lib.rs
+  line: 140
+  module: lasius-forge
+- name: decode_pr_list
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 147
+  module: lasius-forge
+- name: decode_pr_view
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 137
+  module: lasius-forge
+- name: decodes_pr_list_subset
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 215
+  module: lasius-forge
+- name: decodes_pr_view_and_rollup
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 191
+  module: lasius-forge
+- name: gh
+  kind: module
+  file: crates/lasius-forge/src/lib.rs
+  line: 184
+  module: lasius-forge
+- name: lasius-forge
+  kind: module
+  file: crates/lasius-forge/Cargo.toml
+  line: 1
+  module: lasius-forge
+- name: parses_pr_number_from_url
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 240
+  module: lasius-forge
+- name: pr_number_from_url
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 154
+  module: lasius-forge
+- name: pr_state
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 84
+  module: lasius-forge
+- name: rejects_garbage
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 250
+  module: lasius-forge
+- name: tests
+  kind: module
+  file: crates/lasius-forge/src/gh.rs
+  line: 162
+  module: lasius-forge
+- name: to_check
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 114
+  module: lasius-forge
+- name: to_pr
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 93
+  module: lasius-forge
+- name: unknown_state_and_typename_degrade
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 230
+  module: lasius-forge
+deps:
+- serde
+- serde_json
+- serde
+notes: ''
+verify:
+- crates/lasius-forge/Cargo.toml
+- crates/lasius-forge/src/gh.rs
+- crates/lasius-forge/src/lib.rs
+provenance:
+  files:
+  - crates/lasius-forge/Cargo.toml
+  - crates/lasius-forge/src/gh.rs
+  - crates/lasius-forge/src/lib.rs
+  hashes:
+  - 8404bbb8751a160982b8d9de0a7795e255098aca
+  - 002ef46f94288ac10d590406506b8ccca9d254e9
+  - 5a25b6f6007ffe1f5739f27de8176c943e295c46
+  commit_sha: f536244bb055b9157c2251e9fdc1c40d3210de2d
+  generated_at: '1794424045'
+  generator: kuda-template/0.1.2

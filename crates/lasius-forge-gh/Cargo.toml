@@ -1,0 +1,16 @@
+[package]
+name = "lasius-forge-gh"
+description = "GitHub impl of lasius-forge — shells out to the gh CLI."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+lasius-forge.workspace = true
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true

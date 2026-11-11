@@ -90,6 +90,48 @@ fn fake_gh(dir: &Path, repos: &[(&str, PathBuf)]) -> String {
     format!("{}:{}", bin_dir.display(), std::env::var("PATH").unwrap())
 }
 
+/// Fake `gh` that answers `repo list` plus the `pr` subcommands the
+/// forge verbs use; returns PATH prefix. `pr create` prints a fixed
+/// URL, `pr view` a fixed JSON payload with a check rollup,
+/// `pr merge`/`pr list` succeed trivially.
+fn fake_gh_forge(dir: &Path, repos: &[(&str, PathBuf)]) -> String {
+    let bin_dir = dir.join("bin");
+    fs::create_dir_all(&bin_dir).unwrap();
+    let payload = repos
+        .iter()
+        .map(|(name, path)| {
+            format!(
+                "{{\"name\":\"{name}\",\"sshUrl\":\"file://{}\",\"isArchived\":false}}",
+                path.display()
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(",");
+    let script = format!(
+        r#"#!/bin/sh
+case "$1 $2" in
+  "repo list") echo '[{payload}]' ;;
+  "auth status") exit 0 ;;
+  "pr create") echo "https://github.com/testorg/alpha/pull/5" ;;
+  "pr view")
+    echo '{{"number":5,"title":"fix: heal","state":"OPEN","url":"https://github.com/testorg/alpha/pull/5","isDraft":false,"headRefName":"heal/x","headRefOid":"abc123","baseRefName":"main","body":"","author":{{"login":"devin"}},"mergeable":"MERGEABLE","mergeStateStatus":"CLEAN","reviewDecision":null,"createdAt":"2025-01-01T00:00:00Z","updatedAt":"2025-01-02T00:00:00Z","mergedAt":null,"statusCheckRollup":[{{"__typename":"CheckRun","name":"ci","status":"COMPLETED","conclusion":"SUCCESS","detailsUrl":"https://ci/1","workflowName":"ci"}}]}}'
+    ;;
+  "pr merge"|"pr list")
+    if [ "$1 $2" = "pr list" ]; then echo '[]'; fi
+    exit 0 ;;
+  *) echo "fake gh: unhandled $*" >&2; exit 1 ;;
+esac
+"#
+    );
+    fs::write(bin_dir.join("gh"), script).unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(bin_dir.join("gh"), fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    format!("{}:{}", bin_dir.display(), std::env::var("PATH").unwrap())
+}
+
 /// Workspace root with lasius.toml + org fixture repos; returns (tmp, root, path_env).
 fn setup(names: &[&str]) -> (TempDir, PathBuf, String) {
     let tmp = tempfile::tempdir().unwrap();
@@ -488,4 +530,151 @@ fn workspace_repo_self_excluded() {
     assert!(root.join("repos/alpha/.git").exists());
     assert!(!root.join("repos/workspace").exists());
     assert!(stdout(&out).contains("skip") || !stdout(&out).contains("cloned  workspace"));
+}
+
+/// Workspace whose fake `gh` also answers `pr` subcommands.
+fn setup_forge(names: &[&str]) -> (TempDir, PathBuf, String) {
+    let tmp = tempfile::tempdir().unwrap();
+    let base = tmp.path();
+    let org_dir = base.join("org");
+    let mut repos = Vec::new();
+    for name in names {
+        let src = org_dir.join(name);
+        make_git_repo(&src);
+        repos.push((*name, src));
+    }
+    let root = base.join("ws");
+    fs::create_dir_all(&root).unwrap();
+    fs::write(root.join("lasius.toml"), "org = \"testorg\"\n").unwrap();
+    let path_env = fake_gh_forge(base, &repos);
+    (tmp, root, path_env)
+}
+
+#[test]
+fn vcs_worktree_commit_push_fetch_flow() {
+    let (tmp, root, path) = setup(&["alpha"]);
+    assert!(run(&["clone"], &root, &path).status.success());
+    // commit identity for the agent-made commit (repo-local config is
+    // shared with linked worktrees)
+    let clone = root.join("repos/alpha");
+    git(&clone, &["config", "user.email", "t@t"]);
+    git(&clone, &["config", "user.name", "t"]);
+
+    let wt = tmp.path().join("wt-heal");
+    let wt_arg = wt.to_string_lossy().into_owned();
+
+    // worktree on a new branch at HEAD
+    let out = run(
+        &[
+            "vcs", "worktree", "add", "alpha", "--branch", "heal/x", "--dir", &wt_arg,
+        ],
+        &root,
+        &path,
+    );
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(wt.join(".git").exists());
+
+    // agent edits → commit (repo arg is the worktree path)
+    fs::write(wt.join("fix.txt"), "healed\n").unwrap();
+    let out = run(
+        &["vcs", "commit", &wt_arg, "-m", "fix: heal alpha"],
+        &root,
+        &path,
+    );
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(stdout(&out).contains("committed"));
+
+    // push the worktree's branch to origin (file:// source repo —
+    // pushing a new branch to a non-bare remote is allowed)
+    let out = run(&["vcs", "push", &wt_arg], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    // the pushed branch exists on the "remote" (the org source repo)
+    let src = tmp.path().join("org/alpha");
+    let probe = Command::new("git")
+        .arg("-C")
+        .arg(&src)
+        .args(["rev-parse", "--verify", "heal/x"])
+        .output()
+        .unwrap();
+    assert!(probe.status.success());
+
+    // fetch + worktree remove round out the flow
+    let out = run(&["vcs", "fetch", "alpha"], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let out = run(
+        &["vcs", "worktree", "remove", "alpha", "--dir", &wt_arg],
+        &root,
+        &path,
+    );
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(!wt.exists());
+}
+
+#[test]
+fn forge_pr_lifecycle() {
+    let (_tmp, root, path) = setup_forge(&["alpha"]);
+    assert!(run(&["clone"], &root, &path).status.success());
+
+    // create → JSON carries the parsed PR number
+    let out = run(
+        &[
+            "forge",
+            "pr",
+            "create",
+            "alpha",
+            "--title",
+            "fix: heal",
+            "--body",
+            "details",
+            "--base",
+            "main",
+            "--json",
+        ],
+        &root,
+        &path,
+    );
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert_eq!(doc["number"], 5);
+    assert_eq!(doc["url"], "https://github.com/testorg/alpha/pull/5");
+
+    // view + checks decode the fake gh rollup payload
+    let out = run(
+        &["forge", "pr", "view", "alpha", "5", "--json"],
+        &root,
+        &path,
+    );
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert_eq!(doc["number"], 5);
+    assert_eq!(doc["head_ref"], "heal/x");
+    assert_eq!(doc["merge_state"], "CLEAN");
+
+    let out = run(
+        &["forge", "pr", "checks", "alpha", "5", "--json"],
+        &root,
+        &path,
+    );
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert_eq!(doc[0]["name"], "ci");
+    assert_eq!(doc[0]["conclusion"], "SUCCESS");
+
+    // merge + list
+    let out = run(
+        &["forge", "pr", "merge", "alpha", "5", "--json"],
+        &root,
+        &path,
+    );
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert_eq!(doc["merged"], true);
+    assert_eq!(doc["method"], "squash");
+
+    let out = run(&["forge", "pr", "list", "alpha", "--json"], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(&stdout(&out)).unwrap(),
+        serde_json::json!([])
+    );
 }

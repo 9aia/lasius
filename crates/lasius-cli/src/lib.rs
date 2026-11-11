@@ -14,10 +14,12 @@
 //! ant — it tends the garden so you don't have to.
 
 mod commands;
+mod forge;
 mod proc;
 mod providers;
 mod serve;
 mod support;
+mod vcs;
 
 use std::path::PathBuf;
 
@@ -119,6 +121,16 @@ enum Cmd {
         /// Repo name
         name: String,
     },
+    /// VCS verbs — worktrees, commits, fetch/push over the lasius-vcs port
+    Vcs {
+        #[command(subcommand)]
+        action: VcsAction,
+    },
+    /// Forge verbs — pull requests and checks over the lasius-forge port
+    Forge {
+        #[command(subcommand)]
+        action: ForgeAction,
+    },
     /// ndjson JSON-RPC over stdio — read-only ops for embedding
     /// (ping, list, status, doctor); same wire as tamias/sepia/cuora/myco serve
     Serve,
@@ -127,6 +139,214 @@ enum Cmd {
         /// Shell to generate completions for
         #[arg(value_enum)]
         shell: clap_complete::Shell,
+    },
+}
+
+#[derive(Subcommand)]
+enum VcsAction {
+    /// Worktree commands
+    Worktree {
+        #[command(subcommand)]
+        action: VcsWorktreeAction,
+    },
+    /// Stage all changes and commit in a checkout/worktree
+    Commit {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// Commit subject (`-m`)
+        #[arg(short = 'm', long)]
+        message: String,
+        /// Commit body — second paragraph (`--body`)
+        #[arg(long)]
+        body: Option<String>,
+        /// Allow committing with no staged changes (CI retrigger)
+        #[arg(long)]
+        allow_empty: bool,
+        /// Emit JSON instead of the summary line
+        #[arg(long)]
+        json: bool,
+    },
+    /// Push a branch to a remote (default: current branch → origin)
+    Push {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// Remote name (default: origin)
+        #[arg(long)]
+        remote: Option<String>,
+        /// Branch to push (default: the branch checked out at repo)
+        #[arg(long)]
+        branch: Option<String>,
+        /// Emit JSON instead of the summary line
+        #[arg(long)]
+        json: bool,
+    },
+    /// Fetch a remote (optionally specific refspecs via --refspec)
+    Fetch {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// Remote name (default: origin)
+        #[arg(long)]
+        remote: Option<String>,
+        /// Refspec to fetch (repeatable; empty = remote's configured refspecs)
+        #[arg(long)]
+        refspec: Vec<String>,
+        /// Emit JSON instead of the summary line
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum VcsWorktreeAction {
+    /// Create a worktree at --rev (default HEAD), optionally on a new --branch
+    Add {
+        /// Clone name under repos_dir, or a checkout path
+        repo: String,
+        /// Worktree path (default: <ws>/worktrees/<repo>/<branch|rev|HEAD>)
+        #[arg(long)]
+        dir: Option<PathBuf>,
+        /// New branch to create and check out in the worktree
+        #[arg(long)]
+        branch: Option<String>,
+        /// Revision/sha to base the worktree on (default: HEAD)
+        #[arg(long)]
+        rev: Option<String>,
+        /// Emit JSON instead of the summary line
+        #[arg(long)]
+        json: bool,
+    },
+    /// Remove a worktree (--dir is the worktree path)
+    Remove {
+        /// Clone name under repos_dir, or the owning checkout path
+        repo: String,
+        /// Worktree directory to remove
+        #[arg(long)]
+        dir: PathBuf,
+        /// Emit JSON instead of the summary line
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum ForgeAction {
+    /// Pull-request commands
+    Pr {
+        #[command(subcommand)]
+        action: ForgePrAction,
+    },
+}
+
+#[derive(clap::ValueEnum, Clone, Copy, Debug)]
+enum MergeMethodArg {
+    Squash,
+    Merge,
+    Rebase,
+}
+
+impl From<MergeMethodArg> for lasius_forge::MergeMethod {
+    fn from(m: MergeMethodArg) -> Self {
+        match m {
+            MergeMethodArg::Squash => Self::Squash,
+            MergeMethodArg::Merge => Self::Merge,
+            MergeMethodArg::Rebase => Self::Rebase,
+        }
+    }
+}
+
+#[derive(clap::ValueEnum, Clone, Copy, Debug)]
+enum PrStateArg {
+    Open,
+    Closed,
+    Merged,
+    All,
+}
+
+impl From<PrStateArg> for lasius_forge::PrStateFilter {
+    fn from(s: PrStateArg) -> Self {
+        match s {
+            PrStateArg::Open => Self::Open,
+            PrStateArg::Closed => Self::Closed,
+            PrStateArg::Merged => Self::Merged,
+            PrStateArg::All => Self::All,
+        }
+    }
+}
+
+#[derive(Subcommand)]
+enum ForgePrAction {
+    /// Open a pull request (--title/--body; --base/--head optional)
+    Create {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// PR title
+        #[arg(long)]
+        title: String,
+        /// PR body
+        #[arg(long, default_value = "")]
+        body: String,
+        /// Base branch (default: repo default)
+        #[arg(long)]
+        base: Option<String>,
+        /// Head branch/ref (default: the checkout's current branch)
+        #[arg(long)]
+        head: Option<String>,
+        /// Open as a draft PR
+        #[arg(long)]
+        draft: bool,
+        /// Emit JSON instead of the summary line
+        #[arg(long)]
+        json: bool,
+    },
+    /// Merge a pull request (--method, default squash; --delete-branch)
+    Merge {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// Pull request number
+        number: u64,
+        /// Merge strategy
+        #[arg(long, value_enum, default_value = "squash")]
+        method: MergeMethodArg,
+        /// Delete the head branch after merging
+        #[arg(long)]
+        delete_branch: bool,
+        /// Emit JSON instead of the summary line
+        #[arg(long)]
+        json: bool,
+    },
+    /// Show one pull request (state, refs, mergeability, review)
+    View {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// Pull request number
+        number: u64,
+        /// Emit JSON instead of the summary
+        #[arg(long)]
+        json: bool,
+    },
+    /// List CI checks / status contexts on a PR's head
+    Checks {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// Pull request number
+        number: u64,
+        /// Emit JSON instead of the table
+        #[arg(long)]
+        json: bool,
+    },
+    /// List pull requests (--state, --limit)
+    List {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// State filter
+        #[arg(long, value_enum, default_value = "open")]
+        state: PrStateArg,
+        /// Max PRs to list (0 = backend default)
+        #[arg(long, default_value_t = 0)]
+        limit: usize,
+        /// Emit JSON instead of the table
+        #[arg(long)]
+        json: bool,
     },
 }
 
@@ -200,6 +420,96 @@ pub fn dispatch(cli: &Cli) -> i32 {
                 Cmd::Rm { name, yes, force } => commands::rm(&ws, name, *yes, *force),
                 Cmd::Exec { filter, cmd } => commands::exec(&ws, filter.as_deref(), cmd),
                 Cmd::Add { name } => commands::add(&ws, name),
+                Cmd::Vcs { action } => match action {
+                    VcsAction::Worktree { action } => match action {
+                        VcsWorktreeAction::Add {
+                            repo,
+                            dir,
+                            branch,
+                            rev,
+                            json,
+                        } => vcs::worktree_add(
+                            &ws,
+                            repo,
+                            dir.clone(),
+                            branch.clone(),
+                            rev.clone(),
+                            *json,
+                        ),
+                        VcsWorktreeAction::Remove { repo, dir, json } => {
+                            vcs::worktree_remove(&ws, repo, dir.clone(), *json)
+                        }
+                    },
+                    VcsAction::Commit {
+                        repo,
+                        message,
+                        body,
+                        allow_empty,
+                        json,
+                    } => vcs::commit(&ws, repo, message, body.clone(), *allow_empty, *json),
+                    VcsAction::Push {
+                        repo,
+                        remote,
+                        branch,
+                        json,
+                    } => vcs::push(&ws, repo, remote.clone(), branch.clone(), *json),
+                    VcsAction::Fetch {
+                        repo,
+                        remote,
+                        refspec,
+                        json,
+                    } => vcs::fetch(&ws, repo, remote.clone(), refspec, *json),
+                },
+                Cmd::Forge { action } => match action {
+                    ForgeAction::Pr { action } => match action {
+                        ForgePrAction::Create {
+                            repo,
+                            title,
+                            body,
+                            base,
+                            head,
+                            draft,
+                            json,
+                        } => forge::pr_create(
+                            &ws,
+                            repo,
+                            lasius_forge::CreatePr {
+                                title: title.clone(),
+                                body: body.clone(),
+                                base: base.clone(),
+                                head: head.clone(),
+                                draft: *draft,
+                            },
+                            *json,
+                        ),
+                        ForgePrAction::Merge {
+                            repo,
+                            number,
+                            method,
+                            delete_branch,
+                            json,
+                        } => forge::pr_merge(
+                            &ws,
+                            repo,
+                            *number,
+                            (*method).into(),
+                            *delete_branch,
+                            *json,
+                        ),
+                        ForgePrAction::View { repo, number, json } => {
+                            forge::pr_view(&ws, repo, *number, *json)
+                        }
+                        ForgePrAction::Checks { repo, number, json } => {
+                            forge::pr_checks(&ws, repo, *number, *json)
+                        }
+                        ForgePrAction::List {
+                            repo,
+                            state,
+                            limit,
+                            json,
+                        } => forge::pr_list(&ws, repo, (*state).into(), *limit, *json),
+                    },
+                },
                 Cmd::Serve => serve::serve(&ws),
                 Cmd::Completions { .. } => unreachable!(),
                 Cmd::Init { .. } => unreachable!(),
