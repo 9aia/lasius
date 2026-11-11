@@ -21,8 +21,8 @@ const PR_FIELDS: &str = "number,title,state,url,isDraft,body,headRefName,headRef
      baseRefName,author,mergeable,mergeStateStatus,reviewDecision,createdAt,updatedAt,\
      mergedAt,statusCheckRollup";
 
-const LIST_FIELDS: &str = "number,title,state,url,isDraft,headRefName,baseRefName,\
-     author,updatedAt";
+const LIST_FIELDS: &str = "number,title,state,url,isDraft,headRefName,headRefOid,\
+     baseRefName,author,updatedAt";
 
 /// Captured `gh` invocation.
 struct GhOut {
