@@ -3,7 +3,14 @@
 ## Install
 
 The `lasius` command ships as a [tamias](https://github.com/9aia/tamias)
-pack — a generated `bins[]` shim over `tamias-driver-lasius`:
+pack — a generated `bins[]` shim over `tamias-driver-lasius`. With
+`tamias` installed:
+
+```bash
+tamias install 9aia:lasius@0.3.0    # org registry (needs TAMIAS_REGISTRY_TOKEN)
+```
+
+Or from a checkout:
 
 ```bash
 cargo xtask pack                                  # stage the driver payload
