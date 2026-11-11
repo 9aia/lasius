@@ -12,6 +12,8 @@ I/O); `lasius-cli` is the composition root.
 | Crate | Role |
 | --- | --- |
 | `crates/lasius-core` | `lasius.toml` model (incl. `provider`), `gh repo list` JSON decoding, failure classification, repo-name safety + exclude globs, `git status --porcelain=v2` parse/format, `*.code-workspace` generation — pure, unit-tested |
+| `crates/lasius-vcs` | VCS port — union trait (history/worktree/tag/sync ops) shared by tarsi/mimus/bupha/kuda/sturn consumers (P-019) |
+| `crates/lasius-vcs-git` | git impl of `lasius-vcs` — shells out to the `git` binary |
 | `crates/lasius-cli` | the `lasius` binary — clap derive, `std::process` for `git`/`gh`/`sh`, `std::fs` for the workspace, `std::thread::scope` parallelism, `providers.rs` `RepoProvider` seam. `init` scaffolds the workspace repo (`lasius.toml`, `.gitignore`, doc stubs) then clones + generates. E2e tests spawn the real binary against fake `gh` + `file://` git repos |
 | `xtask` (`lasius-xtask`) | `check` (fmt + clippy -D warnings) / `test` (nextest or cargo test) / `coverage` (llvm-cov) / `fmt` |
 
@@ -30,8 +32,9 @@ pre-commit runs `cargo fmt --all -- --check`, pre-push runs
 
 ## Boundary
 
-Lasius owns **workspace mechanics** — repo discovery, clone/pull,
-status, editor workspace files, safe removal. It does not own:
+Lasius owns **git & workspace expertise** — repo discovery,
+clone/pull, status, editor workspace files, safe removal, plus the
+shared `lasius-vcs` port other repos consume (P-019). It does not own:
 
 - **myco** — the org work ledger; `project/` worktrees are managed by myco verbs, never by lasius.
 - **kuda** — code maps; per-repo `.kuda/` cards are that repo's concern.

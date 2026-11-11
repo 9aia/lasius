@@ -217,6 +217,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "lasius-vcs"
+version = "0.3.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "lasius-vcs-git"
+version = "0.3.0"
+dependencies = [
+ "lasius-vcs",
+ "tempfile",
+]
+
+[[package]]
 name = "lasius-xtask"
 version = "0.3.0"
 dependencies = [

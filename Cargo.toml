@@ -1,8 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/lasius-cli",
-    "crates/lasius-core",
+    "crates/*",
     "xtask",
 ]
 
@@ -25,6 +24,8 @@ lto = "thin"
 [workspace.dependencies]
 lasius = { path = "crates/lasius-cli", version = "0.3.0" }
 lasius-core = { path = "crates/lasius-core", version = "0.3.0" }
+lasius-vcs = { path = "crates/lasius-vcs", version = "0.3.0" }
+lasius-vcs-git = { path = "crates/lasius-vcs-git", version = "0.3.0" }
 
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }

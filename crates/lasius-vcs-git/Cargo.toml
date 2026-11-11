@@ -1,0 +1,16 @@
+[package]
+name = "lasius-vcs-git"
+description = "Git impl of lasius-vcs — shells out to the git binary."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+lasius-vcs.workspace = true
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true
