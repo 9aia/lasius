@@ -9,3 +9,6 @@ docs/
 
 # kuda
 .kuda/index.sqlite
+
+# tamias pack build artifacts (cargo xtask pack stages these)
+/libraries/lasius/drivers/

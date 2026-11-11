@@ -1,0 +1,33 @@
+# lasius — the workspace gardener as a tamias package (the T-012
+# replication of the cuora P-023 pilot: a real product CLI riding
+# `bins[]`, no hand-rolled binary).
+#
+# `cargo xtask pack` release-builds `tamias-driver-lasius` into
+# `drivers/bin/<host-triple>/` (gitignored — a build artifact) and
+# this manifest ships it as a bundled driver. `tamias install
+# ./libraries/lasius` (or the packed `.tgz` / a registry ref)
+# registers the driver into `<tamias-home>/drivers/` and deploys the
+# `lasius` bin below by default.
+#
+# The `lasius` shim is a generated script → `tamias bin exec` →
+# `tamias-driver-lasius cli --dir <pkg> --name lasius <argv>` → the
+# lasius engine lib's `run_from` in-process with inherited stdio.
+# That is full argv parity with the retired `lasius` binary:
+# `--help`/`version`, globals before the verb, `--json`, the
+# unbounded `lasius serve` ndjson loop, and stdin-bound verbs
+# (`rm`'s confirm prompt, `exec`'s shell) all stream end-to-end. No
+# `tools/bin/` payload bin: `lasius serve` is a *surface*, not a
+# second binary — it rides the same shim.
+name: lasius
+version: "0.3.0"
+type: files
+description: >-
+  Workspace gardener for GitHub orgs — clone, sync, inspect, and
+  generate editor workspace files for every repo of an org under one
+  root. Every verb rides the tamias-driver-lasius engine passthrough;
+  `lasius serve` is the ndjson read-only wire for embedding.
+
+bins:
+  - name: lasius
+    shim: cli
+    driver: lasius
