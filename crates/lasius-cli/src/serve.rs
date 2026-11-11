@@ -15,7 +15,7 @@ use serde_json::{json, Value};
 use crate::support::{self, Workspace};
 
 /// Ops exposed over the wire.
-const OPS: &[&str] = &["ping", "list", "status", "doctor"];
+const OPS: &[&str] = &["manifest", "ping", "list", "status", "doctor"];
 
 /// Run the serve loop until stdin closes.
 pub fn serve(ws: &Workspace) -> Result<()> {
@@ -47,6 +47,11 @@ fn dispatch(ws: &Workspace, line: &str) -> Result<Value> {
         .and_then(Value::as_str)
         .ok_or_else(|| anyhow::anyhow!("missing 'op'"))?;
     match op {
+        "manifest" => Ok(json!({
+            "name": "lasius-serve",
+            "version": env!("CARGO_PKG_VERSION"),
+            "ops": OPS,
+        })),
         "ping" => Ok(json!({"pong": true})),
         "list" => {
             let names = support::local_repos(ws)?;
