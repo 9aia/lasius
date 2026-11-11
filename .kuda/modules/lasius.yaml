@@ -55,7 +55,7 @@ api:
 - name: PROBE_TIMEOUT
   kind: const
   file: crates/lasius-cli/src/commands.rs
-  line: 763
+  line: 767
   module: lasius
 - name: PrStateArg
   kind: type
@@ -75,12 +75,12 @@ api:
 - name: StatusFailure
   kind: type
   file: crates/lasius-cli/src/commands.rs
-  line: 327
+  line: 331
   module: lasius
 - name: UpdateRow
   kind: type
   file: crates/lasius-cli/src/commands.rs
-  line: 272
+  line: 276
   module: lasius
 - name: VcsAction
   kind: type
@@ -100,7 +100,7 @@ api:
 - name: add
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 727
+  line: 731
   module: lasius
 - name: agents_stub
   kind: function
@@ -150,12 +150,12 @@ api:
 - name: check
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 873
+  line: 877
   module: lasius
 - name: clone
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 265
+  line: 269
   module: lasius
 - name: clone_all
   kind: function
@@ -165,12 +165,12 @@ api:
 - name: code_workspace_generate
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 418
+  line: 422
   module: lasius
 - name: collect_status
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 331
+  line: 335
   module: lasius
 - name: command
   kind: function
@@ -248,9 +248,9 @@ provenance:
   - crates/lasius-cli/src/support.rs
   - crates/lasius-cli/src/vcs.rs
   hashes:
-  - 3ee94e480485c95d78ba9fcb7972602cff0691d1
+  - 558ff5d81e4992c1b0ac51795300c99d52c04abe
   - 3dd7ddc7327da4605e0dafb4699f83e491bd6fdc
-  - 4e5dac3c26871f9531d82f45bef1544f488d0325
+  - f6db671fdd22c80d77f24b541ab3e12b31abf8a2
   - e9315f389320205a2275f143eb9567c884f9236e
   - 5b1138d9ac36c429b4f204b46d2667f52758027e
   - 3576ab200b7d9d7f6d11b5ec4246c3cd587b9119
@@ -258,6 +258,6 @@ provenance:
   - fd4a2f17950d7a2bf01ff1e03003ffe8cc309264
   - ff8dc94d52c641e08dd51b6152751993e312c237
   - 32e64b66f0ecf9d8d8939b7d5a842807cbf133dd
-  commit_sha: f536244bb055b9157c2251e9fdc1c40d3210de2d
-  generated_at: '1794424045'
-  generator: kuda-template/0.1.2
+  commit_sha: 99974c87c008af614dea13ab50ff99fb73a386b9
+  generated_at: '1794435958'
+  generator: kuda-template/0.1.4

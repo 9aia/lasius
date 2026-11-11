@@ -12,11 +12,12 @@ modules:
 - lasius-vcs-git
 - lasius-xtask
 - project
+- sturn-wal
 commands:
 - cargo check
 - cargo test --workspace
-tree_digest: 51b7ade8fc2acf086f4ed77ff2849764ccb0ff91
-files_total: 57
+tree_digest: d390578c055690b279f6518c39e24d53b99d3658
+files_total: 62
 provenance:
   files:
   - Cargo.toml
@@ -30,8 +31,8 @@ provenance:
   - crates/lasius-vcs-git/Cargo.toml
   - xtask/Cargo.toml
   hashes:
-  - 3ee94e480485c95d78ba9fcb7972602cff0691d1
-  - deba81ba695d1cfd380fedb4a1ea754d05c16e2d
+  - 558ff5d81e4992c1b0ac51795300c99d52c04abe
+  - 1d037d11533bb72b17ffb3b265b663e1c2e2cdb5
   - 3dd7ddc7327da4605e0dafb4699f83e491bd6fdc
   - e652df3ed76782348b86659e9f0a4c2096fd4ee0
   - e610ce6601c6365f98d2c47a7c55de1b4600a584
@@ -40,6 +41,6 @@ provenance:
   - 8f3abd4dd2e314328d01f8a958a10e56613fe00e
   - f088dd721b910fe406b7648e5db324f469108c55
   - 71efabd40e313d27e2fea97ed39941767b77db79
-  commit_sha: f536244bb055b9157c2251e9fdc1c40d3210de2d
-  generated_at: '1794424045'
+  commit_sha: 99974c87c008af614dea13ab50ff99fb73a386b9
+  generated_at: '1794435958'
   generator: kuda/0.1.0

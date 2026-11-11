@@ -10,17 +10,22 @@ api:
 - name: DiffStat
   kind: type
   file: crates/lasius-vcs/src/lib.rs
-  line: 37
+  line: 50
+  module: lasius-vcs
+- name: LogEntry
+  kind: type
+  file: crates/lasius-vcs/src/lib.rs
+  line: 39
   module: lasius-vcs
 - name: Vcs
   kind: trait
   file: crates/lasius-vcs/src/lib.rs
-  line: 46
+  line: 59
   module: lasius-vcs
 - name: commit_info_serde_round_trip
   kind: function
   file: crates/lasius-vcs/src/lib.rs
-  line: 132
+  line: 247
   module: lasius-vcs
 - name: lasius-vcs
   kind: module
@@ -30,7 +35,7 @@ api:
 - name: tests
   kind: module
   file: crates/lasius-vcs/src/lib.rs
-  line: 128
+  line: 243
   module: lasius-vcs
 deps:
 - serde
@@ -45,7 +50,7 @@ provenance:
   - crates/lasius-vcs/src/lib.rs
   hashes:
   - 8f3abd4dd2e314328d01f8a958a10e56613fe00e
-  - 36ef0e138586a0b1255a59b7898d3895f29d756e
-  commit_sha: f536244bb055b9157c2251e9fdc1c40d3210de2d
-  generated_at: '1794424045'
-  generator: kuda-template/0.1.2
+  - 3943e1ea318cbb980e32ba2ea7a07d4e786493c3
+  commit_sha: 99974c87c008af614dea13ab50ff99fb73a386b9
+  generated_at: '1794435958'
+  generator: kuda-template/0.1.4

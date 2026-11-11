@@ -83,7 +83,7 @@ provenance:
   hashes:
   - a85b774584f0241f5bae6b7e5f356d543b38f2a0
   - bc083f128ba54d261d0d3f0f7084f7a37ffd030e
-  - 17370e725f9443ae0fb1c9dc17f6adf2f2ec1fe1
+  - 3e7a1940815c189c0d2f60ea4a9c5ea025c43d76
   - 53824c05c793ee2e7cf94603e70d29460139428e
   - 3ec9165f7ccfd62b7ea3781db6e8313475052f8e
   - bf5a812238afc324ce0647a8c155618fcb149dce
@@ -94,6 +94,6 @@ provenance:
   - 85c602e36f2c756f165bedc1409527fca15dbb76
   - 79965e3456be1ef8e96c80bb20a6e25ab484fe10
   - 16ff1605e8c86f31e76ee3f89ecb003f7e4f3b93
-  commit_sha: 09a65decd3e0b27b5d452713f9e99f7cd7b01a44
-  generated_at: '1794417801'
-  generator: kuda-template/0.1.2
+  commit_sha: 99974c87c008af614dea13ab50ff99fb73a386b9
+  generated_at: '1794435958'
+  generator: kuda-template/0.1.4
