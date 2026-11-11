@@ -5,7 +5,10 @@ editor workspace files for every repo of an org under one root. Named
 for *Lasius niger*, the black garden ant — it tends the garden.
 
 Rust workspace, ports-and-adapters. `lasius-core` is pure domain (no
-I/O); `lasius-cli` is the composition root.
+I/O); `lasius-cli` is the composition root — its lib exposes the
+engine surface (`Cli`/`command()`/`parse_from()`/`dispatch()`/
+`run_from()`) that `lasius-driver` consumes for the generated
+CLI/MCP surfaces (P-021).
 
 ## Layout
 
@@ -14,7 +17,8 @@ I/O); `lasius-cli` is the composition root.
 | `crates/lasius-core` | `lasius.toml` model (incl. `provider`), `gh repo list` JSON decoding, failure classification, repo-name safety + exclude globs, `git status --porcelain=v2` parse/format, `*.code-workspace` generation — pure, unit-tested |
 | `crates/lasius-vcs` | VCS port — union trait (history/worktree/tag/sync ops) shared by tarsi/mimus/bupha/kuda/sturn consumers (P-019) |
 | `crates/lasius-vcs-git` | git impl of `lasius-vcs` — shells out to the `git` binary |
-| `crates/lasius-cli` | the `lasius` binary — clap derive, `std::process` for `git`/`gh`/`sh`, `std::fs` for the workspace, `std::thread::scope` parallelism, `providers.rs` `RepoProvider` seam. `init` scaffolds the workspace repo (`lasius.toml`, `.gitignore`, doc stubs) then clones + generates. E2e tests spawn the real binary against fake `gh` + `file://` git repos |
+| `crates/lasius-cli` | the `lasius` engine lib + binary — clap derive in `lib.rs` (`Cli`/`command`/`parse_from`/`dispatch`/`run_from`), thin `main.rs` → `lasius::run()`; `std::process` for `git`/`gh`/`sh`, `std::fs` for the workspace, `std::thread::scope` parallelism, `providers.rs` `RepoProvider` seam. `init` scaffolds the workspace repo (`lasius.toml`, `.gitignore`, doc stubs) then clones + generates. E2e tests spawn the real binary against fake `gh` + `file://` git repos |
+| `crates/lasius-driver` | `tamias-driver-lasius` — pavo driver exposing the engine ops surface: every bounded `lasius` verb as a `cli.<verb>` wire query derived from `lasius::command()` (`serve`/`open`/`exec` are surfaces — unbounded/host-interactive), `run <argv>` passthrough, `serve` ndjson loop, feature-gated `cli`/`mcp` embedded surfaces. No views |
 | `xtask` (`lasius-xtask`) | `check` (fmt + clippy -D warnings) / `test` (nextest or cargo test) / `coverage` (llvm-cov) / `fmt` |
 
 ## Commands

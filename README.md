@@ -82,7 +82,8 @@ I/O); `lasius-cli` is the composition root — `std::process` for `git`/`gh`,
 | Crate | Role |
 | --- | --- |
 | `crates/lasius-core` | config model, `gh` JSON decoding, repo-name safety, git status parse/format, workspace-file generation — pure, unit-tested |
-| `crates/lasius-cli` | the `lasius` binary — clap commands, process/fs layer, e2e tests |
+| `crates/lasius-cli` | the `lasius` engine lib + binary — clap commands, process/fs layer, e2e tests |
+| `crates/lasius-driver` | `tamias-driver-lasius` — pavo driver: engine ops as `cli.<verb>` wire queries + `run` passthrough (generated CLI/MCP surfaces via features) |
 | `xtask` | `cargo xtask check` / `test` / `coverage` / `fmt` |
 
 ## Development
