@@ -25,7 +25,13 @@ own history and remotes. `*.code-workspace` is generated, never committed.
 
 The `lasius` command ships as a [tamias](https://github.com/9aia/tamias)
 pack — a generated `bins[]` shim over `tamias-driver-lasius`, no
-hand-rolled binary:
+hand-rolled binary. With `tamias` installed:
+
+```bash
+tamias install 9aia:lasius@0.3.0    # org registry (needs TAMIAS_REGISTRY_TOKEN)
+```
+
+From a checkout:
 
 ```bash
 cargo xtask pack                                        # stage the driver payload
