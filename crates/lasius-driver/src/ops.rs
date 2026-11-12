@@ -364,6 +364,7 @@ mod tests {
                 "cli.vcs.fetch",
                 "cli.forge.pr.create",
                 "cli.forge.pr.merge",
+                "cli.forge.status.create",
             ]
         );
     }

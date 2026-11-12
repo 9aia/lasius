@@ -5,7 +5,7 @@
 
 use serde::Deserialize;
 
-use crate::{CheckKind, CheckRun, PrState, PullRequest};
+use crate::{CheckKind, CheckRun, CommitStatus, PrState, PullRequest};
 
 /// Fields requested from `gh pr view --json` / `gh pr list --json`.
 /// All optional at decode time — `gh` omits empty fields and list
@@ -149,6 +149,43 @@ pub fn decode_pr_list(json: &str) -> Result<Vec<PullRequest>, serde_json::Error>
     Ok(items.into_iter().map(to_pr).collect())
 }
 
+/// One entry of the `POST /repos/{o}/{r}/statuses/{sha}` response —
+/// the API returns an array of the created status objects.
+#[derive(Debug, Deserialize)]
+struct GhStatus {
+    #[serde(default)]
+    id: u64,
+    #[serde(default)]
+    state: String,
+    #[serde(default)]
+    context: String,
+    #[serde(default)]
+    description: String,
+    #[serde(rename = "target_url", default)]
+    target_url: Option<String>,
+    #[serde(rename = "created_at", default)]
+    created_at: Option<String>,
+}
+
+/// Decode a commit-status POST response → the first created status.
+/// The endpoint answers an array (usually one element); an empty
+/// array is a decode error — nothing was recorded.
+pub fn decode_status(json: &str) -> Result<CommitStatus, serde_json::Error> {
+    let items: Vec<GhStatus> = serde_json::from_str(json)?;
+    items
+        .into_iter()
+        .next()
+        .map(|s| CommitStatus {
+            id: s.id,
+            state: s.state,
+            context: s.context,
+            description: s.description,
+            target_url: s.target_url,
+            created_at: s.created_at,
+        })
+        .ok_or_else(|| serde::de::Error::custom("commit-status response was an empty array"))
+}
+
 /// Extract the PR number from a `…/pull/<N>` URL — `gh pr create`
 /// prints the URL on stdout, not JSON.
 pub fn pr_number_from_url(url: &str) -> Option<u64> {
@@ -244,6 +281,19 @@ mod tests {
         );
         assert_eq!(pr_number_from_url("https://x/pull/7/files"), Some(7));
         assert_eq!(pr_number_from_url("not a url"), None);
+    }
+
+    #[test]
+    fn decodes_status_response() {
+        let json = r#"[{"id":7,"state":"pending","context":"docs/deploy",
+            "description":"push.docs.abc","target_url":"https://x","created_at":"2025-01-01T00:00:00Z"}]"#;
+        let st = decode_status(json).unwrap();
+        assert_eq!(st.id, 7);
+        assert_eq!(st.state, "pending");
+        assert_eq!(st.context, "docs/deploy");
+        assert_eq!(st.target_url.as_deref(), Some("https://x"));
+        assert!(decode_status("[]").is_err());
+        assert!(decode_status("nope").is_err());
     }
 
     #[test]

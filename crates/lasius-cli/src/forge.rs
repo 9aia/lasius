@@ -9,7 +9,9 @@
 
 use anyhow::Result;
 use lasius_core::ProviderKind;
-use lasius_forge::{CheckRun, CreatePr, Forge, MergeMethod, PrState, PrStateFilter, PullRequest};
+use lasius_forge::{
+    CheckRun, CreatePr, CreateStatus, Forge, MergeMethod, PrState, PrStateFilter, PullRequest,
+};
 use lasius_forge_gh::GhForge;
 
 use crate::support::{self, Workspace};
@@ -147,6 +149,19 @@ pub fn pr_list(
         if prs.is_empty() {
             println!("no pull requests");
         }
+    }
+    Ok(())
+}
+
+/// `lasius forge status create <repo>` — post a commit status on a
+/// sha (`--state pending|success|failure|error`, `--context`).
+pub fn status_create(ws: &Workspace, repo: &str, req: CreateStatus, json: bool) -> Result<()> {
+    let dir = support::repo_dir(ws, repo)?;
+    let st = forge(ws).create_status(&dir, &req)?;
+    if json {
+        println!("{}", serde_json::to_string_pretty(&st)?);
+    } else {
+        println!("status {} {} on {}", st.state, st.context, req.sha);
     }
     Ok(())
 }

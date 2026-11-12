@@ -126,7 +126,7 @@ enum Cmd {
         #[command(subcommand)]
         action: VcsAction,
     },
-    /// Forge verbs — pull requests and checks over the lasius-forge port
+    /// Forge verbs — pull requests, checks, and commit statuses over the lasius-forge port
     Forge {
         #[command(subcommand)]
         action: ForgeAction,
@@ -234,6 +234,11 @@ enum ForgeAction {
     Pr {
         #[command(subcommand)]
         action: ForgePrAction,
+    },
+    /// Commit-status commands
+    Status {
+        #[command(subcommand)]
+        action: ForgeStatusAction,
     },
 }
 
@@ -345,6 +350,52 @@ enum ForgePrAction {
         #[arg(long, default_value_t = 0)]
         limit: usize,
         /// Emit JSON instead of the table
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(clap::ValueEnum, Clone, Copy, Debug)]
+enum StatusStateArg {
+    Pending,
+    Success,
+    Failure,
+    Error,
+}
+
+impl From<StatusStateArg> for lasius_forge::StatusState {
+    fn from(s: StatusStateArg) -> Self {
+        match s {
+            StatusStateArg::Pending => Self::Pending,
+            StatusStateArg::Success => Self::Success,
+            StatusStateArg::Failure => Self::Failure,
+            StatusStateArg::Error => Self::Error,
+        }
+    }
+}
+
+#[derive(Subcommand)]
+enum ForgeStatusAction {
+    /// Post a commit status on a sha (CI verdict egress)
+    Create {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// Commit sha the status describes
+        #[arg(long)]
+        sha: String,
+        /// Status state
+        #[arg(long, value_enum)]
+        state: StatusStateArg,
+        /// Status context (e.g. docs/deploy, ci/bupha)
+        #[arg(long)]
+        context: String,
+        /// Short description (forge truncates ~140 chars)
+        #[arg(long)]
+        description: Option<String>,
+        /// Link back to the run/logs
+        #[arg(long)]
+        target_url: Option<String>,
+        /// Emit JSON instead of the summary line
         #[arg(long)]
         json: bool,
     },
@@ -508,6 +559,28 @@ pub fn dispatch(cli: &Cli) -> i32 {
                             limit,
                             json,
                         } => forge::pr_list(&ws, repo, (*state).into(), *limit, *json),
+                    },
+                    ForgeAction::Status { action } => match action {
+                        ForgeStatusAction::Create {
+                            repo,
+                            sha,
+                            state,
+                            context,
+                            description,
+                            target_url,
+                            json,
+                        } => forge::status_create(
+                            &ws,
+                            repo,
+                            lasius_forge::CreateStatus {
+                                sha: sha.clone(),
+                                state: (*state).into(),
+                                context: context.clone(),
+                                description: description.clone(),
+                                target_url: target_url.clone(),
+                            },
+                            *json,
+                        ),
                     },
                 },
                 Cmd::Serve => serve::serve(&ws),

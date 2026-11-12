@@ -64,6 +64,7 @@ lasius vcs fetch <repo> [--remote origin] [--refspec <spec>]...
 lasius forge pr create <repo> --title <t> [--body <b>] [--base main] [--head <b>] [--draft]
 lasius forge pr merge <repo> <n> [--method squash|merge|rebase] [--delete-branch]
 lasius forge pr view|checks|list <repo> [<n>] [--json]  # PR + CI status
+lasius forge status create <repo> --sha <sha> --state pending|success|failure|error --context <ctx> [--description <d>] [--target-url <u>] [--json]  # commit status
 lasius serve                   # ndjson JSON-RPC on stdio (ping/list/status/doctor)
 lasius completions <shell>     # print a shell completion script
 ```

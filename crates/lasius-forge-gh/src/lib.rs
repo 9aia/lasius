@@ -13,7 +13,9 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 use lasius_forge::gh as gh_json;
-use lasius_forge::{CheckRun, CreatePr, Forge, MergeMethod, PrStateFilter, PullRequest};
+use lasius_forge::{
+    CheckRun, CommitStatus, CreatePr, CreateStatus, Forge, MergeMethod, PrStateFilter, PullRequest,
+};
 
 /// `gh pr view/list --json` field list — keep in sync with the
 /// `GhPr` decoder in `lasius-forge::gh`.
@@ -232,6 +234,48 @@ impl Forge for GhForge {
         gh_json::decode_pr_list(&out)
             .map_err(|e| io::Error::other(format!("gh pr list: bad JSON: {e}")))
     }
+
+    fn create_status(&self, repo: &Path, req: &CreateStatus) -> io::Result<CommitStatus> {
+        // The sha rides the URL path — reject anything that could
+        // escape it (refs with `/`, flags, whitespace). Hex shas and
+        // short refs like `HEAD` pass.
+        let sha = req.sha.trim();
+        if sha.is_empty()
+            || sha.starts_with('-')
+            || !sha
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
+        {
+            return Err(io::Error::other(format!("invalid status sha {sha:?}")));
+        }
+        if req.context.trim().is_empty() {
+            return Err(io::Error::other("status context must not be empty"));
+        }
+        // `gh api` substitutes {owner}/{repo} placeholders from the
+        // checkout's remote — same cwd convention as the pr verbs.
+        let endpoint = format!("repos/{{owner}}/{{repo}}/statuses/{sha}");
+        let mut args: Vec<String> = vec![
+            "api".into(),
+            "--method".into(),
+            "POST".into(),
+            endpoint,
+            "--field".into(),
+            format!("state={}", req.state.as_str()),
+            "--field".into(),
+            format!("context={}", req.context),
+        ];
+        if let Some(description) = req.description.as_deref().filter(|d| !d.is_empty()) {
+            args.push("--field".into());
+            args.push(format!("description={description}"));
+        }
+        if let Some(target) = req.target_url.as_deref().filter(|u| !u.is_empty()) {
+            args.push("--field".into());
+            args.push(format!("target_url={target}"));
+        }
+        let out = self.ok(repo, &args)?;
+        gh_json::decode_status(&out)
+            .map_err(|e| io::Error::other(format!("gh api statuses: bad JSON: {e}")))
+    }
 }
 
 #[cfg(test)]
@@ -304,6 +348,65 @@ echo '{"number":7,"title":"t","state":"OPEN","url":"https://x/pull/7","statusChe
             .unwrap();
         let prs = forge.list_prs(repo.path(), PrStateFilter::All, 5).unwrap();
         assert!(prs.is_empty());
+    }
+
+    #[test]
+    fn create_status_posts_and_decodes() {
+        // Log argv for assertion; answer the statuses POST with the
+        // API's array-shaped response.
+        let body = r#"#!/bin/sh
+printf '%s\n' "$@" > "$GH_FAKE_LOG"
+echo '[{"id":9,"state":"pending","context":"docs/deploy","description":"d","target_url":null,"created_at":"2025-01-01T00:00:00Z"}]'
+"#;
+        let (dir, forge) = fake_gh(body);
+        let repo = tempfile::tempdir().unwrap();
+        let log = dir.path().join("argv.log");
+        // fake_gh doesn't export GH_FAKE_LOG — write it via env on the
+        // Command instead: GhForge inherits the test process env, so
+        // set it before invoking.
+        std::env::set_var("GH_FAKE_LOG", &log);
+        let st = forge
+            .create_status(
+                repo.path(),
+                &CreateStatus {
+                    sha: "abc123".into(),
+                    state: lasius_forge::StatusState::Pending,
+                    context: "docs/deploy".into(),
+                    description: Some("push.docs".into()),
+                    target_url: None,
+                },
+            )
+            .unwrap();
+        std::env::remove_var("GH_FAKE_LOG");
+        assert_eq!(st.id, 9);
+        assert_eq!(st.state, "pending");
+        assert_eq!(st.context, "docs/deploy");
+        let argv = fs::read_to_string(&log).unwrap();
+        assert!(argv.contains("repos/{owner}/{repo}/statuses/abc123"));
+        assert!(argv.contains("state=pending"));
+        assert!(argv.contains("context=docs/deploy"));
+        assert!(argv.contains("description=push.docs"));
+    }
+
+    #[test]
+    fn create_status_rejects_bad_sha() {
+        let (_t, forge) = fake_gh("#!/bin/sh\nexit 0\n");
+        let repo = tempfile::tempdir().unwrap();
+        for sha in ["", "-x", "a/b", "a b"] {
+            let err = forge
+                .create_status(
+                    repo.path(),
+                    &CreateStatus {
+                        sha: sha.into(),
+                        state: lasius_forge::StatusState::Success,
+                        context: "c".into(),
+                        description: None,
+                        target_url: None,
+                    },
+                )
+                .unwrap_err();
+            assert!(err.to_string().contains("invalid status sha"), "{sha}");
+        }
     }
 
     #[test]

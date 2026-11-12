@@ -119,6 +119,8 @@ case "$1 $2" in
   "pr merge"|"pr list")
     if [ "$1 $2" = "pr list" ]; then echo '[]'; fi
     exit 0 ;;
+  "api"*)
+    echo '[{{"id":9,"state":"pending","context":"docs/deploy","description":"d","target_url":null,"created_at":"2025-01-01T00:00:00Z"}}]' ;;
   *) echo "fake gh: unhandled $*" >&2; exit 1 ;;
 esac
 "#
@@ -677,4 +679,55 @@ fn forge_pr_lifecycle() {
         serde_json::from_str::<serde_json::Value>(&stdout(&out)).unwrap(),
         serde_json::json!([])
     );
+}
+
+#[test]
+fn forge_status_create() {
+    let (_tmp, root, path) = setup_forge(&["alpha"]);
+    assert!(run(&["clone"], &root, &path).status.success());
+
+    let out = run(
+        &[
+            "forge",
+            "status",
+            "create",
+            "alpha",
+            "--sha",
+            "abc123",
+            "--state",
+            "pending",
+            "--context",
+            "docs/deploy",
+            "--description",
+            "push.docs.abc123",
+            "--json",
+        ],
+        &root,
+        &path,
+    );
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert_eq!(doc["id"], 9);
+    assert_eq!(doc["state"], "pending");
+    assert_eq!(doc["context"], "docs/deploy");
+
+    // non-json summary line
+    let out = run(
+        &[
+            "forge",
+            "status",
+            "create",
+            "alpha",
+            "--sha",
+            "abc123",
+            "--state",
+            "success",
+            "--context",
+            "docs/deploy",
+        ],
+        &root,
+        &path,
+    );
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(stdout(&out).contains("status pending docs/deploy on abc123"));
 }

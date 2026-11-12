@@ -153,6 +153,61 @@ impl CheckRun {
     }
 }
 
+/// State of a commit status — the GitHub statuses API vocabulary.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum StatusState {
+    Pending,
+    #[default]
+    Success,
+    Failure,
+    Error,
+}
+
+impl StatusState {
+    /// Wire spelling (`pending`/`success`/`failure`/`error`).
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Pending => "pending",
+            Self::Success => "success",
+            Self::Failure => "failure",
+            Self::Error => "error",
+        }
+    }
+}
+
+/// Parameters for [`Forge::create_status`] — a commit status on a sha.
+#[derive(Debug, Clone)]
+pub struct CreateStatus {
+    /// Commit sha the status describes.
+    pub sha: String,
+    pub state: StatusState,
+    /// Status context (e.g. `docs/deploy`, `ci/bupha`).
+    pub context: String,
+    /// Short description (forges truncate ~140 chars).
+    pub description: Option<String>,
+    /// Link back to the run/logs.
+    pub target_url: Option<String>,
+}
+
+/// A commit status as the forge reports it after creation.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct CommitStatus {
+    #[serde(default)]
+    pub id: u64,
+    /// Raw backend state (`pending`/`success`/`failure`/`error`).
+    #[serde(default)]
+    pub state: String,
+    #[serde(default)]
+    pub context: String,
+    #[serde(default)]
+    pub description: String,
+    #[serde(default)]
+    pub target_url: Option<String>,
+    #[serde(default)]
+    pub created_at: Option<String>,
+}
+
 /// The forge port. All methods take the repo root; `Err` carries the
 /// backend's diagnostic so callers can surface it verbatim.
 pub trait Forge: Send + Sync {
@@ -179,6 +234,9 @@ pub trait Forge: Send + Sync {
         state: PrStateFilter,
         limit: usize,
     ) -> io::Result<Vec<PullRequest>>;
+    /// Post a commit status on `req.sha` — the CI verdict egress
+    /// (pending while running, success/failure at the end).
+    fn create_status(&self, repo: &Path, req: &CreateStatus) -> io::Result<CommitStatus>;
 }
 
 pub mod gh;
