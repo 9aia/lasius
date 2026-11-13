@@ -6,9 +6,9 @@
 # Operator-run on main — `tarsi-serve release` is dry-run by
 # default; --yes is the explicit opt-in.
 #
-# Preserved repo step: the tamias pack manifest + README install
-# ref are synced to the new version *before* the release commit
-# lands, so the tagged tree carries consistent versions. The pack
+# Pack-ref sync (`[release.sync_refs]` in tarsi.toml) rewrites the
+# tamias pack manifest + README install ref inside the release
+# commit, so the tagged tree carries consistent versions. The pack
 # publish itself stays manual (`cargo xtask pack` stages the driver
 # payload, then `tamias publish libraries/lasius`).
 set -euo pipefail
@@ -16,27 +16,7 @@ cd "$(git rev-parse --show-toplevel)"
 # worktree-local env (gitignored); the service env file is canonical
 [ -f ./.env ] && { set -a; source ./.env; set +a; }
 
-ws_version() { grep -m1 '^version = "' Cargo.toml | cut -d'"' -f2; }
-
-# Learn the version tarsi will bump to (all releasing units share one
-# workspace version — empty output means "don't sync").
-new="$(tarsi-serve plan --dir . | python3 -c '
-import json,sys
-d=json.load(sys.stdin)
-if not d.get("ok"): sys.exit(0)
-units=[u for u in d["result"]["plan"]["units"] if u.get("releases")]
-vs={u["new_version"] for u in units}
-print(vs.pop() if len(vs)==1 else "")
-')"
-old="$(ws_version)"
-if [ -n "$new" ] && [ "$new" != "$old" ]; then
-    sed -i "s/^version: \"${old}\"/version: \"${new}\"/" libraries/lasius/tamias.yaml
-    sed -i "s|lasius@${old}|lasius@${new}|g" README.md
-    git add libraries/lasius/tamias.yaml README.md
-    git commit -qm "chore(release): sync lasius@${new} version refs ahead of tarsi bump"
-fi
-
 tarsi-serve release --dir . --yes
 
-echo "released: lasius ${new:-$old} (tag lasius-v${new:-$old}, per-unit tags for the rest)"
-echo "next: cargo xtask pack && tamias publish libraries/lasius  # ship 9aia:lasius@${new:-$old} to the org registry"
+echo "released: see tags lasius-*-v<ver>"
+echo "next: cargo xtask pack && tamias publish libraries/lasius  # ship 9aia:lasius@<ver> to the org registry"
