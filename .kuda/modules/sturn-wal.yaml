@@ -92,6 +92,11 @@ api:
   file: refs/sturn/wal/lasius
   line: 3
   module: sturn-wal
+- name: luis:claim@lasius#162ac2d2
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 7
+  module: sturn-wal
 - name: luis:claim@lasius#2e983de5
   kind: record
   file: refs/sturn/wal/lasius
@@ -152,6 +157,26 @@ api:
   file: refs/sturn/wal/main
   line: 3
   module: sturn-wal
+- name: luis:claim@pl014-e1#900b35f4
+  kind: record
+  file: refs/sturn/wal/pl014-e1
+  line: 1
+  module: sturn-wal
+- name: luis:claim@pl014-e1#e3c2bbfa
+  kind: record
+  file: refs/sturn/wal/pl014-e1
+  line: 2
+  module: sturn-wal
+- name: luis:claim@sync-refs-rollout#8a87a211
+  kind: record
+  file: refs/sturn/wal/sync-refs-rollout
+  line: 2
+  module: sturn-wal
+- name: luis:claim@sync-refs-rollout#c32a45ff
+  kind: record
+  file: refs/sturn/wal/sync-refs-rollout
+  line: 1
+  module: sturn-wal
 - name: luis:presence@devin#09f4af99
   kind: record
   file: refs/sturn/wal/devin
@@ -162,67 +187,52 @@ api:
   file: refs/sturn/wal/devin
   line: 16
   module: sturn-wal
+- name: luis:presence@devin-pl014-e1#f846a7b8
+  kind: record
+  file: refs/sturn/wal/devin-pl014-e1
+  line: 1
+  module: sturn-wal
+- name: luis:presence@devin-vcs-port#c670d994
+  kind: record
+  file: refs/sturn/wal/devin-vcs-port
+  line: 4
+  module: sturn-wal
 - name: luis:presence@docs-sweep#e88f1f7c
   kind: record
   file: refs/sturn/wal/docs-sweep
   line: 3
   module: sturn-wal
-- name: luis:presence@main#314cc9b2
-  kind: record
-  file: refs/sturn/wal/main
-  line: 12
-  module: sturn-wal
-- name: luis:presence@main#753d6ba0
-  kind: record
-  file: refs/sturn/wal/main
-  line: 4
-  module: sturn-wal
-- name: luis:release@devin#a37a0bee
-  kind: record
-  file: refs/sturn/wal/devin
-  line: 2
-  module: sturn-wal
-- name: luis:release@devin#e1f32819
-  kind: record
-  file: refs/sturn/wal/devin
-  line: 4
-  module: sturn-wal
-- name: luis:release@lasius#5f7969ee
-  kind: record
-  file: refs/sturn/wal/lasius
-  line: 6
-  module: sturn-wal
-- name: luis:release@lasius#937efc3a
-  kind: record
-  file: refs/sturn/wal/lasius
-  line: 4
-  module: sturn-wal
-- name: luis:release@lasius#c96f97f8
-  kind: record
-  file: refs/sturn/wal/lasius
-  line: 5
-  module: sturn-wal
+api_omitted: 11
 deps: []
 notes: ''
 verify:
 - refs/sturn/wal/devin
+- refs/sturn/wal/devin-pl014-e1
 - refs/sturn/wal/devin-vcs-port
 - refs/sturn/wal/docs-sweep
 - refs/sturn/wal/lasius
 - refs/sturn/wal/main
+- refs/sturn/wal/pl014-e1
+- refs/sturn/wal/sync-refs-rollout
 provenance:
   files:
   - refs/sturn/wal/devin
+  - refs/sturn/wal/devin-pl014-e1
   - refs/sturn/wal/devin-vcs-port
   - refs/sturn/wal/docs-sweep
   - refs/sturn/wal/lasius
   - refs/sturn/wal/main
+  - refs/sturn/wal/pl014-e1
+  - refs/sturn/wal/sync-refs-rollout
   hashes:
   - 1113fbcd0b1ed416c7f7824c0d54cd2eaaae3f3e
-  - 97786ab27ace090ae555c829c0e4495d4ad4bf28
+  - f846a7b8b273c5f879a7a446e1c796f9659c4eeb
+  - c670d994a7a81692445ea55ec842e484a687f5e0
   - e88f1f7c0bea9cda3b8f3b2ff7ed64fc1a60fdaf
-  - 5f7969ee3965662d12334a51bf4b706a0618a46b
+  - 9debec716cb61d385cb267f86b183d8371dd2e25
   - 314cc9b285ab29de1f8ff81b43ae4f61773f1a29
-  commit_sha: 99974c87c008af614dea13ab50ff99fb73a386b9
-  generated_at: '1794435958'
+  - e3c2bbfae4b5d032e16f4444a125b5e9c0294298
+  - b7396c5a7e3bae00a7040b0ce9abcadc07847ff3
+  commit_sha: 3b752e4352c1d2df3b102ceb5bc1d70266db3e7f
+  generated_at: '1794726697'
   generator: kuda-template/0.1.4

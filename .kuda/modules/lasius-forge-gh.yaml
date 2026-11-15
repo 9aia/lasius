@@ -5,42 +5,57 @@ api:
 - name: GhForge
   kind: type
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 36
+  line: 38
   module: lasius-forge-gh
 - name: GhOut
   kind: type
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 28
+  line: 30
   module: lasius-forge-gh
 - name: LIST_FIELDS
   kind: const
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 24
+  line: 26
   module: lasius-forge-gh
 - name: PR_FIELDS
   kind: const
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 20
+  line: 22
   module: lasius-forge-gh
 - name: create_parses_url_and_sends_flags
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 274
+  line: 318
   module: lasius-forge-gh
 - name: create_pr
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 98
+  line: 100
+  module: lasius-forge-gh
+- name: create_status
+  kind: function
+  file: crates/lasius-forge-gh/src/lib.rs
+  line: 238
+  module: lasius-forge-gh
+- name: create_status_posts_and_decodes
+  kind: function
+  file: crates/lasius-forge-gh/src/lib.rs
+  line: 354
+  module: lasius-forge-gh
+- name: create_status_rejects_bad_sha
+  kind: function
+  file: crates/lasius-forge-gh/src/lib.rs
+  line: 392
   module: lasius-forge-gh
 - name: default
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 41
+  line: 43
   module: lasius-forge-gh
 - name: fake_gh
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 246
+  line: 290
   module: lasius-forge-gh
 - name: lasius-forge-gh
   kind: module
@@ -50,62 +65,62 @@ api:
 - name: list_prs
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 207
+  line: 209
   module: lasius-forge-gh
 - name: merge_and_list_round_trip
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 296
+  line: 340
   module: lasius-forge-gh
 - name: merge_pr
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 150
+  line: 152
   module: lasius-forge-gh
 - name: new
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 48
+  line: 50
   module: lasius-forge-gh
 - name: ok
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 78
+  line: 80
   module: lasius-forge-gh
 - name: pr_checks
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 188
+  line: 190
   module: lasius-forge-gh
 - name: propagates_gh_failure
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 310
+  line: 413
   module: lasius-forge-gh
 - name: run
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 62
+  line: 64
   module: lasius-forge-gh
 - name: tests
   kind: module
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 238
+  line: 282
   module: lasius-forge-gh
 - name: view_decodes_rollup
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 260
+  line: 304
   module: lasius-forge-gh
 - name: view_pr
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 172
+  line: 174
   module: lasius-forge-gh
 - name: with_program
   kind: function
   file: crates/lasius-forge-gh/src/lib.rs
-  line: 55
+  line: 57
   module: lasius-forge-gh
 deps:
 - lasius-forge
@@ -121,7 +136,7 @@ provenance:
   - crates/lasius-forge-gh/src/lib.rs
   hashes:
   - 215a6e2e45ddf0e481b4f708cb07bdf1f6d4ec6e
-  - 74a499fc19093086e435fb0a54beb11fe6d883d6
-  commit_sha: 99974c87c008af614dea13ab50ff99fb73a386b9
-  generated_at: '1794435958'
+  - 6930428f0d92d4347d8d943c4e9a19e20f950cec
+  commit_sha: 3b752e4352c1d2df3b102ceb5bc1d70266db3e7f
+  generated_at: '1794726697'
   generator: kuda-template/0.1.4
