@@ -4,7 +4,7 @@
 cloning.
 
 **Prerequisites:** a `lasius.toml` (see
-[Bootstrap a workspace](../tutorials/bootstrap.md)).
+[Getting started](../tutorials/getting-started.md)).
 
 ## Steps
 

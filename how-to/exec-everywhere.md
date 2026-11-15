@@ -4,7 +4,7 @@
 filtered subset) from the workspace root.
 
 **Prerequisites:** a bootstrapped workspace with clones under
-`repos/` (see [Bootstrap a workspace](../tutorials/bootstrap.md)).
+`repos/` (see [Getting started](../tutorials/getting-started.md)).
 
 ## Steps
 

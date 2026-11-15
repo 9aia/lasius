@@ -24,12 +24,6 @@ export default defineConfig({
         ],
       },
       {
-        text: "Tutorials",
-        items: [
-          { text: "Bootstrap a workspace repo", link: "/tutorials/bootstrap" },
-        ],
-      },
-      {
         text: "How-to",
         items: [
           { text: "Include private repos", link: "/how-to/private-repos" },

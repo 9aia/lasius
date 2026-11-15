@@ -4,7 +4,7 @@
 alongside public ones.
 
 **Prerequisites:** a `lasius.toml` (see
-[Bootstrap a workspace](../tutorials/bootstrap.md)); `gh`
+[Getting started](../tutorials/getting-started.md)); `gh`
 authenticated with access to the private repos
 (`gh auth status`).
 

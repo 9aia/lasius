@@ -30,7 +30,8 @@ coordination is sturn's, per-repo tooling stays per-repo.
 
 ## Which quadrant answers which goal
 
-- **Learn it** → [Tutorial: bootstrap a workspace](tutorials/bootstrap.md)
+- **Learn it** → [Getting started](tutorials/getting-started.md) —
+  install, bootstrap a workspace, day-to-day verbs
 - **Do a task** → [How-to](/how-to/private-repos) — private repos,
   exclude repos, run everywhere, embed via serve
 - **Understand why** → [Architecture](/explanation/architecture),
