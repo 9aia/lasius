@@ -87,3 +87,6 @@ text = """
   repo names.
 - Secret material never lives here.
 """
+
+[check]
+profile = "engine"
