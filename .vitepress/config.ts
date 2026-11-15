@@ -48,7 +48,11 @@ export default defineConfig({
       },
       {
         text: "Explanation",
-        items: [{ text: "Architecture", link: "/explanation/architecture" }],
+        items: [
+          { text: "Architecture", link: "/explanation/architecture" },
+          { text: "Concepts", link: "/explanation/concepts" },
+          { text: "Decisions", link: "/explanation/decisions" },
+        ],
       },
     ],
     socialLinks: [{ icon: "github", link: "https://github.com/9aia/lasius" }],

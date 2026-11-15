@@ -3,6 +3,17 @@
 Rust workspace, ports-and-adapters. `lasius-core` is pure domain (no
 I/O); `lasius-cli` is the composition root.
 
+## Where it sits
+
+The org stack is **tamias → engines → orchestration → surfaces**.
+Lasius is an **engine** — git & workspace expertise, repo-local,
+no hosted state. It manages the *clones* every other engine lives
+in: `lasius-vcs`/`lasius-forge` are shared ports consumed by
+engines (tarsi, mimus, bupha, kuda, sturn); `lasius serve` exposes
+read-only ops on the org wire convention; orchestration
+(`peregrin`) and surfaces (`pavo`) consume lasius output like any
+other engine's.
+
 <!-- crate-map -->
 | crate | layer | purpose |
 |---|---|---|
@@ -45,3 +56,20 @@ and a 20s timeout, so a hung network can't stall the run.
   worktrees, nested `.git` dirs, and extra remotes unless `--force`.
 - Generated files (`*.code-workspace`) and `repos/` are gitignored —
   the workspace repo tracks config and docs only.
+
+## Boundary
+
+Lasius owns **git & workspace expertise** — repo discovery,
+clone/pull, status, editor workspace files, safe removal, plus the
+shared `lasius-vcs`/`lasius-forge` ports. It does not own:
+
+- **myco** — the org work ledger; `project/` worktrees are managed
+  by myco verbs, never by lasius.
+- **kuda** — code maps; per-repo `.kuda/` cards are that repo's
+  concern.
+- **sturn** — ephemeral coordination; lasius doesn't claim files.
+- **Per-repo tooling** — each clone's own build/test/dev flow is
+  its own `AGENTS.md`'s business. `lasius exec` is the escape
+  hatch, not a task runner.
+- **Secrets** — `gh`/`git` credentials are the user's own; lasius
+  shells out and inherits the environment.

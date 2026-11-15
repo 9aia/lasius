@@ -1,12 +1,36 @@
 # Include private repos
 
-Private repos are excluded from discovery by default. Opt in with one
-line in `lasius.toml`:
+**Goal:** make `lasius` discover and clone the org's private repos
+alongside public ones.
+
+**Prerequisites:** a `lasius.toml` (see
+[Bootstrap a workspace](../tutorials/bootstrap.md)); `gh`
+authenticated with access to the private repos
+(`gh auth status`).
+
+## Steps
+
+Private repos are excluded from discovery by default. Opt in with
+one line in `lasius.toml`:
 
 ```toml
 org = "acme"
 include_private = true
 ```
 
-`lasius clone` / `lasius init` then clone private repos too — requires
-`gh` to be authenticated with access (`gh auth status`).
+Then re-run discovery:
+
+```bash
+lasius clone    # clones any missing repos, private included
+```
+
+## Verify
+
+```bash
+lasius status   # private clones appear in the table
+```
+
+## Deeper
+
+- [Concepts — provider and filters](../explanation/concepts.md)
+- [Exclude repos](exclude-repos.md) — the inverse knob
