@@ -3,13 +3,22 @@
 Rust workspace, ports-and-adapters. `lasius-core` is pure domain (no
 I/O); `lasius-cli` is the composition root.
 
-| Crate | Role |
-| --- | --- |
-| `crates/lasius-core` | `lasius.toml` model (incl. `provider`), provider kind, `gh repo list` JSON decoding, failure classification (`access-denied:`/`not-found:`), repo-name safety + exclude globs, `git status --porcelain=v2` parse/format, `*.code-workspace` generation — pure, unit-tested |
-| `crates/lasius-cli` | the `lasius` engine lib — clap commands, `RepoProvider` seam (`providers.rs`, github via `gh` today), `std::process` for `git`/`gh`/`sh`, `std::fs` for the workspace, `std::thread::scope` parallelism. **No bin** — the `lasius` command is the tamias pack's generated `bins[]` shim → `tamias-driver-lasius cli` → `lasius::run_from` (T-012) |
-| `crates/lasius-driver` | `tamias-driver-lasius` — pavo driver: engine ops as `cli.<verb>` wire queries + `run`/`cli` engine passthroughs, `serve` ndjson loop, feature-gated `mcp` |
-| `libraries/lasius` | the tamias pack — `tamias.yaml` (`type: files`, `bins: [{name: lasius, shim: cli, driver: lasius}]`); `cargo xtask pack` stages `drivers/bin/<triple>/tamias-driver-lasius` (gitignored) |
-| `xtask` | `cargo xtask check` / `test` / `coverage` / `pack` / `install` / `fmt` |
+<!-- crate-map -->
+| crate | layer | purpose |
+|---|---|---|
+| `lasius-core` | domain | Pure domain logic for lasius — config model, gh decoding, git status, workspace files |
+| `lasius-forge` | port | Forge port — pull requests, merges, and check status, generic over the backend. |
+| `lasius-vcs` | port | VCS port — history/worktree/tag/sync ops, generic over the backend (P-019). |
+| `lasius-forge-gh` | adapter | GitHub impl of lasius-forge — shells out to the gh CLI. |
+| `lasius-vcs-git` | adapter | Git impl of lasius-vcs — shells out to the git binary. |
+| `lasius` | engine | lasius — the engine as a library. Everything that used to live in the binary lives here: `Cli`/`Cmd`, workspace resolution, verb dispatch. |
+| `lasius-driver` | driver | tamias-driver-lasius — pavo driver exposing a lasius workspace's engine ops (no views) |
+| `lasius-xtask` | tooling | lasius-xtask — workspace automation: check / test / coverage / pack / install / fmt. |
+
+The `lasius` command itself ships as the tamias pack in
+`libraries/lasius/` (`tamias.yaml` declares
+`bins: [{name: lasius, shim: cli, driver: lasius}]`;
+`cargo xtask pack` stages the driver payload, gitignored).
 
 ## Data flow
 

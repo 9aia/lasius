@@ -12,7 +12,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: "Guide", link: "/getting-started" },
-      { text: "Reference", link: "/reference/commands" },
+      { text: "Reference", link: "/reference/cli" },
       { text: "GitHub", link: "https://github.com/9aia/lasius" },
     ],
     sidebar: [
@@ -41,7 +41,7 @@ export default defineConfig({
       {
         text: "Reference",
         items: [
-          { text: "Commands", link: "/reference/commands" },
+          { text: "CLI reference", link: "/reference/cli" },
           { text: "lasius.toml", link: "/reference/config" },
           { text: "serve wire protocol", link: "/reference/serve" },
         ],

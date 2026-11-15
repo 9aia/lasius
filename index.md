@@ -9,8 +9,8 @@ hero:
       text: Get started
       link: /getting-started
     - theme: alt
-      text: Command reference
-      link: /reference/commands
+      text: CLI reference
+      link: /reference/cli
 features:
   - title: One root, every repo
     details: Independent git clones under repos/ — no submodules, each keeps its own history and remotes.
