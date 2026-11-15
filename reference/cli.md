@@ -15,6 +15,7 @@ lasius keeps a directory of independent git clones in sync with a GitHub org: in
 * [`lasius code-workspace generate`↴](#lasius-code-workspace-generate)
 * [`lasius doctor`↴](#lasius-doctor)
 * [`lasius check`↴](#lasius-check)
+* [`lasius conform`↴](#lasius-conform)
 * [`lasius open`↴](#lasius-open)
 * [`lasius rm`↴](#lasius-rm)
 * [`lasius exec`↴](#lasius-exec)
@@ -53,6 +54,7 @@ lasius keeps a directory of independent git clones in sync with a GitHub org: in
 * `code-workspace` — Workspace-file commands
 * `doctor` — Environment + drift diagnostics
 * `check` — Conformance checks — does the workspace follow the lasius pattern?
+* `conform` — Bring clones up to the org docs contract — scaffold missing README/AGENTS/cypera.toml/SECURITY/CONTRIBUTING/docs stubs; never overwrites existing files
 * `open` — Open the generated workspace file in an editor
 * `rm` — Remove a clone after safety checks (clean tree, no unpushed commits, …)
 * `exec` — Run a shell command in every clone
@@ -165,6 +167,23 @@ Conformance checks — does the workspace follow the lasius pattern?
 * `--domain <DOMAIN>` — Check domain to run (structure|clones|generated|policy)
 * `--root <ROOT>` — Workspace root containing lasius.toml (default: discovered upward from cwd)
 * `--only <ONLY>` — Only run these check ids (repeatable or comma-separated)
+* `--json` — Emit JSON findings instead of the table
+* `-h, --help` — Print help
+
+## `lasius conform`
+
+Bring clones up to the org docs contract — scaffold missing README/AGENTS/cypera.toml/SECURITY/CONTRIBUTING/docs stubs; never overwrites existing files
+
+**Usage:** `lasius conform [OPTIONS] [NAME]`
+
+###### **Arguments:**
+
+* `[NAME]` — Repo name under repos_dir (default: all clones)
+
+###### **Options:**
+
+* `--dry-run` — Report only — don't write anything
+* `--root <ROOT>` — Workspace root containing lasius.toml (default: discovered upward from cwd)
 * `--json` — Emit JSON findings instead of the table
 * `-h, --help` — Print help
 
