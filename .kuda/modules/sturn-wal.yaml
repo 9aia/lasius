@@ -92,6 +92,11 @@ api:
   file: refs/sturn/wal/lasius
   line: 3
   module: sturn-wal
+- name: luis:claim@lasius#04a51c64
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 12
+  module: sturn-wal
 - name: luis:claim@lasius#162ac2d2
   kind: record
   file: refs/sturn/wal/lasius
@@ -102,10 +107,25 @@ api:
   file: refs/sturn/wal/lasius
   line: 2
   module: sturn-wal
+- name: luis:claim@lasius#4d7866ba
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 11
+  module: sturn-wal
 - name: luis:claim@lasius#7721a868
   kind: record
   file: refs/sturn/wal/lasius
   line: 1
+  module: sturn-wal
+- name: luis:claim@lasius#fc7aa7e1
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 14
+  module: sturn-wal
+- name: luis:claim@lasius#fe7ac308
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 13
   module: sturn-wal
 - name: luis:claim@main#108d87ba
   kind: record
@@ -182,27 +202,7 @@ api:
   file: refs/sturn/wal/devin
   line: 5
   module: sturn-wal
-- name: luis:presence@devin#1113fbcd
-  kind: record
-  file: refs/sturn/wal/devin
-  line: 16
-  module: sturn-wal
-- name: luis:presence@devin-pl014-e1#f846a7b8
-  kind: record
-  file: refs/sturn/wal/devin-pl014-e1
-  line: 1
-  module: sturn-wal
-- name: luis:presence@devin-vcs-port#c670d994
-  kind: record
-  file: refs/sturn/wal/devin-vcs-port
-  line: 4
-  module: sturn-wal
-- name: luis:presence@docs-sweep#e88f1f7c
-  kind: record
-  file: refs/sturn/wal/docs-sweep
-  line: 3
-  module: sturn-wal
-api_omitted: 11
+api_omitted: 16
 deps: []
 notes: ''
 verify:
@@ -229,10 +229,10 @@ provenance:
   - f846a7b8b273c5f879a7a446e1c796f9659c4eeb
   - c670d994a7a81692445ea55ec842e484a687f5e0
   - e88f1f7c0bea9cda3b8f3b2ff7ed64fc1a60fdaf
-  - 9debec716cb61d385cb267f86b183d8371dd2e25
+  - 2939b1e0fe71a3706f6c376d9999179400e6ace0
   - 314cc9b285ab29de1f8ff81b43ae4f61773f1a29
   - e3c2bbfae4b5d032e16f4444a125b5e9c0294298
   - b7396c5a7e3bae00a7040b0ce9abcadc07847ff3
-  commit_sha: 3b752e4352c1d2df3b102ceb5bc1d70266db3e7f
-  generated_at: '1794726697'
+  commit_sha: 46bbd0111c8b5642aece37d711d84e0285e1360d
+  generated_at: '1794762043'
   generator: kuda-template/0.1.4

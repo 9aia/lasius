@@ -206,6 +206,7 @@ dependencies = [
  "lasius-vcs-git",
  "serde",
  "serde_json",
+ "tempfile",
  "thiserror",
 ]
 

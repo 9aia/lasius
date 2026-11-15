@@ -120,6 +120,15 @@ fn clone_all(ws: &Workspace, repos: &[Repo]) -> Result<()> {
     // Always refresh — partial clones are still valid workspace members.
     support::refresh_workspace(ws)?;
 
+    // Org docs contract — scaffold missing stubs into every clone
+    // (init/clone/add all land here). Never overwrites; failures are
+    // warnings, not clone failures.
+    match crate::conform::scaffold_clones(ws) {
+        Ok(0) => {}
+        Ok(n) => println!("conform: {n} contract file(s) written"),
+        Err(e) => eprintln!("warn    conform: {e:#}"),
+    }
+
     if !failures.is_empty() {
         anyhow::bail!(
             "failed to clone {} repo(s): {}",
@@ -230,6 +239,9 @@ fn agents_stub(org: &str) -> String {
          - `lasius status` — branch / dirty / sync matrix (`--json`)\n\
          - `lasius code-workspace generate` — regenerate the workspace file\n\
          - `lasius doctor` — env + drift diagnostics\n\
+         - `lasius conform [repo]` — scaffold missing org docs-contract \
+         files (README/AGENTS/cypera.toml/SECURITY/CONTRIBUTING) into \
+         clones; never overwrites (`--dry-run`, `--json`)\n\
          - `lasius exec -- <cmd>` — run a command in every clone\n\
          - `lasius rm <repo>` — remove a clone after safety checks\n\
          - `lasius vcs worktree|commit|push|fetch` — agent-facing git \

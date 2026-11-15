@@ -10,7 +10,7 @@ api:
 - name: Cli
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 37
+  line: 38
   module: lasius
 - name: CloneOutcome
   kind: type
@@ -20,37 +20,47 @@ api:
 - name: Cmd
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 47
+  line: 48
   module: lasius
 - name: CodeWorkspaceAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 405
+  line: 419
+  module: lasius
+- name: ConformItem
+  kind: type
+  file: crates/lasius-cli/src/conform.rs
+  line: 51
   module: lasius
 - name: ForgeAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 232
+  line: 246
   module: lasius
 - name: ForgePrAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 282
+  line: 296
   module: lasius
 - name: ForgeStatusAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 378
+  line: 392
   module: lasius
 - name: Github
   kind: type
   file: crates/lasius-cli/src/providers.rs
   line: 44
   module: lasius
+- name: ItemStatus
+  kind: type
+  file: crates/lasius-cli/src/conform.rs
+  line: 24
+  module: lasius
 - name: MergeMethodArg
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 246
+  line: 260
   module: lasius
 - name: OPS
   kind: const
@@ -60,12 +70,12 @@ api:
 - name: PROBE_TIMEOUT
   kind: const
   file: crates/lasius-cli/src/commands.rs
-  line: 767
+  line: 779
   module: lasius
 - name: PrStateArg
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 263
+  line: 277
   module: lasius
 - name: ProcOutput
   kind: type
@@ -77,30 +87,40 @@ api:
   file: crates/lasius-cli/src/providers.rs
   line: 14
   module: lasius
+- name: SECURITY_STUB
+  kind: const
+  file: crates/lasius-cli/src/conform.rs
+  line: 353
+  module: lasius
 - name: StatusFailure
   kind: type
   file: crates/lasius-cli/src/commands.rs
-  line: 331
+  line: 343
   module: lasius
 - name: StatusStateArg
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 359
+  line: 373
+  module: lasius
+- name: Stub
+  kind: type
+  file: crates/lasius-cli/src/conform.rs
+  line: 59
   module: lasius
 - name: UpdateRow
   kind: type
   file: crates/lasius-cli/src/commands.rs
-  line: 276
+  line: 288
   module: lasius
 - name: VcsAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 146
+  line: 160
   module: lasius
 - name: VcsWorktreeAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 200
+  line: 214
   module: lasius
 - name: Workspace
   kind: type
@@ -110,17 +130,32 @@ api:
 - name: add
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 731
+  line: 743
   module: lasius
 - name: agents_stub
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 218
+  line: 227
+  module: lasius
+- name: agents_stub
+  kind: function
+  file: crates/lasius-cli/src/conform.rs
+  line: 283
+  module: lasius
+- name: agents_stub_has_dev_map_and_awareness
+  kind: function
+  file: crates/lasius-cli/src/conform.rs
+  line: 408
   module: lasius
 - name: args
   kind: function
   file: crates/lasius-cli/src/proc.rs
   line: 155
+  module: lasius
+- name: as_str
+  kind: function
+  file: crates/lasius-cli/src/conform.rs
+  line: 38
   module: lasius
 - name: auth_check
   kind: function
@@ -160,49 +195,14 @@ api:
 - name: check
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 877
+  line: 889
   module: lasius
 - name: clone
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 269
+  line: 281
   module: lasius
-- name: clone_all
-  kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 56
-  module: lasius
-- name: code_workspace_generate
-  kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 422
-  module: lasius
-- name: collect_status
-  kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 335
-  module: lasius
-- name: command
-  kind: function
-  file: crates/lasius-cli/src/lib.rs
-  line: 434
-  module: lasius
-- name: commands
-  kind: module
-  file: crates/lasius-cli/src/lib.rs
-  line: 16
-  module: lasius
-- name: commit
-  kind: function
-  file: crates/lasius-cli/src/vcs.rs
-  line: 102
-  module: lasius
-- name: dispatch
-  kind: function
-  file: crates/lasius-cli/src/lib.rs
-  line: 440
-  module: lasius
-api_omitted: 74
+api_omitted: 96
 deps:
 - anyhow
 - clap
@@ -215,6 +215,7 @@ deps:
 - serde
 - serde_json
 - thiserror
+- tempfile
 - anyhow
 - serde_json
 - lasius-core
@@ -227,19 +228,20 @@ notes: ''
 verify:
 - Cargo.toml
 - crates/lasius-cli/Cargo.toml
-- crates/lasius-cli/src/commands.rs
-- crates/lasius-cli/src/forge.rs
 - crates/lasius-cli/src/lib.rs
+- crates/lasius-cli/src/commands.rs
+- crates/lasius-cli/src/conform.rs
+- crates/lasius-cli/src/forge.rs
 - crates/lasius-cli/src/proc.rs
 - crates/lasius-cli/src/providers.rs
 - crates/lasius-cli/src/serve.rs
 - crates/lasius-cli/src/support.rs
-- crates/lasius-cli/src/vcs.rs
 provenance:
   files:
   - Cargo.toml
   - crates/lasius-cli/Cargo.toml
   - crates/lasius-cli/src/commands.rs
+  - crates/lasius-cli/src/conform.rs
   - crates/lasius-cli/src/forge.rs
   - crates/lasius-cli/src/lib.rs
   - crates/lasius-cli/src/proc.rs
@@ -249,15 +251,16 @@ provenance:
   - crates/lasius-cli/src/vcs.rs
   hashes:
   - 558ff5d81e4992c1b0ac51795300c99d52c04abe
-  - 3dd7ddc7327da4605e0dafb4699f83e491bd6fdc
-  - f6db671fdd22c80d77f24b541ab3e12b31abf8a2
+  - a993538386dace2f2b2a99c921d27160bd9ac1de
+  - a23aa24a1fdfbecdabe3dbb69c2f33333751b650
+  - 28d7ce1d8a88e62eaa688496d012f3c581681a1c
   - 8f4b542b7fab9d668ec3c8af0d8ce0b30fa73c2e
-  - d7c2d2d71a23d33d0b1d3efa9dfdab6a114fcb07
+  - 4964248c849c2ca67e7a1887d90d2e44f0057011
   - 3576ab200b7d9d7f6d11b5ec4246c3cd587b9119
   - 415e6446334c162054fff2edbcd6695395b7cd45
   - fd4a2f17950d7a2bf01ff1e03003ffe8cc309264
   - ff8dc94d52c641e08dd51b6152751993e312c237
   - 32e64b66f0ecf9d8d8939b7d5a842807cbf133dd
-  commit_sha: 3b752e4352c1d2df3b102ceb5bc1d70266db3e7f
-  generated_at: '1794726697'
+  commit_sha: 46bbd0111c8b5642aece37d711d84e0285e1360d
+  generated_at: '1794762043'
   generator: kuda-template/0.1.4

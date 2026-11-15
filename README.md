@@ -54,6 +54,7 @@ lasius code-workspace generate [--json]  # regenerate the *.code-workspace file
 lasius open                    # open the workspace file in your editor
 lasius doctor [--json]         # env + drift diagnostics
 lasius check [--json] [--only id]  # conformance checks (structure/clones/generated/policy)
+lasius conform [repo] [--dry-run] [--json]  # scaffold missing org docs-contract files into clones
 lasius exec -- cargo build     # run a command in every clone (--filter <substr>)
 lasius add <repo>              # clone a single org repo
 lasius rm <repo>               # remove a clone after safety checks
@@ -76,6 +77,18 @@ discovered upward from the current directory.
 `.gitignore` entries for `repos/` and the workspace file, README/AGENTS
 stubs — then clones and generates. Everything is idempotent and never
 overwrites existing files.
+
+`init`/`clone`/`add` also run `conform` over the clones: the org docs
+contract (workspace `AGENTS.md`) requires every repo to carry a README
+skeleton, an `AGENTS.md` dev map, `cypera.toml`, `SECURITY.md`,
+`CONTRIBUTING.md`, and a `docs/` worktree with a `docs:check` drift
+gate — and no CHANGELOG. Conform writes **only missing files** as
+TODO-marked stubs (it never fabricates crate tables or overwrites real
+content), plants `docs/package.json` when a `docs/` worktree exists,
+and flags a stray `CHANGELOG.md`. `lasius conform <repo>` brings an
+existing clone up to contract; `--dry-run` reports without writing.
+Review and commit the stubs — they show up as untracked files until
+you do.
 
 Repo discovery is provider-driven (`provider = "github"` today): `gh repo
 list <org> --json name,sshUrl,isArchived,isPrivate`

@@ -25,7 +25,7 @@ api:
 - name: add_clones_single_repo
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 307
+  line: 310
   module: lasius-driver
 - name: argv
   kind: function
@@ -35,17 +35,17 @@ api:
 - name: argv_maps_params_to_lasius_flags
   kind: function
   file: crates/lasius-driver/src/ops.rs
-  line: 373
+  line: 374
   module: lasius-driver
 - name: argv_omits_root_when_absent
   kind: function
   file: crates/lasius-driver/src/ops.rs
-  line: 398
+  line: 399
   module: lasius-driver
 - name: argv_splits_dotted_names_and_json_flags
   kind: function
   file: crates/lasius-driver/src/ops.rs
-  line: 387
+  line: 388
   module: lasius-driver
 - name: bin
   kind: function
@@ -60,12 +60,12 @@ api:
 - name: check_reports_conformance
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 422
+  line: 425
   module: lasius-driver
 - name: check_reports_org_discovery_failure
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 449
+  line: 452
   module: lasius-driver
 - name: clone_is_idempotent
   kind: function
@@ -76,6 +76,11 @@ api:
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
   line: 238
+  module: lasius-driver
+- name: conform_scaffolds_and_never_overwrites
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 515
   module: lasius-driver
 - name: dispatch
   kind: function
@@ -100,17 +105,17 @@ api:
 - name: exec_filter_selects_subset
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 297
+  line: 300
   module: lasius-driver
 - name: exec_runs_in_each_clone
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 285
+  line: 288
   module: lasius-driver
 - name: fails_outside_workspace
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 316
+  line: 319
   module: lasius-driver
 - name: fake_gh
   kind: function
@@ -125,12 +130,12 @@ api:
 - name: forge_pr_lifecycle
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 616
+  line: 682
   module: lasius-driver
 - name: forge_status_create
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 685
+  line: 751
   module: lasius-driver
 - name: git
   kind: function
@@ -141,6 +146,11 @@ api:
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
   line: 156
+  module: lasius-driver
+- name: init_conforms_clones_to_docs_contract
+  kind: function
+  file: crates/lasius-driver/tests/e2e.rs
+  line: 491
   module: lasius-driver
 - name: init_creates_config_with_org_flag
   kind: function
@@ -192,17 +202,7 @@ api:
   file: crates/lasius-driver/src/ops.rs
   line: 93
   module: lasius-driver
-- name: op_of
-  kind: function
-  file: crates/lasius-driver/src/ops.rs
-  line: 171
-  module: lasius-driver
-- name: op_of_accepts_cli_prefix_only
-  kind: function
-  file: crates/lasius-driver/src/ops.rs
-  line: 308
-  module: lasius-driver
-api_omitted: 28
+api_omitted: 30
 deps:
 - clap
 - lasius
@@ -234,10 +234,10 @@ provenance:
   hashes:
   - e610ce6601c6365f98d2c47a7c55de1b4600a584
   - 1199aeb5bdf79b875b0947539597d3add37655e2
-  - 202e73fc5f2a936aaa9bb6b3ad7a08fa4ac56bb0
+  - 7a3cc4807453a0721d10352903c61bd7fd3766bf
   - 043b464591dbf19c3b6adba8e8852cc85d255c1d
   - df811c1ab3cc4861a72bafd9cfb735e816f0982d
-  - 63cee6360c8ec7383d07d884b7c36e3052ebdfcc
-  commit_sha: 3b752e4352c1d2df3b102ceb5bc1d70266db3e7f
-  generated_at: '1794726697'
+  - b05caa5ad3c7cb3075cb07ff04d25f336da65b72
+  commit_sha: bd368d9fb3ce54ca4c4a99a878948f0d6d58540b
+  generated_at: '1794761798'
   generator: kuda-template/0.1.4

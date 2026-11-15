@@ -355,6 +355,7 @@ mod tests {
                 "cli.clone",
                 "cli.update",
                 "cli.code-workspace.generate",
+                "cli.conform",
                 "cli.rm",
                 "cli.add",
                 "cli.vcs.worktree.add",

@@ -271,6 +271,9 @@ fn rm_refuses_dirty_clone() {
 fn rm_removes_clean_clone() {
     let (_tmp, root, path) = setup(&["alpha"]);
     assert!(run(&["clone"], &root, &path).status.success());
+    // clone now drops docs-contract stubs (untracked) — clean them so
+    // the tree is clean for rm's safety checks
+    git(&root.join("repos/alpha"), &["clean", "-fd"]);
     // commit the clone's clean state — clone of file:// repo has upstream? no;
     // unpushed check uses --branches --not --remotes: cloned HEAD == remote so ok.
     let out = run(&["rm", "alpha", "--yes"], &root, &path);
@@ -482,6 +485,69 @@ fn check_reports_org_discovery_failure() {
     assert!(text.contains("org-drift"));
     assert!(text.contains("org discovery failed"));
     assert!(text.contains("auth/permission"));
+}
+
+#[test]
+fn init_conforms_clones_to_docs_contract() {
+    let (_tmp, root, path) = setup(&["alpha"]);
+    let out = run(&["init"], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(stdout(&out).contains("conform:"));
+
+    let clone = root.join("repos/alpha");
+    for f in [
+        "README.md",
+        "AGENTS.md",
+        "cypera.toml",
+        "SECURITY.md",
+        "CONTRIBUTING.md",
+    ] {
+        assert!(clone.join(f).exists(), "{f} not scaffolded");
+    }
+    // stubs are honest — TODOs, no fabricated content
+    let readme = fs::read_to_string(clone.join("README.md")).unwrap();
+    assert!(readme.contains("TODO"));
+    // no docs/ worktree in the fixture → reported as info, not created
+    assert!(!clone.join("docs").exists());
+}
+
+#[test]
+fn conform_scaffolds_and_never_overwrites() {
+    let (_tmp, root, path) = setup(&["alpha"]);
+    assert!(run(&["init"], &root, &path).status.success());
+
+    let clone = root.join("repos/alpha");
+    // simulate a real README landing after init
+    fs::write(clone.join("README.md"), "# alpha — real\n").unwrap();
+    fs::create_dir_all(clone.join("docs")).unwrap();
+
+    // dry-run reports but writes nothing new
+    let out = run(&["conform", "--dry-run"], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(stdout(&out).contains("would-write"));
+    assert!(!clone.join("docs/package.json").exists());
+
+    let out = run(&["conform", "alpha"], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(clone.join("docs/package.json").exists());
+    // existing README untouched
+    assert_eq!(
+        fs::read_to_string(clone.join("README.md")).unwrap(),
+        "# alpha — real\n"
+    );
+    // second run: everything present, idempotent
+    let out = run(&["conform", "alpha"], &root, &path);
+    assert!(out.status.success());
+    assert!(stdout(&out).contains("0 file(s) written"));
+
+    // --json emits findings
+    let out = run(&["conform", "alpha", "--json"], &root, &path);
+    let doc: serde_json::Value = serde_json::from_str(&stdout(&out)).unwrap();
+    assert!(doc
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|i| i["repo"] == "alpha" && i["path"] == "README.md" && i["status"] == "skip"));
 }
 
 #[test]

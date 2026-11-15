@@ -14,6 +14,7 @@
 //! ant — it tends the garden so you don't have to.
 
 mod commands;
+mod conform;
 mod forge;
 mod proc;
 mod providers;
@@ -86,6 +87,19 @@ enum Cmd {
         /// Only run these check ids (repeatable or comma-separated)
         #[arg(long, value_delimiter = ',')]
         only: Vec<String>,
+        /// Emit JSON findings instead of the table
+        #[arg(long)]
+        json: bool,
+    },
+    /// Bring clones up to the org docs contract — scaffold missing
+    /// README/AGENTS/cypera.toml/SECURITY/CONTRIBUTING/docs stubs;
+    /// never overwrites existing files
+    Conform {
+        /// Repo name under repos_dir (default: all clones)
+        name: Option<String>,
+        /// Report only — don't write anything
+        #[arg(long)]
+        dry_run: bool,
         /// Emit JSON findings instead of the table
         #[arg(long)]
         json: bool,
@@ -467,6 +481,11 @@ pub fn dispatch(cli: &Cli) -> i32 {
                 Cmd::Check { domain, only, json } => {
                     commands::check(&ws, domain.as_deref(), only, *json)
                 }
+                Cmd::Conform {
+                    name,
+                    dry_run,
+                    json,
+                } => conform::conform(&ws, name.as_deref(), *dry_run, *json),
                 Cmd::Open { editor } => commands::open(&ws, editor.clone()),
                 Cmd::Rm { name, yes, force } => commands::rm(&ws, name, *yes, *force),
                 Cmd::Exec { filter, cmd } => commands::exec(&ws, filter.as_deref(), cmd),
