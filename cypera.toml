@@ -1,0 +1,89 @@
+# lasius — docs/reference generation contract for `cypera`
+# (`cypera gen crate-map|cli|config`, discovered upward from --repo).
+# Replaces the retired docs/gen-*.py wrappers; schema lives in
+# ../cypera crates/cypera-core/src/repo_config.rs.
+
+[crate_map]
+
+[crate_map.layers]
+"lasius-core" = "domain"
+"lasius-vcs" = "port"
+"lasius-forge" = "port"
+"lasius-vcs-git" = "adapter"
+"lasius-forge-gh" = "adapter"
+"lasius-cli" = "engine"
+"lasius" = "engine"
+"lasius-driver" = "driver"
+"lasius-xtask" = "tooling"
+
+[[crate_map.splices]]
+target = "docs/explanation/architecture.md"
+marker = "<!-- crate-map -->"
+
+[cli]
+package = "lasius-driver"
+bin = "tamias-driver-lasius"
+prefix = ["run"]
+out = "docs/reference/cli.md"
+
+[config]
+title = "Config — `lasius.toml`"
+types = { "String" = "string", "PathBuf" = "path", "bool" = "bool", "u16" = "int", "usize" = "int", "u64" = "int", "Vec<String>" = "list", "Vec<PathBuf>" = "list", "std::collections::BTreeMap<String, String>" = "map", "std::collections::BTreeMap<String, UnitOverride>" = "map" }
+out = "docs/reference/config.md"
+
+[[config.structs]]
+file = "crates/lasius-core/src/config.rs"
+name = "WorkspaceConfig"
+title = "Top level"
+
+[[config.structs]]
+file = "crates/lasius-core/src/config.rs"
+name = "CheckConfig"
+title = "`[checks]` table"
+
+[[config.structs]]
+file = "crates/lasius-core/src/config.rs"
+name = "Policy"
+title = "`[policy]` table"
+
+[[config.sections]]
+title = "Top level"
+struct = "WorkspaceConfig"
+
+[[config.sections]]
+title = "`[checks]` table"
+struct = "CheckConfig"
+
+[[config.sections]]
+title = "`[policy]` table"
+struct = "Policy"
+
+[[config.sections]]
+title = "Example"
+text = """
+```toml
+org = "9aia"
+repos_dir = "repos"
+exclude = ["workspace"]
+
+[checks]
+# disabled = ["<check-id>"]
+severity = { "<check-id>" = "warn" }
+
+[policy]
+require_worktrees = ["project", "docs"]
+require_files = ["AGENTS.md"]
+```
+"""
+
+[[config.sections]]
+title = "Constraints"
+text = """
+- `lasius.toml` is discovered by walking ancestors from the cwd
+  (or `--root <dir>`); every field except `org` has a default.
+- `provider` is a closed set — unknown values are a config error;
+  there is no silent fallback.
+- `exclude` entries are glob patterns (`*`, `?`) matched against
+  repo names.
+- Secret material never lives here.
+"""
