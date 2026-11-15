@@ -102,6 +102,8 @@ I/O); `lasius-cli` is the composition root — `std::process` for `git`/`gh`,
 | `crates/lasius-core` | config model, `gh` JSON decoding, repo-name safety, git status parse/format, workspace-file generation — pure, unit-tested |
 | `crates/lasius-cli` | the `lasius` engine lib — clap commands, process/fs layer (no bin — the command is the tamias pack's `bins[]` shim) |
 | `crates/lasius-driver` | `tamias-driver-lasius` — pavo driver: engine ops as `cli.<verb>` wire queries + `run`/`cli` passthroughs (`cli` is the bins-shim engine passthrough; `mcp` feature-gated) |
+| `crates/lasius-vcs` + `lasius-vcs-git` | VCS port — history/worktree/tag/sync + agent-mutation ops shared by tarsi/mimus/bupha/kuda/sturn (P-019); git impl shells out to `git` |
+| `crates/lasius-forge` + `lasius-forge-gh` | forge port — PR create/merge/view/list + check-status reads + commit-status writes; `gh` impl shells out to `gh` |
 | `libraries/lasius` | the tamias pack — `tamias.yaml` declares `bins: [{name: lasius, shim: cli, driver: lasius}]`; `cargo xtask pack` stages `drivers/bin/<triple>/tamias-driver-lasius` (gitignored) |
 | `xtask` | `cargo xtask check` / `test` / `coverage` / `pack` / `install` / `fmt` |
 
