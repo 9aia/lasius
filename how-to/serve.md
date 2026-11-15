@@ -4,7 +4,7 @@
 ndjson JSON-RPC wire convention.
 
 **Prerequisites:** `lasius` installed (see
-[Getting started](../getting-started.md)).
+[Getting started](../tutorials/getting-started.md)).
 
 ## Steps
 

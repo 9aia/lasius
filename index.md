@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: Get started
-      link: /getting-started
+      link: /tutorials/getting-started
     - theme: alt
       text: CLI reference
       link: /reference/cli

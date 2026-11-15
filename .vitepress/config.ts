@@ -11,7 +11,7 @@ export default defineConfig({
   ],
   themeConfig: {
     nav: [
-      { text: "Guide", link: "/getting-started" },
+      { text: "Guide", link: "/tutorials/getting-started" },
       { text: "Reference", link: "/reference/cli" },
       { text: "GitHub", link: "https://github.com/9aia/lasius" },
     ],
@@ -20,7 +20,7 @@ export default defineConfig({
         text: "Start",
         items: [
           { text: "Introduction", link: "/" },
-          { text: "Getting started", link: "/getting-started" },
+          { text: "Getting started", link: "/tutorials/getting-started" },
         ],
       },
       {
@@ -50,6 +50,7 @@ export default defineConfig({
         text: "Explanation",
         items: [
           { text: "Architecture", link: "/explanation/architecture" },
+          { text: "Boundaries", link: "/explanation/boundaries" },
           { text: "Concepts", link: "/explanation/concepts" },
           { text: "Decisions", link: "/explanation/decisions" },
         ],

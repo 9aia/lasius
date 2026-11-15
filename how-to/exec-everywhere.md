@@ -34,5 +34,5 @@ lasius exec -- pwd    # prints each clone's path, prefixed by repo name
 ## Deeper
 
 - [CLI reference](../reference/cli.md) — all verbs and flags
-- [Boundary](../explanation/architecture.md#boundary) — what
+- [Boundary](../explanation/boundaries.md) — what
   per-repo tooling owns instead
