@@ -11,6 +11,7 @@ export default defineConfig({
   ],
   themeConfig: {
     nav: [
+      { text: "9aia", link: "https://9aia.com", target: "_blank" },
       { text: "Guide", link: "/tutorials/getting-started" },
       { text: "Reference", link: "/reference/cli" },
       { text: "GitHub", link: "https://github.com/9aia/lasius" },
