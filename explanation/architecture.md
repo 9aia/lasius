@@ -5,14 +5,14 @@ I/O); `lasius-cli` is the composition root.
 
 ## Where it sits
 
-The org stack is **delivery → memory → process → agency**.
-Lasius is a **process-layer engine** — git & workspace expertise,
+The org stack is **delivery → memory → process → interface**.
+Lasius is a **process-layer organism** — git & workspace expertise,
 repo-local, no hosted state. It manages the *clones* every other
-engine lives in: `lasius-vcs`/`lasius-forge` are shared ports
+organism lives in: `lasius-vcs`/`lasius-forge` are shared ports
 consumed across the stack (tarsi, mimus, bupha, kuda, sturn);
 `lasius serve` exposes read-only ops on the org wire convention;
-the agency layer (`peregrin`, `pavo`) consumes lasius output like
-any other engine's.
+the process layer (`peregrin`) and the interface (`pavo`) consume
+lasius output like any other organism's.
 
 <!-- crate-map -->
 | crate | layer | purpose |
