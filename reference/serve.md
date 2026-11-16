@@ -14,6 +14,7 @@
 
 | op | result |
 | --- | --- |
+| `manifest` | `{"name": "lasius-serve", "version": "…", "ops": […]}` — surface manifest |
 | `ping` | `{"pong": true}` |
 | `list` | `{"repos": [names…], "count": n}` — local clones under `repos_dir` |
 | `status` | `{"repos": [{name, branch, upstream, ahead, behind, dirty}…]}` |

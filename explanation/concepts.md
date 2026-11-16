@@ -46,6 +46,6 @@ directory that owns every clone of an org.
 ## Surfaces
 
 `lasius` CLI for humans and scripts; `lasius serve` speaks ndjson
-JSON-RPC read-only ops (`ping`, `list`, `status`, `doctor`) for
+JSON-RPC read-only ops (`manifest`, `ping`, `list`, `status`, `doctor`) for
 embedding — the org wire convention shared with tamias, sepia,
 cuora, and myco; `lasius-driver` exposes the same ops to pavo.

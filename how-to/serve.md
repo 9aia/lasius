@@ -16,7 +16,7 @@ one JSON response per line on stdout — the same wire as
 printf '{"op":"list"}\n{"op":"status"}\n' | lasius serve
 ```
 
-Ops: `ping`, `list`, `status`, `doctor` — read-only; mutating
+Ops: `manifest`, `ping`, `list`, `status`, `doctor` — read-only; mutating
 commands stay CLI-side so stdout stays protocol-clean.
 
 ## Verify

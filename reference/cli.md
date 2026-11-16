@@ -61,7 +61,7 @@ lasius keeps a directory of independent git clones in sync with a GitHub org: in
 * `add` — Clone a single org repo by name
 * `vcs` — VCS verbs — worktrees, commits, fetch/push over the lasius-vcs port
 * `forge` — Forge verbs — pull requests, checks, and commit statuses over the lasius-forge port
-* `serve` — ndjson JSON-RPC over stdio — read-only ops for embedding (ping, list, status, doctor); same wire as tamias/sepia/cuora/myco serve
+* `serve` — ndjson JSON-RPC over stdio — read-only ops for embedding (manifest, ping, list, status, doctor); same wire as tamias/sepia/cuora/myco serve
 * `completions` — Print shell completion script for SHELL
 
 ###### **Options:**
@@ -537,7 +537,7 @@ Post a commit status on a sha (CI verdict egress)
 
 ## `lasius serve`
 
-ndjson JSON-RPC over stdio — read-only ops for embedding (ping, list, status, doctor); same wire as tamias/sepia/cuora/myco serve
+ndjson JSON-RPC over stdio — read-only ops for embedding (manifest, ping, list, status, doctor); same wire as tamias/sepia/cuora/myco serve
 
 **Usage:** `lasius serve [OPTIONS]`
 
