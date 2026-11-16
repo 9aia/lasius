@@ -521,6 +521,73 @@ pub fn doctor_checks(ws: &Workspace) -> Result<Vec<(String, bool, String)>> {
         checks.push(("local clones".into(), true, format!("{}", local.len())));
     }
 
+    // loc coverage: every non-archived org repo must appear in the
+    // .github loc config pack's `repos:` list. Only runs when the pack
+    // exists — orgs without loc reporting skip silently. Uses a raw
+    // `gh repo list` (not `org_repos`): loc counts private repos too
+    // (via LOC_READ_TOKEN), while the provider filters them out for
+    // cloning. loc.yaml is machine-generated, so a plain
+    // `repos: a b c` line parse is enough (no yaml dep).
+    let loc_yaml = ws.repos_path().join(".github/packs/loc/loc.yaml");
+    if let Ok(text) = fs::read_to_string(&loc_yaml) {
+        let loc_repos: std::collections::BTreeSet<String> = text
+            .lines()
+            .find_map(|l| l.strip_prefix("repos:"))
+            .map(|v| v.split_whitespace().map(str::to_string).collect())
+            .unwrap_or_default();
+        let out = proc::capture(
+            "gh",
+            &[
+                "repo".to_string(),
+                "list".to_string(),
+                ws.config.org.clone(),
+                "--limit".to_string(),
+                "1000".to_string(),
+                "--json".to_string(),
+                "name,isArchived".to_string(),
+            ],
+            None,
+        );
+        match out {
+            Ok(o) if o.success() => {
+                let org_names: std::collections::BTreeSet<String> =
+                    serde_json::from_str::<Vec<serde_json::Value>>(&o.stdout)
+                        .unwrap_or_default()
+                        .iter()
+                        .filter(|r| r.get("isArchived").and_then(|v| v.as_bool()) != Some(true))
+                        .filter_map(|r| r.get("name").and_then(|v| v.as_str()).map(str::to_string))
+                        .collect();
+                let missing: Vec<&String> = org_names.difference(&loc_repos).collect();
+                let extra: Vec<&String> = loc_repos.difference(&org_names).collect();
+                let ok = missing.is_empty() && extra.is_empty();
+                let names = |v: &[&String]| {
+                    v.iter()
+                        .take(5)
+                        .map(|s| s.to_string())
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                };
+                checks.push((
+                    "loc coverage".into(),
+                    ok,
+                    format!(
+                        "{} missing from loc config ({}), {} stale in loc config ({})",
+                        missing.len(),
+                        names(&missing),
+                        extra.len(),
+                        names(&extra)
+                    ),
+                ));
+            }
+            Ok(o) => checks.push((
+                "loc coverage".into(),
+                false,
+                format!("gh repo list failed: {}", o.stderr.trim()),
+            )),
+            Err(e) => checks.push(("loc coverage".into(), false, e.to_string())),
+        }
+    }
+
     // workspace file freshness
     let ws_path = ws.workspace_file_path();
     match fs::read_to_string(&ws_path) {
