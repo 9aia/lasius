@@ -146,7 +146,8 @@ enum Cmd {
         action: ForgeAction,
     },
     /// ndjson JSON-RPC over stdio — read-only ops for embedding
-    /// (ping, list, status, doctor); same wire as tamias/sepia/cuora/myco serve
+    /// (manifest, ping, list, status, doctor); same wire as
+    /// tamias/sepia/cuora/myco serve
     Serve,
     /// Print shell completion script for SHELL
     Completions {
