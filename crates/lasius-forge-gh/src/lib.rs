@@ -353,10 +353,10 @@ echo '{"number":7,"title":"t","state":"OPEN","url":"https://x/pull/7","statusChe
     #[test]
     fn create_status_posts_and_decodes() {
         // Log argv for assertion; answer the statuses POST with the
-        // API's array-shaped response.
+        // API's object-shaped response.
         let body = r#"#!/bin/sh
 printf '%s\n' "$@" > "$GH_FAKE_LOG"
-echo '[{"id":9,"state":"pending","context":"docs/deploy","description":"d","target_url":null,"created_at":"2025-01-01T00:00:00Z"}]'
+echo '{"id":9,"state":"pending","context":"docs/deploy","description":"d","target_url":null,"created_at":"2025-01-01T00:00:00Z"}'
 "#;
         let (dir, forge) = fake_gh(body);
         let repo = tempfile::tempdir().unwrap();

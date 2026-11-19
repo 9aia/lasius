@@ -150,7 +150,7 @@ pub fn decode_pr_list(json: &str) -> Result<Vec<PullRequest>, serde_json::Error>
 }
 
 /// One entry of the `POST /repos/{o}/{r}/statuses/{sha}` response —
-/// the API returns an array of the created status objects.
+/// the API returns a single status object.
 #[derive(Debug, Deserialize)]
 struct GhStatus {
     #[serde(default)]
@@ -167,23 +167,38 @@ struct GhStatus {
     created_at: Option<String>,
 }
 
-/// Decode a commit-status POST response → the first created status.
-/// The endpoint answers an array (usually one element); an empty
-/// array is a decode error — nothing was recorded.
+/// The POST answers a single status object; some gh/API versions
+/// wrap it in a one-element array — accept both. `Many` comes first:
+/// serde structs also deserialize from sequences, so `One` would
+/// otherwise swallow `[]` (all fields defaulted) and turn the
+/// empty-array error into a bogus all-defaults status.
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum GhStatusResponse {
+    Many(Vec<GhStatus>),
+    One(GhStatus),
+}
+
+/// Decode a commit-status POST response → the created status.
+/// Accepts the bare object or a single-element array; anything
+/// else (empty array included) is a decode error — nothing was
+/// recorded.
 pub fn decode_status(json: &str) -> Result<CommitStatus, serde_json::Error> {
-    let items: Vec<GhStatus> = serde_json::from_str(json)?;
-    items
-        .into_iter()
-        .next()
-        .map(|s| CommitStatus {
-            id: s.id,
-            state: s.state,
-            context: s.context,
-            description: s.description,
-            target_url: s.target_url,
-            created_at: s.created_at,
-        })
-        .ok_or_else(|| serde::de::Error::custom("commit-status response was an empty array"))
+    let item = match serde_json::from_str::<GhStatusResponse>(json)? {
+        GhStatusResponse::Many(items) => items
+            .into_iter()
+            .next()
+            .ok_or_else(|| serde::de::Error::custom("commit-status response was an empty array"))?,
+        GhStatusResponse::One(s) => s,
+    };
+    Ok(CommitStatus {
+        id: item.id,
+        state: item.state,
+        context: item.context,
+        description: item.description,
+        target_url: item.target_url,
+        created_at: item.created_at,
+    })
 }
 
 /// Extract the PR number from a `…/pull/<N>` URL — `gh pr create`
@@ -294,6 +309,18 @@ mod tests {
         assert_eq!(st.target_url.as_deref(), Some("https://x"));
         assert!(decode_status("[]").is_err());
         assert!(decode_status("nope").is_err());
+    }
+
+    #[test]
+    fn decodes_status_object_response() {
+        // The real POST answers a bare object, not an array.
+        let json = r#"{"id":8,"state":"success","context":"ci/build",
+            "description":"ok","target_url":null,"created_at":"2025-01-01T00:00:00Z"}"#;
+        let st = decode_status(json).unwrap();
+        assert_eq!(st.id, 8);
+        assert_eq!(st.state, "success");
+        assert_eq!(st.context, "ci/build");
+        assert!(st.target_url.is_none());
     }
 
     #[test]
