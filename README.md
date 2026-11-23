@@ -21,6 +21,14 @@ include_private = true                   # optional, default false
 `repos/` holds independent clones — no submodules, each repo keeps its
 own history and remotes. `*.code-workspace` is generated, never committed.
 
+Beyond the CLI, lasius ships two shared ports other repos consume:
+`lasius-vcs` (VCS ops — worktrees, commits, pushes, fetches) and
+`lasius-forge` (forge ops — PR create/merge/view/list, check reads,
+commit-status writes), both generic over the backend with `git`/`gh`
+impls. Consumers — bupha status reporting, pr-heal, docs-deploy,
+tarsi/mimus/kuda/sturn — go through the ports; nobody reimplements a
+forge or git client.
+
 ## Install
 
 The `lasius` command ships as a [tamias](https://github.com/9aia/tamias)

@@ -48,8 +48,16 @@ pre-commit runs `cargo fmt --all -- --check`, pre-push runs
 
 Lasius owns **git & workspace expertise** — repo discovery,
 clone/pull, status, editor workspace files, safe removal, plus the
-shared `lasius-vcs` port other repos consume (P-019). It does not own:
+shared `lasius-vcs` port other repos consume (P-019). The
+`lasius-forge` port is the same story for the forge surface —
+commit-status writes, check reads, PR ops — consumed by bupha, tarsi,
+mimus, kuda, and sturn rather than reimplemented per repo. It does
+not own:
 
+- **CI gate semantics** — gate workflows are peregrin campaigns;
+  lasius owns the forge API surface (`lasius-forge`), not what a
+  status means. bupha maps run results → commit statuses *through*
+  `lasius-forge`.
 - **myco** — the org work ledger; `project/` worktrees are managed by myco verbs, never by lasius.
 - **kuda** — code maps; per-repo `.kuda/` cards are that repo's concern.
 - **sturn** — ephemeral coordination; lasius doesn't claim files.
