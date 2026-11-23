@@ -8,6 +8,8 @@ repository.workspace = true
 
 [dependencies]
 lasius-vcs.workspace = true
+sha1 = "0.11"
+flate2 = "1"
 
 [dev-dependencies]
 tempfile = "3"

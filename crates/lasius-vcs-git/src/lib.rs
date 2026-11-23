@@ -4,10 +4,16 @@
 //! possible later impl behind the same trait).
 
 use std::io;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::sync::atomic::{AtomicU64, Ordering};
 
-use lasius_vcs::{CommitInfo, DiffStat, LogEntry, Vcs};
+use lasius_vcs::{CommitInfo, DiffStat, LogEntry, TreeOp, Vcs};
+
+mod odb;
+
+pub use odb::{object_id, tree_object};
 
 /// The git CLI backend.
 #[derive(Debug, Default, Clone, Copy)]
@@ -72,6 +78,58 @@ fn exec_out(repo: &Path, args: &[&str]) -> io::Result<String> {
     }
 }
 
+/// `git -C <repo> <args>…` with `input` on stdin → raw stdout
+/// bytes. Binary-safe counterpart of [`exec_out`] — `cat-file -p`
+/// on blobs and `archive` output don't survive UTF-8 trimming.
+fn exec_in(repo: &Path, args: &[&str], input: &[u8]) -> io::Result<Vec<u8>> {
+    let mut c = Command::new("git")
+        .arg("-C")
+        .arg(repo)
+        .args(args)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()?;
+    // take() closes stdin when the handle drops — the child sees
+    // EOF even when `input` is empty.
+    let write = c.stdin.take().map(|mut s| s.write_all(input));
+    let o = c.wait_with_output()?;
+    if let Some(Err(e)) = write {
+        return Err(e);
+    }
+    if o.status.success() {
+        Ok(o.stdout)
+    } else {
+        Err(io::Error::other(format!(
+            "git {}: {}",
+            args.join(" "),
+            String::from_utf8_lossy(&o.stderr).trim()
+        )))
+    }
+}
+
+/// `git -C <repo> <args>…` with `GIT_INDEX_FILE=<index>` → trimmed
+/// stdout. Scratch-index plumbing for [`Vcs::commit_overlay`].
+fn git_index_out(repo: &Path, index: &Path, args: &[&str]) -> io::Result<String> {
+    let o = Command::new("git")
+        .arg("-C")
+        .arg(repo)
+        .env("GIT_INDEX_FILE", index)
+        .args(args)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()?;
+    if o.status.success() {
+        Ok(String::from_utf8_lossy(&o.stdout).trim().to_string())
+    } else {
+        Err(io::Error::other(format!(
+            "git {}: {}",
+            args.join(" "),
+            String::from_utf8_lossy(&o.stderr).trim()
+        )))
+    }
+}
+
 /// `dir`'s path can't ride git's argv — refuse rather than pass an
 /// empty string that would target the wrong directory.
 fn path_arg(p: &Path) -> io::Result<&str> {
@@ -102,7 +160,10 @@ impl Vcs for GitVcs {
     }
 
     fn has_commit(&self, repo: &Path, sha: &str) -> bool {
-        git_ok(repo, &["cat-file", "-e", sha])
+        // Loose-object fast path; `cat-file -e` covers packs and
+        // alternates (`cat-file -e` is object-generic, not
+        // commit-only).
+        odb::object_exists(repo, sha) || git_ok(repo, &["cat-file", "-e", sha])
     }
 
     fn commits(&self, repo: &Path, rev: &str, limit: usize) -> Vec<CommitInfo> {
@@ -566,6 +627,220 @@ impl Vcs for GitVcs {
         git_out(repo, &["push", "-u", remote, branch.unwrap_or("HEAD")]).map(|_| ())
     }
 
+    // -- object database ----------------------------------------------------
+
+    fn write_object(&self, repo: &Path, kind: &str, payload: &[u8]) -> io::Result<String> {
+        // Loose-object fast path; plumbing covers the layouts the
+        // direct writer can't resolve (sha256 odb, GIT_DIR env, …).
+        match odb::write_object(repo, kind, payload) {
+            Ok(sha) => Ok(sha),
+            Err(_) => {
+                let out = exec_in(repo, &["hash-object", "-w", "-t", kind, "--stdin"], payload)?;
+                Ok(first_line(&String::from_utf8_lossy(&out)))
+            }
+        }
+    }
+
+    fn read_object(&self, repo: &Path, sha: &str) -> io::Result<Option<(String, Vec<u8>)>> {
+        match odb::read_object(repo, sha)? {
+            Some(o) => Ok(Some(o)),
+            None => {
+                // Packed/alternate/absent — ask plumbing. A failed
+                // `cat-file -t` means the object isn't there.
+                let kind = match exec_out(repo, &["cat-file", "-t", sha]) {
+                    Ok(k) => k,
+                    Err(_) => return Ok(None),
+                };
+                let data = exec_in(repo, &["cat-file", "-p", sha], &[])?;
+                Ok(Some((kind, data)))
+            }
+        }
+    }
+
+    fn read_at(&self, repo: &Path, rev: &str, path: &str) -> io::Result<Option<Vec<u8>>> {
+        match odb::read_at(repo, rev, path) {
+            Ok(Some(b)) => Ok(Some(b)),
+            _ => {
+                // Loose walk missed — resolve the entry, then read
+                // the blob by id so a missing path is `None`, not
+                // a cat-file error.
+                let Some(oid) = self.entry_oid(repo, rev, path)? else {
+                    return Ok(None);
+                };
+                match self.read_object(repo, &oid)? {
+                    Some((kind, data)) if kind == "blob" => Ok(Some(data)),
+                    _ => Ok(None),
+                }
+            }
+        }
+    }
+
+    fn entry_oid(&self, repo: &Path, rev: &str, path: &str) -> io::Result<Option<String>> {
+        match odb::entry_oid(repo, rev, path) {
+            Ok(Some(s)) => Ok(Some(s)),
+            _ => {
+                let spec = format!("{rev}:{path}");
+                match exec_out(repo, &["rev-parse", "-q", "--verify", &spec]) {
+                    Ok(s) => {
+                        let s = first_line(&s);
+                        Ok((!s.is_empty()).then_some(s))
+                    }
+                    Err(_) => Ok(None),
+                }
+            }
+        }
+    }
+
+    fn list_tree(&self, repo: &Path, rev: &str) -> io::Result<Vec<String>> {
+        match odb::list_tree(repo, rev) {
+            Ok(Some(paths)) => Ok(paths),
+            _ => {
+                let out = exec_out(repo, &["ls-tree", "-r", "--name-only", rev])?;
+                Ok(out
+                    .lines()
+                    .map(str::trim)
+                    .filter(|l| !l.is_empty())
+                    .map(str::to_string)
+                    .collect())
+            }
+        }
+    }
+
+    fn write_tree(&self, repo: &Path, entries: &[(u32, &str, &str)]) -> io::Result<String> {
+        // Payload built + stored directly; `mktree` covers the
+        // layouts the loose writer can't resolve.
+        let built = tree_object(entries).and_then(|t| odb::write_object(repo, "tree", &t).ok());
+        match built {
+            Some(t) => Ok(t),
+            None => {
+                let mut input = String::new();
+                for (mode, name, sha) in entries {
+                    // Tree objects store no type — mktree's input
+                    // does: 040000→tree, 160000→commit, else blob.
+                    let kind = if *mode == 0o40000 {
+                        "tree"
+                    } else if *mode == 0o160000 {
+                        "commit"
+                    } else {
+                        "blob"
+                    };
+                    input.push_str(&format!("{mode:o} {kind} {sha}\t{name}\n"));
+                }
+                let out = exec_in(repo, &["mktree"], input.as_bytes())?;
+                Ok(first_line(&String::from_utf8_lossy(&out)))
+            }
+        }
+    }
+
+    fn commit_tree(
+        &self,
+        repo: &Path,
+        tree: &str,
+        parents: &[&str],
+        message: &str,
+    ) -> io::Result<String> {
+        // Direct object write (ident via `git var`, cached); the
+        // plumbing fallback covers date envs and ident failures.
+        match odb::commit(repo, tree, parents, message) {
+            Ok(c) => Ok(c),
+            Err(_) => {
+                let mut args: Vec<&str> = vec!["commit-tree", tree];
+                for p in parents {
+                    args.extend(["-p", p]);
+                }
+                args.extend(["-m", message]);
+                exec_out(repo, &args)
+            }
+        }
+    }
+
+    fn commit_overlay(
+        &self,
+        repo: &Path,
+        base: &str,
+        ops: &[TreeOp],
+        message: &str,
+        branch: &str,
+    ) -> io::Result<String> {
+        // Per-call scratch index — two overlays in one process must
+        // not share GIT_INDEX_FILE or they interleave updates.
+        static N: AtomicU64 = AtomicU64::new(0);
+        let idx = std::env::temp_dir().join(format!(
+            "lasius-index-{}-{}",
+            std::process::id(),
+            N.fetch_add(1, Ordering::Relaxed)
+        ));
+        git_index_out(repo, &idx, &["read-tree", base])?;
+        for op in ops {
+            match op {
+                TreeOp::Write { path, oid } => {
+                    // 3-arg cacheinfo — no comma-escaping pitfalls
+                    // for paths containing ','.
+                    git_index_out(
+                        repo,
+                        &idx,
+                        &["update-index", "--add", "--cacheinfo", "100644", oid, path],
+                    )?;
+                }
+                TreeOp::Delete { path } => {
+                    git_index_out(repo, &idx, &["update-index", "--force-remove", path])?;
+                }
+            }
+        }
+        let tree = git_index_out(repo, &idx, &["write-tree"])?;
+        let _ = std::fs::remove_file(&idx);
+        let commit = self.commit_tree(repo, &tree, &[base], message)?;
+        self.update_ref(repo, &format!("refs/heads/{branch}"), &commit, None)?;
+        Ok(commit)
+    }
+
+    // -- refs ----------------------------------------------------------------
+
+    fn read_ref(&self, repo: &Path, refname: &str) -> io::Result<Option<String>> {
+        match odb::read_ref(repo, refname) {
+            Ok(Some(s)) => Ok(Some(s)),
+            Ok(None) | Err(_) => {
+                // Reftable backends and other exotic layouts —
+                // plumbing resolves what the loose scan can't.
+                match exec_out(repo, &["rev-parse", "-q", "--verify", refname]) {
+                    Ok(s) => {
+                        let s = first_line(&s);
+                        Ok((!s.is_empty()).then_some(s))
+                    }
+                    Err(_) => Ok(None),
+                }
+            }
+        }
+    }
+
+    fn update_ref(
+        &self,
+        repo: &Path,
+        refname: &str,
+        new: &str,
+        old: Option<&str>,
+    ) -> io::Result<()> {
+        let mut args: Vec<&str> = vec!["update-ref", refname, new];
+        if let Some(o) = old {
+            args.push(o);
+        }
+        exec_out(repo, &args).map(|_| ())
+    }
+
+    fn delete_ref(&self, repo: &Path, refname: &str) -> io::Result<()> {
+        exec_out(repo, &["update-ref", "-d", refname]).map(|_| ())
+    }
+
+    fn list_refs(&self, repo: &Path, prefix: &str) -> io::Result<Vec<String>> {
+        let out = exec_out(repo, &["for-each-ref", "--format=%(refname)", prefix])?;
+        Ok(out
+            .lines()
+            .map(str::trim)
+            .filter(|l| !l.is_empty())
+            .map(str::to_string)
+            .collect())
+    }
+
     // -- raw passthrough -----------------------------------------------------
 
     fn exec(&self, repo: &Path, args: &[&str]) -> bool {
@@ -574,6 +849,10 @@ impl Vcs for GitVcs {
 
     fn exec_out(&self, repo: &Path, args: &[&str]) -> io::Result<String> {
         exec_out(repo, args)
+    }
+
+    fn exec_in(&self, repo: &Path, args: &[&str], input: &[u8]) -> io::Result<Vec<u8>> {
+        exec_in(repo, args, input)
     }
 }
 
@@ -884,6 +1163,104 @@ mod tests {
         v.rebase(&wt, &main_head).unwrap();
         assert!(!v.rebase_in_progress(&wt));
         assert!(v.worktree_remove(&repo, &wt));
+    }
+
+    #[test]
+    fn odb_refs_overlay_and_exec_in() {
+        let (_t, repo) = fixture();
+        ident(&repo);
+        let v = GitVcs;
+        let head = v.head(&repo).unwrap();
+
+        // object write/read round-trip — binary-safe payload
+        let payload: &[u8] = b"blob-bytes\x00\xff";
+        let sha = v.write_object(&repo, "blob", payload).unwrap();
+        assert_eq!(sha, object_id("blob", payload));
+        let (kind, data) = v.read_object(&repo, &sha).unwrap().unwrap();
+        assert_eq!(kind, "blob");
+        assert_eq!(data, payload);
+        assert!(v.read_object(&repo, &"0".repeat(40)).unwrap().is_none());
+        assert!(v.has_commit(&repo, &sha));
+
+        // rev:path reads, entry oid, tree listing
+        assert_eq!(
+            v.read_at(&repo, "HEAD", "a.txt").unwrap().unwrap(),
+            b"one\n"
+        );
+        assert!(v.read_at(&repo, "HEAD", "missing.txt").unwrap().is_none());
+        let oid = v.entry_oid(&repo, "HEAD", "a.txt").unwrap().unwrap();
+        assert_eq!(oid, v.write_object(&repo, "blob", b"one\n").unwrap());
+        assert_eq!(v.entry_oid(&repo, "HEAD", "nope").unwrap(), None);
+        assert_eq!(
+            v.list_tree(&repo, "HEAD").unwrap(),
+            vec!["a.txt".to_string(), "b.txt".to_string()]
+        );
+
+        // refs: write/read/CAS/delete/list
+        v.update_ref(&repo, "refs/heads/side", &head, None).unwrap();
+        assert_eq!(
+            v.read_ref(&repo, "refs/heads/side").unwrap().as_deref(),
+            Some(head.as_str())
+        );
+        let older = v.resolve(&repo, "HEAD~1").unwrap();
+        assert!(v
+            .update_ref(&repo, "refs/heads/side", &head, Some(&older))
+            .is_err());
+        let refs = v.list_refs(&repo, "refs/heads/").unwrap();
+        assert!(refs.iter().any(|r| r == "refs/heads/side"));
+        v.delete_ref(&repo, "refs/heads/side").unwrap();
+        assert_eq!(v.read_ref(&repo, "refs/heads/side").unwrap(), None);
+
+        // tree + commit objects
+        let blob = v.write_object(&repo, "blob", b"new\n").unwrap();
+        let tree = v.write_tree(&repo, &[(0o100644, "c.txt", &blob)]).unwrap();
+        let c = v
+            .commit_tree(&repo, &tree, &[&head], "test: overlay base")
+            .unwrap();
+        assert!(v.has_commit(&repo, &c));
+
+        // overlay commit: write + delete land on the branch, the
+        // worktree and index stay untouched
+        let commit = v
+            .commit_overlay(
+                &repo,
+                &head,
+                &[
+                    TreeOp::Write {
+                        path: "c.txt".into(),
+                        oid: blob.clone(),
+                    },
+                    TreeOp::Delete {
+                        path: "b.txt".into(),
+                    },
+                ],
+                "test: overlay",
+                "overlay-br",
+            )
+            .unwrap();
+        assert_eq!(
+            v.read_ref(&repo, "refs/heads/overlay-br")
+                .unwrap()
+                .as_deref(),
+            Some(commit.as_str())
+        );
+        assert_eq!(
+            v.read_at(&repo, &commit, "c.txt").unwrap().unwrap(),
+            b"new\n"
+        );
+        assert!(v.read_at(&repo, &commit, "b.txt").unwrap().is_none());
+        assert_eq!(
+            v.read_at(&repo, &commit, "a.txt").unwrap().unwrap(),
+            b"one\n"
+        );
+        assert!(repo.join("a.txt").exists() && !repo.join("c.txt").exists());
+        assert!(!v.has_changes(&repo).unwrap());
+
+        // stdin passthrough — binary-safe hash-object
+        let via_stdin = v
+            .exec_in(&repo, &["hash-object", "-w", "--stdin"], payload)
+            .unwrap();
+        assert_eq!(via_stdin, format!("{sha}\n").into_bytes());
     }
 
     #[test]
