@@ -740,10 +740,20 @@ impl Vcs for GitVcs {
         message: &str,
     ) -> io::Result<String> {
         // Direct object write (ident via `git var`, cached); the
-        // plumbing fallback covers date envs and ident failures.
-        match odb::commit(repo, tree, parents, message) {
-            Ok(c) => Ok(c),
-            Err(_) => {
+        // plumbing fallback covers date envs, ident failures, and
+        // parent revs the loose resolver can't peel (fancy syntax —
+        // `commit-tree` resolves those itself).
+        let resolved: Option<Vec<String>> = parents
+            .iter()
+            .map(|p| odb::resolve(repo, p).ok().flatten())
+            .collect();
+        let fast = resolved.and_then(|shas| {
+            let refs: Vec<&str> = shas.iter().map(String::as_str).collect();
+            odb::commit(repo, tree, &refs, message).ok()
+        });
+        match fast {
+            Some(c) => Ok(c),
+            None => {
                 let mut args: Vec<&str> = vec!["commit-tree", tree];
                 for p in parents {
                     args.extend(["-p", p]);
