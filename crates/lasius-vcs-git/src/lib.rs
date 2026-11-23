@@ -193,6 +193,58 @@ impl Vcs for GitVcs {
             .collect()
     }
 
+    fn diff_names(&self, repo: &Path, spec: &str) -> io::Result<Vec<String>> {
+        exec_out(repo, &["diff", "--name-only", spec]).map(|s| {
+            s.lines()
+                .map(str::trim)
+                .filter(|l| !l.is_empty())
+                .map(str::to_string)
+                .collect()
+        })
+    }
+
+    fn hash_object(&self, repo: &Path, path: &str) -> Option<String> {
+        exec_out(repo, &["hash-object", "--", path])
+            .ok()
+            .map(|s| first_line(&s))
+            .filter(|s| !s.is_empty())
+    }
+
+    fn hash_objects(&self, repo: &Path, paths: &[&str]) -> Vec<Option<String>> {
+        if paths.is_empty() {
+            return Vec::new();
+        }
+        let mut args: Vec<&str> = vec!["hash-object", "--"];
+        args.extend_from_slice(paths);
+        match exec_out(repo, &args) {
+            Ok(out) => {
+                let hashes: Vec<String> = out
+                    .lines()
+                    .map(str::trim)
+                    .filter(|l| !l.is_empty())
+                    .map(str::to_string)
+                    .collect();
+                if hashes.len() == paths.len() {
+                    hashes.into_iter().map(Some).collect()
+                } else {
+                    // Partial output means the backend disagreed —
+                    // degrade per-file rather than misalign.
+                    paths.iter().map(|p| self.hash_object(repo, p)).collect()
+                }
+            }
+            // One unreadable path fails the whole spawn — fall back
+            // to per-file so the good entries still resolve.
+            Err(_) => paths.iter().map(|p| self.hash_object(repo, p)).collect(),
+        }
+    }
+
+    fn rev_parse_verify(&self, repo: &Path, rev: &str) -> Option<String> {
+        exec_out(repo, &["rev-parse", "-q", "--verify", rev])
+            .ok()
+            .map(|s| first_line(&s))
+            .filter(|s| !s.is_empty())
+    }
+
     fn tags(&self, repo: &Path) -> Vec<String> {
         git_out(repo, &["tag", "-l"])
             .map(|s| {
@@ -884,6 +936,54 @@ mod tests {
         v.rebase(&wt, &main_head).unwrap();
         assert!(!v.rebase_in_progress(&wt));
         assert!(v.worktree_remove(&repo, &wt));
+    }
+
+    #[test]
+    fn diff_names_hash_object_and_rev_parse_verify() {
+        let (_t, repo) = fixture();
+        let v = GitVcs;
+
+        // diff_names — same names `git diff --name-only` reports
+        assert_eq!(
+            v.diff_names(&repo, "HEAD~1..HEAD").unwrap(),
+            vec!["b.txt".to_string()]
+        );
+        assert_eq!(
+            v.diff_names(&repo, "v0.1.0..HEAD").unwrap(),
+            vec!["b.txt".to_string()]
+        );
+        assert!(v.diff_names(&repo, "no-such-rev..HEAD").is_err());
+
+        // hash_object — the blob id `git hash-object` prints,
+        // single and batched; missing file → None
+        let want = exec_out(&repo, &["hash-object", "--", "a.txt"])
+            .unwrap()
+            .trim()
+            .to_string();
+        assert_eq!(
+            v.hash_object(&repo, "a.txt").as_deref(),
+            Some(want.as_str())
+        );
+        assert_eq!(
+            v.hash_objects(&repo, &["a.txt", "b.txt", "missing.txt"]),
+            vec![Some(want.clone()), v.hash_object(&repo, "b.txt"), None]
+        );
+        assert!(v.hash_objects(&repo, &[]).is_empty());
+
+        // rev_parse_verify — raw `rev-parse --verify`, no peel:
+        // HEAD and the lightweight tag resolve; garbage doesn't
+        let head = v.head(&repo).unwrap();
+        assert_eq!(
+            v.rev_parse_verify(&repo, "HEAD").as_deref(),
+            Some(head.as_str())
+        );
+        assert_eq!(
+            v.rev_parse_verify(&repo, "refs/tags/v0.1.0"),
+            v.rev_parse_verify(&repo, "HEAD~1")
+        );
+        assert!(v.rev_parse_verify(&repo, "no-such-rev").is_none());
+        // a range is not a single rev — verify refuses it
+        assert!(v.rev_parse_verify(&repo, "HEAD~1..HEAD").is_none());
     }
 
     #[test]

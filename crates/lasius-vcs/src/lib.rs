@@ -71,6 +71,24 @@ pub trait Vcs: Send + Sync {
     fn commits(&self, repo: &Path, rev: &str, limit: usize) -> Vec<CommitInfo>;
     /// Per-file added/deleted counts between two revisions.
     fn diff_stat(&self, repo: &Path, from: &str, to: &str) -> Vec<DiffStat>;
+    /// `diff --name-only <spec>` — repo-relative paths the spec
+    /// touches (`HEAD~1..HEAD`, `origin/main...HEAD`, …). `Err`
+    /// carries the backend's stderr.
+    fn diff_names(&self, repo: &Path, spec: &str) -> io::Result<Vec<String>>;
+    /// `hash-object <path>` — the git blob id of the file's
+    /// current bytes, computed without writing the object.
+    /// `None` on backend failure or a missing/unreadable file.
+    fn hash_object(&self, repo: &Path, path: &str) -> Option<String>;
+    /// Batched [`Vcs::hash_object`] — results align with `paths`
+    /// (`None` = that entry failed). Default loops the single op;
+    /// impls may spawn once.
+    fn hash_objects(&self, repo: &Path, paths: &[&str]) -> Vec<Option<String>> {
+        paths.iter().map(|p| self.hash_object(repo, p)).collect()
+    }
+    /// `rev-parse --verify <rev>` — resolve a single revision to
+    /// its object id *without* peeling (`resolve` appends
+    /// `^{commit}`). `None` when `rev` doesn't resolve.
+    fn rev_parse_verify(&self, repo: &Path, rev: &str) -> Option<String>;
     /// All tag names (annotated + lightweight), sorted.
     fn tags(&self, repo: &Path) -> Vec<String>;
     /// `git describe`-style: nearest tag + distance, or sha fallback.
