@@ -29,6 +29,13 @@ cd "$ROOT"
 # tool dirs in ourselves (same trick scripts/ci.sh uses).
 export PATH="$HOME/.bun/bin:$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 
+# Push hooks export GIT_DIR (absolute for linked worktrees); inside
+# the materialized docs/ worktree it would hijack `git diff` onto the
+# parent worktree's index/HEAD. Drop hook-injected git env — every
+# git call below uses `-C "$ROOT"` or runs inside the docs worktree.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY \
+  GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_COMMON_DIR GIT_PREFIX
+
 cypera_bin() {
   if command -v cypera >/dev/null 2>&1; then
     cypera "$@"
