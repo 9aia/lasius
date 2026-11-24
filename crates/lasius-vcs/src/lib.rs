@@ -53,6 +53,17 @@ pub struct DiffStat {
     pub deleted: u64,
 }
 
+/// One path mutation applied on top of a commit's tree by
+/// [`Vcs::commit_overlay`] — the batch is applied in order, so a
+/// `Delete` after a `Write` on the same path wins.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TreeOp {
+    /// Set `path` to the blob object `oid` (mode `100644`).
+    Write { path: String, oid: String },
+    /// Remove `path` from the tree.
+    Delete { path: String },
+}
+
 /// The VCS port. All methods take the repo root; `None`/`Err`
 /// conventions are per-method (bool = success probe, Option =
 /// lookup miss).
@@ -222,6 +233,69 @@ pub trait Vcs: Send + Sync {
     /// Delete a local tag.
     fn delete_tag(&self, repo: &Path, tag: &str) -> bool;
 
+    // -- object database ----------------------------------------------------
+
+    /// Store `payload` as an object of `kind` (`blob`, `tree`,
+    /// `commit`, `tag`); returns its content id — `hash-object -w
+    /// -t` semantics. Backends may write loose objects directly and
+    /// fall back to plumbing on layouts they can't resolve.
+    fn write_object(&self, repo: &Path, kind: &str, payload: &[u8]) -> io::Result<String>;
+    /// Read an object → (kind, payload). `None` when the object is
+    /// absent; packed objects resolve via plumbing.
+    fn read_object(&self, repo: &Path, sha: &str) -> io::Result<Option<(String, Vec<u8>)>>;
+    /// `<rev>:<path>` → the entry's blob bytes. `None` when `rev`
+    /// doesn't resolve, the path is absent, or it isn't a blob.
+    fn read_at(&self, repo: &Path, rev: &str, path: &str) -> io::Result<Option<Vec<u8>>>;
+    /// `<rev>:<path>` → the entry's object id (blob or tree). `None`
+    /// on any miss — the cheap lookup when only identity matters.
+    fn entry_oid(&self, repo: &Path, rev: &str, path: &str) -> io::Result<Option<String>>;
+    /// `ls-tree -r --name-only <rev>` — every path under `rev`'s
+    /// tree, sorted. `Err` when `rev` doesn't resolve or the
+    /// backend fails.
+    fn list_tree(&self, repo: &Path, rev: &str) -> io::Result<Vec<String>>;
+    /// Build a tree object from `(mode, name, sha)` entries and
+    /// store it — `mktree` semantics; entries sort per git rules.
+    fn write_tree(&self, repo: &Path, entries: &[(u32, &str, &str)]) -> io::Result<String>;
+    /// `commit-tree` semantics — build and store a commit object
+    /// over `tree` with `parents` (empty = root commit).
+    fn commit_tree(
+        &self,
+        repo: &Path,
+        tree: &str,
+        parents: &[&str],
+        message: &str,
+    ) -> io::Result<String>;
+    /// Apply `ops` on top of `base`'s tree and commit the result to
+    /// `refs/heads/<branch>` — index/worktree untouched (a scratch
+    /// index internally). Returns the new commit sha.
+    fn commit_overlay(
+        &self,
+        repo: &Path,
+        base: &str,
+        ops: &[TreeOp],
+        message: &str,
+        branch: &str,
+    ) -> io::Result<String>;
+
+    // -- refs ----------------------------------------------------------------
+
+    /// Resolve `refname` to its sha without peeling tags/commits.
+    /// `None` when the ref doesn't exist.
+    fn read_ref(&self, repo: &Path, refname: &str) -> io::Result<Option<String>>;
+    /// `update-ref <refname> <new> [<old>]` — CAS when `old` is
+    /// `Some`; `Some("")` asserts the ref must not exist yet.
+    fn update_ref(
+        &self,
+        repo: &Path,
+        refname: &str,
+        new: &str,
+        old: Option<&str>,
+    ) -> io::Result<()>;
+    /// `update-ref -d <refname>`.
+    fn delete_ref(&self, repo: &Path, refname: &str) -> io::Result<()>;
+    /// `for-each-ref` under `prefix` — full refnames, sorted.
+    fn list_refs(&self, repo: &Path, prefix: &str) -> io::Result<Vec<String>>;
+
     // -- raw passthrough ---------------------------------------------------
 
     /// Backend CLI probe — `args` appended after the repo selector;
@@ -236,6 +310,11 @@ pub trait Vcs: Send + Sync {
     /// `commit`/`commit-tree` on machines with no configured
     /// identity).
     fn exec_out(&self, repo: &Path, args: &[&str]) -> io::Result<String>;
+    /// [`Vcs::exec_out`] with `input` on stdin and raw stdout bytes
+    /// returned — the binary-safe counterpart for plumbing that
+    /// pipes payloads (`hash-object --stdin`, `mktree`, `cat-file -p`
+    /// on blobs, `archive`).
+    fn exec_in(&self, repo: &Path, args: &[&str], input: &[u8]) -> io::Result<Vec<u8>>;
 }
 
 #[cfg(test)]
