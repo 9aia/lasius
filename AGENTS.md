@@ -15,7 +15,7 @@ the `bins[]` shim passthrough (P-021/T-012).
 | Crate | Role |
 | --- | --- |
 | `crates/lasius-core` | `lasius.toml` model (incl. `provider`), `gh repo list` JSON decoding, failure classification, repo-name safety + exclude globs, `git status --porcelain=v2` parse/format, `*.code-workspace` generation — pure, unit-tested |
-| `crates/lasius-vcs` | VCS port — union trait (history/worktree/tag/sync + agent-mutation ops: `worktree_add_branch`, `stage_all`, `commit`, `fetch`, `push_branch`) shared by tarsi/mimus/bupha/kuda/sturn consumers (P-019) |
+| `crates/lasius-vcs` | VCS port — union trait (history/worktree/tag/sync + object-db/refs/overlay-commit + agent-mutation ops: `worktree_add_branch`, `stage_all`, `commit`, `fetch`, `push_branch`, `diff_names`, `hash_object(s)`, `rev_parse_verify`) shared by tarsi/mimus/bupha/kuda/sturn consumers (P-019, widened P-049/P-050) |
 | `crates/lasius-vcs-git` | git impl of `lasius-vcs` — shells out to the `git` binary |
 | `crates/lasius-forge` | Forge port — PR create/merge/view/list + check-status reads + commit-status writes (`create_status`), generic over the backend; `gh`-shaped JSON decoding lives in `lasius_forge::gh` (the `lasius-core::gh` precedent) |
 | `crates/lasius-forge-gh` | GitHub impl of `lasius-forge` — shells out to the `gh` binary |
