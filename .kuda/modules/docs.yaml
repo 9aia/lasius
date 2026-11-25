@@ -7,9 +7,9 @@ api:
   file: docs/explanation/architecture.md
   line: 1
   module: docs
-- name: Bootstrap a workspace repo
+- name: Boundaries
   kind: record
-  file: docs/tutorials/bootstrap.md
+  file: docs/explanation/boundaries.md
   line: 1
   module: docs
 - name: Command-Line Help for `lasius`
@@ -17,9 +17,19 @@ api:
   file: docs/reference/cli.md
   line: 1
   module: docs
+- name: Concepts
+  kind: record
+  file: docs/explanation/concepts.md
+  line: 1
+  module: docs
 - name: Config — `lasius.toml`
   kind: record
   file: docs/reference/config.md
+  line: 1
+  module: docs
+- name: Decisions
+  kind: record
+  file: docs/explanation/decisions.md
   line: 1
   module: docs
 - name: Embed via serve
@@ -34,7 +44,7 @@ api:
   module: docs
 - name: Getting started
   kind: record
-  file: docs/getting-started.md
+  file: docs/tutorials/getting-started.md
   line: 1
   module: docs
 - name: Include private repos
@@ -55,21 +65,24 @@ api:
 deps: []
 notes: ''
 verify:
+- docs/.vitepress/theme/index.ts
 - docs/package.json
 - docs/.vitepress/config.ts
 - docs/explanation/architecture.md
-- docs/getting-started.md
+- docs/explanation/boundaries.md
+- docs/explanation/concepts.md
+- docs/explanation/decisions.md
 - docs/how-to/exclude-repos.md
 - docs/how-to/exec-everywhere.md
 - docs/how-to/private-repos.md
-- docs/how-to/serve.md
-- docs/index.md
-- docs/reference/cli.md
 provenance:
   files:
   - docs/.vitepress/config.ts
+  - docs/.vitepress/theme/index.ts
   - docs/explanation/architecture.md
-  - docs/getting-started.md
+  - docs/explanation/boundaries.md
+  - docs/explanation/concepts.md
+  - docs/explanation/decisions.md
   - docs/how-to/exclude-repos.md
   - docs/how-to/exec-everywhere.md
   - docs/how-to/private-repos.md
@@ -79,21 +92,24 @@ provenance:
   - docs/reference/cli.md
   - docs/reference/config.md
   - docs/reference/serve.md
-  - docs/tutorials/bootstrap.md
+  - docs/tutorials/getting-started.md
   hashes:
-  - 8c364161c5ccef28cb58cb61e369d2c5e131c9c0
-  - eb75487f46a79ad6fbd9efcd2d9bacedca185b39
-  - 3e7a1940815c189c0d2f60ea4a9c5ea025c43d76
-  - 53824c05c793ee2e7cf94603e70d29460139428e
-  - 3ec9165f7ccfd62b7ea3781db6e8313475052f8e
-  - bf5a812238afc324ce0647a8c155618fcb149dce
-  - 8d0b1b5bbf4636212443f258d653304a50945f56
-  - 48352f33f3dfd9dce8716292a4f432afc2af6c9d
-  - fc795016ced22ded9c445d3080e20312986f9c15
-  - c5158fc72338bc23b1057e94cf95c380f3d8fcec
+  - 01545f8c8348054d62f30a51581cc82e8e489968
+  - 73ba647e82ab0f8fec74d915003400b21fa6898b
+  - 020e8e37f90b008b705577589d4d869954334289
+  - 494dfcfaeca042544d5b288b80a226aa151fc7bb
+  - 1cb01e6842a4bd279001be4bd95dfcecd854739f
+  - 68a92c1853e3738a980cb526893bb3010eceffb3
+  - 594c852629f3c08e991deeec2b26dad55d1ecf16
+  - ee10b35478205e05c2f593a1b9320c8aa703ef34
+  - b2ca8d9800954cfacf663d62d72c4a26d6c9042e
+  - f08652d6881f0aa91869dd73937a1ee5b3263acc
+  - 0007d34d929ec7986a763e463c1a1986760a138a
+  - ddae7494e99f785c6f76fcab7b0694a118f291a1
+  - bd5724ef13bc4d924268a6de5e29ec411fd92306
   - 3bc5e844173125458b523396da69621b609697f4
-  - 79965e3456be1ef8e96c80bb20a6e25ab484fe10
-  - 16ff1605e8c86f31e76ee3f89ecb003f7e4f3b93
-  commit_sha: 46bbd0111c8b5642aece37d711d84e0285e1360d
-  generated_at: '1794762043'
+  - e6908d03bbdb3d9530363226717254855b017f69
+  - 06ab878a9bdf8df24cefea8b7fc544b3af99fd6d
+  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
+  generated_at: '1795566207'
   generator: kuda-template/0.1.4

@@ -1,7 +1,17 @@
 name: sturn-wal
-path: refs/sturn/wal/devin
+path: refs/sturn/wal/decoupling-pl-030
 purpose: sturn coordination WAL — claims, writes, snaps, review events in refs/sturn/*
 api:
+- name: luis:claim@decoupling-pl-030#a4920e18
+  kind: record
+  file: refs/sturn/wal/decoupling-pl-030
+  line: 1
+  module: sturn-wal
+- name: luis:claim@decoupling-pl-031#c4e64ee6
+  kind: record
+  file: refs/sturn/wal/decoupling-pl-031
+  line: 1
+  module: sturn-wal
 - name: luis:claim@devin#392d9043
   kind: record
   file: refs/sturn/wal/devin
@@ -62,6 +72,16 @@ api:
   file: refs/sturn/wal/devin
   line: 15
   module: sturn-wal
+- name: luis:claim@devin-docs-gate#7f64c57c
+  kind: record
+  file: refs/sturn/wal/devin-docs-gate
+  line: 1
+  module: sturn-wal
+- name: luis:claim@devin-shim#7809bd84
+  kind: record
+  file: refs/sturn/wal/devin-shim
+  line: 1
+  module: sturn-wal
 - name: luis:claim@devin-vcs-port#97786ab2
   kind: record
   file: refs/sturn/wal/devin-vcs-port
@@ -77,6 +97,21 @@ api:
   file: refs/sturn/wal/devin-vcs-port
   line: 1
   module: sturn-wal
+- name: luis:claim@docs-gate#77e741b7
+  kind: record
+  file: refs/sturn/wal/docs-gate
+  line: 1
+  module: sturn-wal
+- name: luis:claim@docs-gate#cdc300c0
+  kind: record
+  file: refs/sturn/wal/docs-gate
+  line: 2
+  module: sturn-wal
+- name: luis:claim@docs-gate#d6e00382
+  kind: record
+  file: refs/sturn/wal/docs-gate
+  line: 3
+  module: sturn-wal
 - name: luis:claim@docs-sweep#b621ec46
   kind: record
   file: refs/sturn/wal/docs-sweep
@@ -86,6 +121,11 @@ api:
   kind: record
   file: refs/sturn/wal/docs-sweep
   line: 2
+  module: sturn-wal
+- name: luis:claim@docs-tutorial-merge#c00a727e
+  kind: record
+  file: refs/sturn/wal/docs-tutorial-merge
+  line: 1
   module: sturn-wal
 - name: luis:claim@lasius#0345aa3f
   kind: record
@@ -102,6 +142,11 @@ api:
   file: refs/sturn/wal/lasius
   line: 7
   module: sturn-wal
+- name: luis:claim@lasius#2cf6c9c0
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 16
+  module: sturn-wal
 - name: luis:claim@lasius#2e983de5
   kind: record
   file: refs/sturn/wal/lasius
@@ -116,6 +161,26 @@ api:
   kind: record
   file: refs/sturn/wal/lasius
   line: 1
+  module: sturn-wal
+- name: luis:claim@lasius#9946759c
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 18
+  module: sturn-wal
+- name: luis:claim@lasius#bad9fc2c
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 19
+  module: sturn-wal
+- name: luis:claim@lasius#c1f72ecf
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 20
+  module: sturn-wal
+- name: luis:claim@lasius#f362fb80
+  kind: record
+  file: refs/sturn/wal/lasius
+  line: 21
   module: sturn-wal
 - name: luis:claim@lasius#fc7aa7e1
   kind: record
@@ -137,102 +202,53 @@ api:
   file: refs/sturn/wal/main
   line: 8
   module: sturn-wal
-- name: luis:claim@main#2f4d1a62
-  kind: record
-  file: refs/sturn/wal/main
-  line: 11
-  module: sturn-wal
-- name: luis:claim@main#43a86aba
-  kind: record
-  file: refs/sturn/wal/main
-  line: 2
-  module: sturn-wal
-- name: luis:claim@main#708365ce
-  kind: record
-  file: refs/sturn/wal/main
-  line: 1
-  module: sturn-wal
-- name: luis:claim@main#8581b73b
-  kind: record
-  file: refs/sturn/wal/main
-  line: 10
-  module: sturn-wal
-- name: luis:claim@main#8b67cbef
-  kind: record
-  file: refs/sturn/wal/main
-  line: 5
-  module: sturn-wal
-- name: luis:claim@main#a459cc62
-  kind: record
-  file: refs/sturn/wal/main
-  line: 7
-  module: sturn-wal
-- name: luis:claim@main#bef4fa35
-  kind: record
-  file: refs/sturn/wal/main
-  line: 9
-  module: sturn-wal
-- name: luis:claim@main#f14f901f
-  kind: record
-  file: refs/sturn/wal/main
-  line: 3
-  module: sturn-wal
-- name: luis:claim@pl014-e1#900b35f4
-  kind: record
-  file: refs/sturn/wal/pl014-e1
-  line: 1
-  module: sturn-wal
-- name: luis:claim@pl014-e1#e3c2bbfa
-  kind: record
-  file: refs/sturn/wal/pl014-e1
-  line: 2
-  module: sturn-wal
-- name: luis:claim@sync-refs-rollout#8a87a211
-  kind: record
-  file: refs/sturn/wal/sync-refs-rollout
-  line: 2
-  module: sturn-wal
-- name: luis:claim@sync-refs-rollout#c32a45ff
-  kind: record
-  file: refs/sturn/wal/sync-refs-rollout
-  line: 1
-  module: sturn-wal
-- name: luis:presence@devin#09f4af99
-  kind: record
-  file: refs/sturn/wal/devin
-  line: 5
-  module: sturn-wal
-api_omitted: 16
+api_omitted: 38
 deps: []
 notes: ''
 verify:
+- refs/sturn/wal/decoupling-pl-030
+- refs/sturn/wal/decoupling-pl-031
 - refs/sturn/wal/devin
+- refs/sturn/wal/devin-docs-gate
 - refs/sturn/wal/devin-pl014-e1
+- refs/sturn/wal/devin-shim
 - refs/sturn/wal/devin-vcs-port
+- refs/sturn/wal/docs-gate
 - refs/sturn/wal/docs-sweep
-- refs/sturn/wal/lasius
-- refs/sturn/wal/main
-- refs/sturn/wal/pl014-e1
-- refs/sturn/wal/sync-refs-rollout
+- refs/sturn/wal/docs-tutorial-merge
 provenance:
   files:
+  - refs/sturn/wal/decoupling-pl-030
+  - refs/sturn/wal/decoupling-pl-031
   - refs/sturn/wal/devin
+  - refs/sturn/wal/devin-docs-gate
   - refs/sturn/wal/devin-pl014-e1
+  - refs/sturn/wal/devin-shim
   - refs/sturn/wal/devin-vcs-port
+  - refs/sturn/wal/docs-gate
   - refs/sturn/wal/docs-sweep
+  - refs/sturn/wal/docs-tutorial-merge
   - refs/sturn/wal/lasius
   - refs/sturn/wal/main
+  - refs/sturn/wal/pl-032
   - refs/sturn/wal/pl014-e1
   - refs/sturn/wal/sync-refs-rollout
   hashes:
+  - a4920e18eddadfc94eef6a1be1fb983e9cb10ffd
+  - dce8236e18e18c4ca4479f9d3b40e086457546b9
   - 1113fbcd0b1ed416c7f7824c0d54cd2eaaae3f3e
+  - 74e0dcc42beb687812a79c43e4fa46ebbb36b791
   - f846a7b8b273c5f879a7a446e1c796f9659c4eeb
+  - 6a41918bd41e9fbb66308a037ab14b205e3e470d
   - c670d994a7a81692445ea55ec842e484a687f5e0
+  - d6e00382ab1f8312ae335affd9b81944776f9a02
   - e88f1f7c0bea9cda3b8f3b2ff7ed64fc1a60fdaf
-  - 2939b1e0fe71a3706f6c376d9999179400e6ace0
+  - 250d1bc28eec91465786576b0e70bc0260fca1db
+  - db26e1bee7c3e1fdbfcbb0a9ec6d415f9c0c4218
   - 314cc9b285ab29de1f8ff81b43ae4f61773f1a29
+  - 8cec7e91f3bf946f4c1704c57372c660f4ea99e1
   - e3c2bbfae4b5d032e16f4444a125b5e9c0294298
   - b7396c5a7e3bae00a7040b0ce9abcadc07847ff3
-  commit_sha: 46bbd0111c8b5642aece37d711d84e0285e1360d
-  generated_at: '1794762043'
+  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
+  generated_at: '1795566207'
   generator: kuda-template/0.1.4

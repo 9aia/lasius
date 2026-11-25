@@ -17,15 +17,25 @@ api:
   file: crates/lasius-vcs/src/lib.rs
   line: 39
   module: lasius-vcs
+- name: TreeOp
+  kind: type
+  file: crates/lasius-vcs/src/lib.rs
+  line: 60
+  module: lasius-vcs
 - name: Vcs
   kind: trait
   file: crates/lasius-vcs/src/lib.rs
-  line: 59
+  line: 70
   module: lasius-vcs
 - name: commit_info_serde_round_trip
   kind: function
   file: crates/lasius-vcs/src/lib.rs
-  line: 247
+  line: 344
+  module: lasius-vcs
+- name: hash_objects
+  kind: function
+  file: crates/lasius-vcs/src/lib.rs
+  line: 96
   module: lasius-vcs
 - name: lasius-vcs
   kind: module
@@ -35,7 +45,7 @@ api:
 - name: tests
   kind: module
   file: crates/lasius-vcs/src/lib.rs
-  line: 243
+  line: 340
   module: lasius-vcs
 deps:
 - serde
@@ -50,7 +60,7 @@ provenance:
   - crates/lasius-vcs/src/lib.rs
   hashes:
   - 8f3abd4dd2e314328d01f8a958a10e56613fe00e
-  - 3943e1ea318cbb980e32ba2ea7a07d4e786493c3
-  commit_sha: 99974c87c008af614dea13ab50ff99fb73a386b9
-  generated_at: '1794435958'
+  - 11804ba90f3bd4f4195afd405824929ae7dc4d77
+  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
+  generated_at: '1795566207'
   generator: kuda-template/0.1.4

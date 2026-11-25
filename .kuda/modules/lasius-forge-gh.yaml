@@ -136,7 +136,7 @@ provenance:
   - crates/lasius-forge-gh/src/lib.rs
   hashes:
   - 215a6e2e45ddf0e481b4f708cb07bdf1f6d4ec6e
-  - 6930428f0d92d4347d8d943c4e9a19e20f950cec
-  commit_sha: 3b752e4352c1d2df3b102ceb5bc1d70266db3e7f
-  generated_at: '1794726697'
+  - ee70cb081cf778feb0878febdbf4f7c4baeb2c62
+  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
+  generated_at: '1795566207'
   generator: kuda-template/0.1.4

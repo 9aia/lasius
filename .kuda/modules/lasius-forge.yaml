@@ -52,6 +52,11 @@ api:
   file: crates/lasius-forge/src/gh.rs
   line: 155
   module: lasius-forge
+- name: GhStatusResponse
+  kind: type
+  file: crates/lasius-forge/src/gh.rs
+  line: 177
+  module: lasius-forge
 - name: MergeMethod
   kind: type
   file: crates/lasius-forge/src/lib.rs
@@ -80,7 +85,7 @@ api:
 - name: VIEW
   kind: const
   file: crates/lasius-forge/src/gh.rs
-  line: 203
+  line: 218
   module: lasius-forge
 - name: as_str
   kind: function
@@ -105,22 +110,27 @@ api:
 - name: decode_status
   kind: function
   file: crates/lasius-forge/src/gh.rs
-  line: 173
+  line: 186
   module: lasius-forge
 - name: decodes_pr_list_subset
   kind: function
   file: crates/lasius-forge/src/gh.rs
-  line: 252
+  line: 267
   module: lasius-forge
 - name: decodes_pr_view_and_rollup
   kind: function
   file: crates/lasius-forge/src/gh.rs
-  line: 228
+  line: 243
+  module: lasius-forge
+- name: decodes_status_object_response
+  kind: function
+  file: crates/lasius-forge/src/gh.rs
+  line: 315
   module: lasius-forge
 - name: decodes_status_response
   kind: function
   file: crates/lasius-forge/src/gh.rs
-  line: 287
+  line: 302
   module: lasius-forge
 - name: gh
   kind: module
@@ -135,12 +145,12 @@ api:
 - name: parses_pr_number_from_url
   kind: function
   file: crates/lasius-forge/src/gh.rs
-  line: 277
+  line: 292
   module: lasius-forge
 - name: pr_number_from_url
   kind: function
   file: crates/lasius-forge/src/gh.rs
-  line: 191
+  line: 206
   module: lasius-forge
 - name: pr_state
   kind: function
@@ -150,12 +160,12 @@ api:
 - name: rejects_garbage
   kind: function
   file: crates/lasius-forge/src/gh.rs
-  line: 300
+  line: 327
   module: lasius-forge
 - name: tests
   kind: module
   file: crates/lasius-forge/src/gh.rs
-  line: 199
+  line: 214
   module: lasius-forge
 - name: to_check
   kind: function
@@ -170,7 +180,7 @@ api:
 - name: unknown_state_and_typename_degrade
   kind: function
   file: crates/lasius-forge/src/gh.rs
-  line: 267
+  line: 282
   module: lasius-forge
 deps:
 - serde
@@ -188,8 +198,8 @@ provenance:
   - crates/lasius-forge/src/lib.rs
   hashes:
   - 8404bbb8751a160982b8d9de0a7795e255098aca
-  - 1ac12e7aef8365422c34af55096ebb26e285c622
+  - 3d8976e607b333ce67223bf2a6e635b3ff813cf3
   - 3b048f11aedf98b6aae8368eded830cfd2189588
-  commit_sha: 3b752e4352c1d2df3b102ceb5bc1d70266db3e7f
-  generated_at: '1794726697'
+  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
+  generated_at: '1795566207'
   generator: kuda-template/0.1.4

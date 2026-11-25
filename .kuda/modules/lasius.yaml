@@ -25,7 +25,7 @@ api:
 - name: CodeWorkspaceAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 419
+  line: 420
   module: lasius
 - name: ConformItem
   kind: type
@@ -35,17 +35,17 @@ api:
 - name: ForgeAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 246
+  line: 247
   module: lasius
 - name: ForgePrAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 296
+  line: 297
   module: lasius
 - name: ForgeStatusAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 392
+  line: 393
   module: lasius
 - name: Github
   kind: type
@@ -60,7 +60,7 @@ api:
 - name: MergeMethodArg
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 260
+  line: 261
   module: lasius
 - name: OPS
   kind: const
@@ -70,12 +70,12 @@ api:
 - name: PROBE_TIMEOUT
   kind: const
   file: crates/lasius-cli/src/commands.rs
-  line: 779
+  line: 846
   module: lasius
 - name: PrStateArg
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 277
+  line: 278
   module: lasius
 - name: ProcOutput
   kind: type
@@ -100,7 +100,7 @@ api:
 - name: StatusStateArg
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 373
+  line: 374
   module: lasius
 - name: Stub
   kind: type
@@ -115,12 +115,12 @@ api:
 - name: VcsAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 160
+  line: 161
   module: lasius
 - name: VcsWorktreeAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 214
+  line: 215
   module: lasius
 - name: Workspace
   kind: type
@@ -130,7 +130,7 @@ api:
 - name: add
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 743
+  line: 810
   module: lasius
 - name: agents_stub
   kind: function
@@ -195,7 +195,7 @@ api:
 - name: check
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 889
+  line: 956
   module: lasius
 - name: clone
   kind: function
@@ -252,15 +252,15 @@ provenance:
   hashes:
   - 558ff5d81e4992c1b0ac51795300c99d52c04abe
   - a993538386dace2f2b2a99c921d27160bd9ac1de
-  - a23aa24a1fdfbecdabe3dbb69c2f33333751b650
+  - 45ffa93f96e469d77ebf93542501bbde9aa6d4bb
   - 28d7ce1d8a88e62eaa688496d012f3c581681a1c
   - 8f4b542b7fab9d668ec3c8af0d8ce0b30fa73c2e
-  - 4964248c849c2ca67e7a1887d90d2e44f0057011
+  - 2dbf8aa1ced92f5c8083edf1ff26abe7df216ad3
   - 3576ab200b7d9d7f6d11b5ec4246c3cd587b9119
   - 415e6446334c162054fff2edbcd6695395b7cd45
   - fd4a2f17950d7a2bf01ff1e03003ffe8cc309264
   - ff8dc94d52c641e08dd51b6152751993e312c237
   - 32e64b66f0ecf9d8d8939b7d5a842807cbf133dd
-  commit_sha: 46bbd0111c8b5642aece37d711d84e0285e1360d
-  generated_at: '1794762043'
+  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
+  generated_at: '1795566207'
   generator: kuda-template/0.1.4

@@ -100,7 +100,7 @@ api:
 - name: engine_argv
   kind: function
   file: crates/lasius-driver/src/main.rs
-  line: 114
+  line: 117
   module: lasius-driver
 - name: exec_filter_selects_subset
   kind: function
@@ -170,7 +170,7 @@ api:
 - name: main
   kind: function
   file: crates/lasius-driver/src/main.rs
-  line: 140
+  line: 143
   module: lasius-driver
 - name: make_git_repo
   kind: function
@@ -232,12 +232,12 @@ provenance:
   - crates/lasius-driver/tests/conformance.rs
   - crates/lasius-driver/tests/e2e.rs
   hashes:
-  - e610ce6601c6365f98d2c47a7c55de1b4600a584
-  - 1199aeb5bdf79b875b0947539597d3add37655e2
+  - a903624e1dfe5b84bb4654c82c26b5320bcd0797
+  - 9061a4b407defa40bdd5df819904e4bb58203e50
   - 7a3cc4807453a0721d10352903c61bd7fd3766bf
   - 043b464591dbf19c3b6adba8e8852cc85d255c1d
   - df811c1ab3cc4861a72bafd9cfb735e816f0982d
   - b05caa5ad3c7cb3075cb07ff04d25f336da65b72
-  commit_sha: bd368d9fb3ce54ca4c4a99a878948f0d6d58540b
-  generated_at: '1794761798'
+  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
+  generated_at: '1795566207'
   generator: kuda-template/0.1.4
