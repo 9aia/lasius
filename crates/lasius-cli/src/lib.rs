@@ -209,6 +209,18 @@ enum VcsAction {
         #[arg(long)]
         json: bool,
     },
+    /// Detached checkout of --rev in a checkout/worktree — keeps
+    /// untracked files (node_modules, caches) in place
+    Checkout {
+        /// Clone name under repos_dir, or a checkout/worktree path
+        repo: String,
+        /// Revision/sha to check out (detached HEAD)
+        #[arg(long)]
+        rev: String,
+        /// Emit JSON instead of the summary line
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -530,6 +542,7 @@ pub fn dispatch(cli: &Cli) -> i32 {
                         refspec,
                         json,
                     } => vcs::fetch(&ws, repo, remote.clone(), refspec, *json),
+                    VcsAction::Checkout { repo, rev, json } => vcs::checkout(&ws, repo, rev, *json),
                 },
                 Cmd::Forge { action } => match action {
                     ForgeAction::Pr { action } => match action {

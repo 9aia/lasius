@@ -194,6 +194,13 @@ pub trait Vcs: Send + Sync {
     /// The repair for a detached worktree; the backend refuses when
     /// another worktree holds `name`.
     fn attach_branch(&self, repo: &Path, name: &str) -> io::Result<()>;
+    /// Detached checkout of `rev` in the existing checkout/worktree
+    /// at `repo` (`git checkout --detach <rev>`). Untracked/ignored
+    /// files — node_modules, build caches — stay in place, so this
+    /// is the persistent-checkout primitive: reuse one dir across
+    /// revs instead of a fresh worktree per deploy. Fails when
+    /// tracked local modifications would be overwritten.
+    fn checkout(&self, repo: &Path, rev: &str) -> io::Result<()>;
 
     // -- divergence / rebase ----------------------------------------------
 

@@ -35,17 +35,17 @@ api:
 - name: argv_maps_params_to_lasius_flags
   kind: function
   file: crates/lasius-driver/src/ops.rs
-  line: 374
+  line: 375
   module: lasius-driver
 - name: argv_omits_root_when_absent
   kind: function
   file: crates/lasius-driver/src/ops.rs
-  line: 399
+  line: 400
   module: lasius-driver
 - name: argv_splits_dotted_names_and_json_flags
   kind: function
   file: crates/lasius-driver/src/ops.rs
-  line: 388
+  line: 389
   module: lasius-driver
 - name: bin
   kind: function
@@ -130,12 +130,12 @@ api:
 - name: forge_pr_lifecycle
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 682
+  line: 713
   module: lasius-driver
 - name: forge_status_create
   kind: function
   file: crates/lasius-driver/tests/e2e.rs
-  line: 751
+  line: 782
   module: lasius-driver
 - name: git
   kind: function
@@ -202,7 +202,7 @@ api:
   file: crates/lasius-driver/src/ops.rs
   line: 93
   module: lasius-driver
-api_omitted: 30
+api_omitted: 31
 deps:
 - clap
 - lasius
@@ -232,12 +232,12 @@ provenance:
   - crates/lasius-driver/tests/conformance.rs
   - crates/lasius-driver/tests/e2e.rs
   hashes:
-  - a903624e1dfe5b84bb4654c82c26b5320bcd0797
+  - 504e49a86cd206d2a00241c52ccd2af79ae81b6f
   - 9061a4b407defa40bdd5df819904e4bb58203e50
-  - 7a3cc4807453a0721d10352903c61bd7fd3766bf
+  - d5f961846b725a2baf8722dd1f616fb5b4e8473c
   - 043b464591dbf19c3b6adba8e8852cc85d255c1d
   - df811c1ab3cc4861a72bafd9cfb735e816f0982d
-  - b05caa5ad3c7cb3075cb07ff04d25f336da65b72
-  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
-  generated_at: '1795566207'
+  - 5c7fd1effb1bad5cc83245ba04e36a6dc3259966
+  commit_sha: 3d1dacb20d3a69a101768df4a2b75f8c94a81cd9
+  generated_at: '1795836753'
   generator: kuda-template/0.1.4

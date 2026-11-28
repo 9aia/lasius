@@ -16,8 +16,8 @@ modules:
 commands:
 - cargo check
 - cargo test --workspace
-tree_digest: fa1f03a00f172132051c94ab82cc51c398e9cd75
-files_total: 77
+tree_digest: 3c17cb44ad53ceeb39e0dff65662dd62ed850534
+files_total: 78
 provenance:
   files:
   - Cargo.toml
@@ -31,16 +31,16 @@ provenance:
   - crates/lasius-vcs-git/Cargo.toml
   - xtask/Cargo.toml
   hashes:
-  - 558ff5d81e4992c1b0ac51795300c99d52c04abe
-  - d83e53781f2c19a04983790dca9dd1c82ceb5c19
+  - 80a07647ec2d4a6b889a66ff00e003c81c20de58
+  - c6f3e5ac20287e0c072f64b9c0421cfc80cf9ec0
   - a993538386dace2f2b2a99c921d27160bd9ac1de
   - e652df3ed76782348b86659e9f0a4c2096fd4ee0
-  - a903624e1dfe5b84bb4654c82c26b5320bcd0797
+  - 504e49a86cd206d2a00241c52ccd2af79ae81b6f
   - 8404bbb8751a160982b8d9de0a7795e255098aca
   - 215a6e2e45ddf0e481b4f708cb07bdf1f6d4ec6e
   - 8f3abd4dd2e314328d01f8a958a10e56613fe00e
   - 7ed1550eda065bdaf19d29349e4a5062943e8243
   - 71efabd40e313d27e2fea97ed39941767b77db79
-  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
-  generated_at: '1795566207'
+  commit_sha: 3d1dacb20d3a69a101768df4a2b75f8c94a81cd9
+  generated_at: '1795836753'
   generator: kuda/0.1.0

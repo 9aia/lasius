@@ -70,6 +70,7 @@ lasius vcs worktree add <repo> --branch <b> --rev <sha>  # agent worktree
 lasius vcs commit <repo> -m <msg> [--body <text>] [--allow-empty]
 lasius vcs push <repo> [--remote origin] [--branch <b>]
 lasius vcs fetch <repo> [--remote origin] [--refspec <spec>]...
+lasius vcs checkout <repo> --rev <sha>   # detached checkout; untracked files (deps, caches) stay
 lasius forge pr create <repo> --title <t> [--body <b>] [--base main] [--head <b>] [--draft]
 lasius forge pr merge <repo> <n> [--method squash|merge|rebase] [--delete-branch]
 lasius forge pr view|checks|list <repo> [<n>] [--json]  # PR + CI status

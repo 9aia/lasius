@@ -20,7 +20,7 @@ api:
 - name: N
   kind: const
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 829
+  line: 833
   module: lasius-vcs-git
 - name: N
   kind: const
@@ -30,12 +30,12 @@ api:
 - name: agent_mutation_ops
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 993
+  line: 997
   module: lasius-vcs-git
 - name: ahead_behind_merge_ff_and_rebase
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 1173
+  line: 1203
   module: lasius-vcs-git
 - name: attach_branch
   kind: function
@@ -55,7 +55,17 @@ api:
 - name: branch_ops_and_orphan
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 1082
+  line: 1112
+  module: lasius-vcs-git
+- name: checkout
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 559
+  module: lasius-vcs-git
+- name: checkout_detaches_at_rev_and_keeps_untracked
+  kind: function
+  file: crates/lasius-vcs-git/src/lib.rs
+  line: 1041
   module: lasius-vcs-git
 - name: commit
   kind: function
@@ -70,12 +80,12 @@ api:
 - name: commit_overlay
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 819
+  line: 823
   module: lasius-vcs-git
 - name: commit_tree
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 787
+  line: 791
   module: lasius-vcs-git
 - name: commit_tree_field
   kind: function
@@ -90,12 +100,12 @@ api:
 - name: commits_ahead
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 561
+  line: 565
   module: lasius-vcs-git
 - name: commits_behind
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 569
+  line: 573
   module: lasius-vcs-git
 - name: common_dir
   kind: function
@@ -125,12 +135,12 @@ api:
 - name: delete_ref
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 892
+  line: 896
   module: lasius-vcs-git
 - name: delete_tag
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 655
+  line: 659
   module: lasius-vcs-git
 - name: describe
   kind: function
@@ -140,7 +150,7 @@ api:
 - name: detached_detect_attach_and_has_changes
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 1138
+  line: 1168
   module: lasius-vcs-git
 - name: diff_names
   kind: function
@@ -150,7 +160,7 @@ api:
 - name: diff_names_hash_object_and_rev_parse_verify
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 1329
+  line: 1359
   module: lasius-vcs-git
 - name: diff_stat
   kind: function
@@ -165,7 +175,7 @@ api:
 - name: entry_oid
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 730
+  line: 734
   module: lasius-vcs-git
 - name: entry_oid
   kind: function
@@ -175,7 +185,7 @@ api:
 - name: exec
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 908
+  line: 912
   module: lasius-vcs-git
 - name: exec_in
   kind: function
@@ -185,24 +195,14 @@ api:
 - name: exec_in
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
-  line: 916
+  line: 920
   module: lasius-vcs-git
 - name: exec_out
   kind: function
   file: crates/lasius-vcs-git/src/lib.rs
   line: 61
   module: lasius-vcs-git
-- name: exec_out
-  kind: function
-  file: crates/lasius-vcs-git/src/lib.rs
-  line: 912
-  module: lasius-vcs-git
-- name: fetch
-  kind: function
-  file: crates/lasius-vcs-git/src/lib.rs
-  line: 665
-  module: lasius-vcs-git
-api_omitted: 79
+api_omitted: 81
 deps:
 - flate2
 - lasius-vcs
@@ -223,8 +223,8 @@ provenance:
   - crates/lasius-vcs-git/src/odb.rs
   hashes:
   - 7ed1550eda065bdaf19d29349e4a5062943e8243
-  - 04bf02c872c01741154e9c3428c86959b9e43b3d
+  - 35f8102b7fad138222d706ab8ceb6cd23c07aa6f
   - 769739ee8f7f585e428c27e1d79eb7e338ee37a4
-  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
-  generated_at: '1795566207'
+  commit_sha: 3d1dacb20d3a69a101768df4a2b75f8c94a81cd9
+  generated_at: '1795836753'
   generator: kuda-template/0.1.4

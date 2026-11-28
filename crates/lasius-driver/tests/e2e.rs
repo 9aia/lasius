@@ -679,6 +679,37 @@ fn vcs_worktree_commit_push_fetch_flow() {
 }
 
 #[test]
+fn vcs_checkout_detaches_at_rev() {
+    let (_tmp, root, path) = setup(&["alpha"]);
+    assert!(run(&["clone"], &root, &path).status.success());
+    let clone = root.join("repos/alpha");
+    let sha = String::from_utf8(
+        Command::new("git")
+            .arg("-C")
+            .arg(&clone)
+            .args(["rev-parse", "HEAD"])
+            .output()
+            .unwrap()
+            .stdout,
+    )
+    .unwrap();
+    let sha = sha.trim();
+
+    // detached checkout at the current sha succeeds and reports it
+    let out = run(&["vcs", "checkout", "alpha", "--rev", sha], &root, &path);
+    assert!(out.status.success(), "stderr: {}", stderr(&out));
+    assert!(stdout(&out).contains("detached"));
+
+    // an unknown rev fails instead of silently staying put
+    let out = run(
+        &["vcs", "checkout", "alpha", "--rev", "deadbeefdeadbeef"],
+        &root,
+        &path,
+    );
+    assert!(!out.status.success());
+}
+
+#[test]
 fn forge_pr_lifecycle() {
     let (_tmp, root, path) = setup_forge(&["alpha"]);
     assert!(run(&["clone"], &root, &path).status.success());

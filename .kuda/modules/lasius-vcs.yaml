@@ -30,7 +30,7 @@ api:
 - name: commit_info_serde_round_trip
   kind: function
   file: crates/lasius-vcs/src/lib.rs
-  line: 344
+  line: 351
   module: lasius-vcs
 - name: hash_objects
   kind: function
@@ -45,7 +45,7 @@ api:
 - name: tests
   kind: module
   file: crates/lasius-vcs/src/lib.rs
-  line: 340
+  line: 347
   module: lasius-vcs
 deps:
 - serde
@@ -60,7 +60,7 @@ provenance:
   - crates/lasius-vcs/src/lib.rs
   hashes:
   - 8f3abd4dd2e314328d01f8a958a10e56613fe00e
-  - 11804ba90f3bd4f4195afd405824929ae7dc4d77
-  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
-  generated_at: '1795566207'
+  - ab278e63f4648c57e4deb8bdb063fd99c3b939fa
+  commit_sha: 3d1dacb20d3a69a101768df4a2b75f8c94a81cd9
+  generated_at: '1795836753'
   generator: kuda-template/0.1.4

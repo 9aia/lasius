@@ -363,6 +363,7 @@ mod tests {
                 "cli.vcs.commit",
                 "cli.vcs.push",
                 "cli.vcs.fetch",
+                "cli.vcs.checkout",
                 "cli.forge.pr.create",
                 "cli.forge.pr.merge",
                 "cli.forge.status.create",

@@ -556,6 +556,10 @@ impl Vcs for GitVcs {
         git_out(repo, &["checkout", "-B", name]).map(|_| ())
     }
 
+    fn checkout(&self, repo: &Path, rev: &str) -> io::Result<()> {
+        git_out(repo, &["checkout", "--detach", rev]).map(|_| ())
+    }
+
     // -- divergence / rebase ------------------------------------------------
 
     fn commits_ahead(&self, repo: &Path, rev: &str) -> Option<usize> {
@@ -1031,6 +1035,32 @@ mod tests {
         assert!(v.has_commit(&remote, &new_head));
         v.fetch(&wt, "origin", &[]).unwrap();
         v.fetch(&repo, "origin", &["heal/x"]).unwrap();
+    }
+
+    #[test]
+    fn checkout_detaches_at_rev_and_keeps_untracked() {
+        let (_t, repo) = fixture();
+        let v = GitVcs;
+        let head = v.head(&repo).unwrap();
+        let prev = exec_out(&repo, &["rev-parse", "HEAD~1"]).unwrap();
+
+        // untracked files survive the rev switch (the deploy-cache
+        // case: node_modules and build outputs are never tracked)
+        std::fs::write(repo.join("keep.txt"), "x\n").unwrap();
+
+        v.checkout(&repo, &prev).unwrap();
+        assert_eq!(v.head(&repo).unwrap(), prev);
+        assert!(v.is_detached(&repo).unwrap());
+        // b.txt exists only in the second commit — gone at prev
+        assert!(!repo.join("b.txt").exists());
+        assert!(repo.join("keep.txt").exists());
+
+        v.checkout(&repo, &head).unwrap();
+        assert_eq!(v.head(&repo).unwrap(), head);
+        assert!(repo.join("b.txt").exists());
+
+        // unknown revs surface the backend's error
+        assert!(v.checkout(&repo, "deadbeefdeadbeef").is_err());
     }
 
     /// Repo-local commit identity for `v.commit` (fixture commits

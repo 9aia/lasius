@@ -72,6 +72,21 @@ api:
   file: refs/sturn/wal/devin
   line: 15
   module: sturn-wal
+- name: luis:claim@devin-deploy-cache#1ae1100a
+  kind: record
+  file: refs/sturn/wal/devin-deploy-cache
+  line: 3
+  module: sturn-wal
+- name: luis:claim@devin-deploy-cache#2a8f8c68
+  kind: record
+  file: refs/sturn/wal/devin-deploy-cache
+  line: 2
+  module: sturn-wal
+- name: luis:claim@devin-deploy-cache#362b98c6
+  kind: record
+  file: refs/sturn/wal/devin-deploy-cache
+  line: 1
+  module: sturn-wal
 - name: luis:claim@devin-docs-gate#7f64c57c
   kind: record
   file: refs/sturn/wal/devin-docs-gate
@@ -187,40 +202,26 @@ api:
   file: refs/sturn/wal/lasius
   line: 14
   module: sturn-wal
-- name: luis:claim@lasius#fe7ac308
-  kind: record
-  file: refs/sturn/wal/lasius
-  line: 13
-  module: sturn-wal
-- name: luis:claim@main#108d87ba
-  kind: record
-  file: refs/sturn/wal/main
-  line: 6
-  module: sturn-wal
-- name: luis:claim@main#251a65d3
-  kind: record
-  file: refs/sturn/wal/main
-  line: 8
-  module: sturn-wal
-api_omitted: 38
+api_omitted: 41
 deps: []
 notes: ''
 verify:
 - refs/sturn/wal/decoupling-pl-030
 - refs/sturn/wal/decoupling-pl-031
 - refs/sturn/wal/devin
+- refs/sturn/wal/devin-deploy-cache
 - refs/sturn/wal/devin-docs-gate
 - refs/sturn/wal/devin-pl014-e1
 - refs/sturn/wal/devin-shim
 - refs/sturn/wal/devin-vcs-port
 - refs/sturn/wal/docs-gate
 - refs/sturn/wal/docs-sweep
-- refs/sturn/wal/docs-tutorial-merge
 provenance:
   files:
   - refs/sturn/wal/decoupling-pl-030
   - refs/sturn/wal/decoupling-pl-031
   - refs/sturn/wal/devin
+  - refs/sturn/wal/devin-deploy-cache
   - refs/sturn/wal/devin-docs-gate
   - refs/sturn/wal/devin-pl014-e1
   - refs/sturn/wal/devin-shim
@@ -237,6 +238,7 @@ provenance:
   - a4920e18eddadfc94eef6a1be1fb983e9cb10ffd
   - dce8236e18e18c4ca4479f9d3b40e086457546b9
   - 1113fbcd0b1ed416c7f7824c0d54cd2eaaae3f3e
+  - 1ae1100a27d611ff8b03fa8186d826728d9c15dc
   - 74e0dcc42beb687812a79c43e4fa46ebbb36b791
   - f846a7b8b273c5f879a7a446e1c796f9659c4eeb
   - 6a41918bd41e9fbb66308a037ab14b205e3e470d
@@ -249,6 +251,6 @@ provenance:
   - 8cec7e91f3bf946f4c1704c57372c660f4ea99e1
   - e3c2bbfae4b5d032e16f4444a125b5e9c0294298
   - b7396c5a7e3bae00a7040b0ce9abcadc07847ff3
-  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
-  generated_at: '1795566207'
+  commit_sha: 3d1dacb20d3a69a101768df4a2b75f8c94a81cd9
+  generated_at: '1795836753'
   generator: kuda-template/0.1.4

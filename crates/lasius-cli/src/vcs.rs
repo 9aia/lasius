@@ -98,6 +98,29 @@ pub fn worktree_remove(ws: &Workspace, repo: &str, dir: PathBuf, json: bool) -> 
     Ok(())
 }
 
+/// `lasius vcs checkout <repo>` — detached checkout of `--rev` in an
+/// existing checkout/worktree. Untracked/ignored files stay in
+/// place, so a persistent deploy checkout keeps node_modules and
+/// build caches warm across revs.
+pub fn checkout(ws: &Workspace, repo: &str, rev: &str, json: bool) -> Result<()> {
+    let dir = support::repo_dir(ws, repo)?;
+    vcs()
+        .checkout(&dir, rev)
+        .with_context(|| format!("git checkout --detach {rev}"))?;
+    if json {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({
+                "repo": dir,
+                "rev": rev,
+            }))?
+        );
+    } else {
+        println!("checked out {rev} (detached) in {}", dir.display());
+    }
+    Ok(())
+}
+
 /// `lasius vcs commit <repo>` — stage everything and commit.
 pub fn commit(
     ws: &Workspace,

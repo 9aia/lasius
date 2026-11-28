@@ -25,7 +25,7 @@ api:
 - name: CodeWorkspaceAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 420
+  line: 432
   module: lasius
 - name: ConformItem
   kind: type
@@ -35,17 +35,17 @@ api:
 - name: ForgeAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 247
+  line: 259
   module: lasius
 - name: ForgePrAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 297
+  line: 309
   module: lasius
 - name: ForgeStatusAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 393
+  line: 405
   module: lasius
 - name: Github
   kind: type
@@ -60,7 +60,7 @@ api:
 - name: MergeMethodArg
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 261
+  line: 273
   module: lasius
 - name: OPS
   kind: const
@@ -70,12 +70,12 @@ api:
 - name: PROBE_TIMEOUT
   kind: const
   file: crates/lasius-cli/src/commands.rs
-  line: 846
+  line: 847
   module: lasius
 - name: PrStateArg
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 278
+  line: 290
   module: lasius
 - name: ProcOutput
   kind: type
@@ -95,12 +95,12 @@ api:
 - name: StatusFailure
   kind: type
   file: crates/lasius-cli/src/commands.rs
-  line: 343
+  line: 344
   module: lasius
 - name: StatusStateArg
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 374
+  line: 386
   module: lasius
 - name: Stub
   kind: type
@@ -110,7 +110,7 @@ api:
 - name: UpdateRow
   kind: type
   file: crates/lasius-cli/src/commands.rs
-  line: 288
+  line: 289
   module: lasius
 - name: VcsAction
   kind: type
@@ -120,7 +120,7 @@ api:
 - name: VcsWorktreeAction
   kind: type
   file: crates/lasius-cli/src/lib.rs
-  line: 215
+  line: 227
   module: lasius
 - name: Workspace
   kind: type
@@ -130,7 +130,7 @@ api:
 - name: add
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 810
+  line: 811
   module: lasius
 - name: agents_stub
   kind: function
@@ -195,14 +195,14 @@ api:
 - name: check
   kind: function
   file: crates/lasius-cli/src/commands.rs
-  line: 956
+  line: 957
   module: lasius
-- name: clone
+- name: checkout
   kind: function
-  file: crates/lasius-cli/src/commands.rs
-  line: 281
+  file: crates/lasius-cli/src/vcs.rs
+  line: 105
   module: lasius
-api_omitted: 96
+api_omitted: 97
 deps:
 - anyhow
 - clap
@@ -250,17 +250,17 @@ provenance:
   - crates/lasius-cli/src/support.rs
   - crates/lasius-cli/src/vcs.rs
   hashes:
-  - 558ff5d81e4992c1b0ac51795300c99d52c04abe
+  - 80a07647ec2d4a6b889a66ff00e003c81c20de58
   - a993538386dace2f2b2a99c921d27160bd9ac1de
-  - 45ffa93f96e469d77ebf93542501bbde9aa6d4bb
+  - 43b8c901ad112e2111eccb7e8f796b073ed10039
   - 28d7ce1d8a88e62eaa688496d012f3c581681a1c
   - 8f4b542b7fab9d668ec3c8af0d8ce0b30fa73c2e
-  - 2dbf8aa1ced92f5c8083edf1ff26abe7df216ad3
+  - aaaeca040f3a68d910ba5808c0214585019ffb0e
   - 3576ab200b7d9d7f6d11b5ec4246c3cd587b9119
   - 415e6446334c162054fff2edbcd6695395b7cd45
   - fd4a2f17950d7a2bf01ff1e03003ffe8cc309264
   - ff8dc94d52c641e08dd51b6152751993e312c237
-  - 32e64b66f0ecf9d8d8939b7d5a842807cbf133dd
-  commit_sha: 7838e5c0bd43a0a8cff624ebd00d3828e8dad3e6
-  generated_at: '1795566207'
+  - 3503e2b849c54c2d26c538d40dc072cc09bf6c8e
+  commit_sha: 3d1dacb20d3a69a101768df4a2b75f8c94a81cd9
+  generated_at: '1795836753'
   generator: kuda-template/0.1.4
