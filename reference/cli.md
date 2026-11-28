@@ -27,6 +27,7 @@ lasius keeps a directory of independent git clones in sync with a GitHub org: in
 * [`lasius vcs commit`↴](#lasius-vcs-commit)
 * [`lasius vcs push`↴](#lasius-vcs-push)
 * [`lasius vcs fetch`↴](#lasius-vcs-fetch)
+* [`lasius vcs checkout`↴](#lasius-vcs-checkout)
 * [`lasius forge`↴](#lasius-forge)
 * [`lasius forge pr`↴](#lasius-forge-pr)
 * [`lasius forge pr create`↴](#lasius-forge-pr-create)
@@ -259,6 +260,7 @@ VCS verbs — worktrees, commits, fetch/push over the lasius-vcs port
 * `commit` — Stage all changes and commit in a checkout/worktree
 * `push` — Push a branch to a remote (default: current branch → origin)
 * `fetch` — Fetch a remote (optionally specific refspecs via --refspec)
+* `checkout` — Detached checkout of --rev in a checkout/worktree — keeps untracked files (node_modules, caches) in place
 
 ###### **Options:**
 
@@ -369,6 +371,23 @@ Fetch a remote (optionally specific refspecs via --refspec)
 * `--remote <REMOTE>` — Remote name (default: origin)
 * `--root <ROOT>` — Workspace root containing lasius.toml (default: discovered upward from cwd)
 * `--refspec <REFSPEC>` — Refspec to fetch (repeatable; empty = remote's configured refspecs)
+* `--json` — Emit JSON instead of the summary line
+* `-h, --help` — Print help
+
+## `lasius vcs checkout`
+
+Detached checkout of --rev in a checkout/worktree — keeps untracked files (node_modules, caches) in place
+
+**Usage:** `lasius vcs checkout [OPTIONS] --rev <REV> <REPO>`
+
+###### **Arguments:**
+
+* `<REPO>` — Clone name under repos_dir, or a checkout/worktree path
+
+###### **Options:**
+
+* `--rev <REV>` — Revision/sha to check out (detached HEAD)
+* `--root <ROOT>` — Workspace root containing lasius.toml (default: discovered upward from cwd)
 * `--json` — Emit JSON instead of the summary line
 * `-h, --help` — Print help
 
